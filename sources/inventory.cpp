@@ -51,7 +51,6 @@ void Inventory::remove(Item item, int amount) {
             const int before = (int)slot_size;
             slot_size = max((int)slot_size - amount, 0); // Pour pas avoir des nombres négatifs
             amount = max(amount - (before - (int)slot_size), 0);
-            printf("[ DEBUG ] slot_size : %d - amount = %d\n", (int)slot_size, amount);
             
             if (slot_size == 0) slot = ITEM[VOID]; // Si il n'y a plus d'une valeur, libère le slot
             if (before == 0) return; // Sort une fois la quantité enlevé

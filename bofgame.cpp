@@ -1,55 +1,46 @@
 #include "headers/entities.hpp"
 #include "headers/game.hpp"
-#include "headers/gdb.hpp"
 
 int main() {
-    char buffer[BUFFER_SIZE];
-    cout << "Saisir votre nom: " << endl;
-    cin.getline(buffer, BUFFER_SIZE);
+    Vector2 pos = {950, 460};
+    Hitbox hb = {pos, 30};
+    PNJ farmer("Fermier", hb, RED);
 
-    Item potato = ITEM[POTATO];
-    Item carrot = ITEM[CARROT];
-    Item apple  = ITEM[APPLE];
+    pos = {280, 320};
+    hb = {pos, 30};
+    PNJ guard("Garde", hb, BLUE);
 
-    Position pos = {25, 25};
-    Hitbox hb = {pos, 50, 100};
-    Player player(buffer, hb);
+    pos = {620, 50};
+    hb = {pos, 30};
+    PNJ scribe("Scribe", hb, BLACK);
 
-    player.inventory().add(potato, MAX_POTATO);
-    player.inventory().add(carrot, MAX_CARROT);
-    player.inventory().add(apple, MAX_APPLE);
+    pos = {575, 460};
+    hb = {pos, 30};
+    Player player("Joueur", hb, PURPLE);
 
-    player.inventory().add(carrot, MAX_CARROT);
-    player.inventory().add(potato, MAX_POTATO);
-    player.inventory().add(apple, MAX_APPLE);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hello world");
 
-    player.inventory().add(carrot, MAX_CARROT);
-    player.inventory().add(apple, MAX_APPLE);
-    player.inventory().add(potato, MAX_POTATO);
+    SetTargetFPS(60);
 
-    player.displayInfos();
+    while (!WindowShouldClose()) {
+        if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) player.setPosX(player.getHitbox().pos.x + PLAYER_SPEED);
+        if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) player.setPosX(player.getHitbox().pos.x - PLAYER_SPEED);
+        if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) player.setPosY(player.getHitbox().pos.y - PLAYER_SPEED);
+        if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) player.setPosY(player.getHitbox().pos.y + PLAYER_SPEED);
 
-    player.inventory().remove(potato, 20);
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            printf("[ DEBUG ] Position : %.2fx%.2f\n", GetMousePosition().x, GetMousePosition().y);
+        }
 
-    // Changement de nom (vulnérabilité)
-    cout << "Saisir votre nouveau nom: " << endl;
-    cin.getline(buffer, BUFFER_SIZE);
-    player.changeName(buffer);
-
-    player.displayInfos();
-
-    // Pour gagner il suffit de rentrer le nouveau nom AAAAAAAAAAAAAAAAC
-    if (player.inventory().hasEnoughOf(apple, AMOUNT_TO_FINISH_GAME)) {
-        cout << "Vous avez (x" << player.inventory().getItemQuantity(apple) << ") " << apple.name << ". Requis : " << AMOUNT_TO_FINISH_GAME << ", vous avez gagné." << endl;
-    } else {
-        cout << "Vous avez (x" << player.inventory().getItemQuantity(apple) << ") " << apple.name << ". Requis : " << AMOUNT_TO_FINISH_GAME << ", vous avez perdu." << endl;
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawCircleV(farmer.getHitbox().pos, farmer.getHitbox().radius, farmer.getColor());
+            DrawCircleV(guard.getHitbox().pos, guard.getHitbox().radius, guard.getColor());
+            DrawCircleV(scribe.getHitbox().pos, scribe.getHitbox().radius, scribe.getColor());
+            DrawCircleV(player.getHitbox().pos, player.getHitbox().radius, player.getColor());
+        EndDrawing();
     }
+    CloseWindow();
 
-    cout << endl;
-
-    // Récupère et affiche la stack
-    GDB gdb(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)), 0x170);
-    gdb.displayStack();
-    
     return 0;
 }

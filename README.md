@@ -20,6 +20,8 @@ make clean && make
 ./bofgame
 ```
 
+***⚠️ATTENTION : la taille de l'écran doit être au minimum de 1280x960***
+
 ## 🎯 Objectif du joueur
 - Explorer le jeu  
 - Découvrir le bug  
@@ -29,13 +31,14 @@ make clean && make
 ### ✅ Fait
 - Prototype (PoC) en console fonctionnel : lecture du nom, remplissage d'inventaire, appel des fonctions `inventory().add()`, `inventory().hasEnoughOf()` et affichage d'informations.
 - Définitions d'entités de base (`Player`, `Item`, `Inventory`, `Hitbox`, `Position`) et headers dans `headers/`.
+- Menu permettant de visualiser le contenu de la stack
 - Main minimal démontrant la vulnérabilité.
+- Debut de l'intégration de **raylib**
 
 ### 🔜 À faire / Améliorations prévues
 - Intégrer l'interface graphique avec **raylib**.
 - Créer des assets : PNG pour le joueur et les PNJ, polices et icônes.
 - Implémenter le système de dialogues avec choix et conséquences.
-- Ajout d'un menu avancé montrant l'état des registres pour mieux comprendre ce qu'il se passe
 - Compléter et stabiliser le système d'inventaire (UI, drag & drop si besoin).
 - Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
 
