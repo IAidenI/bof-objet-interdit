@@ -1,13 +1,13 @@
 #include "../headers/gdb.hpp"
 
-GDB::GDB(uintptr_t rbp_main, uint8_t offset){
+GDB::GDB(uintptr_t rbp_main, uint16_t offset){
     this->rbp_address = rbp_main;
     this->positionX = this->rbp_address - offset;
     this->positionY = this->positionX + 0x4;
     this->weight = this->positionY + 0x4;
     this->height = this->weight + 0x4;
     this->name = this->height + 0x4;
-    this->inventory = this->name + 0xc;
+    this->inventory = this->name + 0x10;
 }
 
 int GDB::getIntFromAddress(uintptr_t p) {

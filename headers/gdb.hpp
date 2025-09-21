@@ -17,7 +17,7 @@ class GDB {
         uintptr_t inventory;
     
     public:
-        GDB(uintptr_t rbp_main, uint8_t rbp_address);
+        GDB(uintptr_t rbp_main, uint16_t rbp_address);
 
         int getIntFromAddress(uintptr_t p);
         char* getStringFromAddress(uintptr_t p);
