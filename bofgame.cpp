@@ -1,4 +1,5 @@
 #include "headers/entities.hpp"
+#include "headers/gdb.hpp"
 
 int main() {
     char buffer[BUFFER_SIZE];
@@ -49,6 +50,12 @@ int main() {
     } else {
         cout << "Vous n'avez pas assez de " << itemY.type << ", vous avez perdu." << endl;
     }
+
+    cout << endl;
+
+    // Récupère et affiche la stack
+    GDB gdb(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)), 0xc0);
+    gdb.displayStack();
     
     return 0;
 }

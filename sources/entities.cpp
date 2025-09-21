@@ -96,6 +96,7 @@ void Inventory::display() {
 
 // ---- Player ----
 Player::Player(const char *name, Hitbox hb) : Entity(hb) {
+    memset(this->name, 0, MAX_NAME_LENGTH);
     strncpy(this->name, name, MAX_NAME_LENGTH);
     this->name[MAX_NAME_LENGTH - 1] = '\0';
 }

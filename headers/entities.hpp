@@ -6,8 +6,9 @@
 #include <iomanip>
 using namespace std;
 
-#define BUFFER_SIZE 14 // Vulnérabilité
-#define MAX_NAME_LENGTH 10
+#define BUFFER_SIZE 14     // Vulnérabilité
+#define MAX_NAME_LENGTH 12 //
+
 #define MAX_INVENTORY_LENGTH 16
 #define MAX_INVENTORY_ITEM 64
 
