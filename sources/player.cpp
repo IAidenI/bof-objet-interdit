@@ -1,7 +1,7 @@
 #include "player.hpp"
 
 // ---- Player ----
-Player::Player(const char *name, Hitbox hb, Color hitboxColor) : Entity(name, hb, hitboxColor) {}
+Player::Player(const char *name, Hitbox hb, const char *texture) : Entity(name, hb, texture) {}
 
 void Player::displayInfos() {
     cout << endl;

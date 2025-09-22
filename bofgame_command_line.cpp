@@ -15,19 +15,19 @@ int main() {
 
     Vector2 pos = {25.0, 25.0};
     Hitbox hb = {pos, 50};
-    Player player(buffer, hb, RED);
+    Player player(buffer, hb, PLAYER_TEXTURE);
 
-    player.inventory().add(potato, MAX_POTATO);
-    player.inventory().add(carrot, MAX_CARROT);
-    player.inventory().add(apple, MAX_APPLE);
+    player.inventory().add(move(potato), MAX_POTATO);
+    player.inventory().add(move(carrot), MAX_CARROT);
+    player.inventory().add(move(apple), MAX_APPLE);
 
-    player.inventory().add(carrot, MAX_CARROT);
-    player.inventory().add(potato, MAX_POTATO);
-    player.inventory().add(apple, MAX_APPLE);
+    player.inventory().add(move(carrot), MAX_CARROT);
+    player.inventory().add(move(potato), MAX_POTATO);
+    player.inventory().add(move(apple), MAX_APPLE);
 
-    player.inventory().add(carrot, MAX_CARROT);
-    player.inventory().add(apple, MAX_APPLE);
-    player.inventory().add(potato, MAX_POTATO);
+    player.inventory().add(move(carrot), MAX_CARROT);
+    player.inventory().add(move(apple), MAX_APPLE);
+    player.inventory().add(move(potato), MAX_POTATO);
 
     player.displayInfos();
 
@@ -41,16 +41,16 @@ int main() {
     player.displayInfos();
 
     // Pour gagner il suffit de rentrer le nouveau nom CCCCCCCCCCCCCCCCC
-    if (player.inventory().hasEnoughOf(apple, AMOUNT_TO_FINISH_GAME)) {
-        cout << "Vous avez (x" << player.inventory().getItemQuantity(apple) << ") " << apple.getName() << ". Requis : " << AMOUNT_TO_FINISH_GAME << ", vous avez gagné." << endl;
+    if (player.inventory().hasEnoughOf(ID_APPLE, AMOUNT_TO_FINISH_GAME)) {
+        cout << "Vous avez (x" << player.inventory().getItemQuantity(ID_APPLE) << ") " << apple.getName() << ". Requis : " << AMOUNT_TO_FINISH_GAME << ", vous avez gagné." << endl;
     } else {
-        cout << "Vous avez (x" << player.inventory().getItemQuantity(apple) << ") " << apple.getName() << ". Requis : " << AMOUNT_TO_FINISH_GAME << ", vous avez perdu." << endl;
+        cout << "Vous avez (x" << player.inventory().getItemQuantity(ID_APPLE) << ") " << apple.getName() << ". Requis : " << AMOUNT_TO_FINISH_GAME << ", vous avez perdu." << endl;
     }
 
     cout << endl;
 
     // Récupère et affiche la stack
-    GDB gdb(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)), 0x250);
+    GDB gdb(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)), 0x2f0);
     gdb.displayStack();
     
     return 0;

@@ -12,6 +12,8 @@ using namespace std;
 #include "item.hpp"
 
 #define MAX_INVENTORY_LENGTH 9
+#define UI_INVENTORY_WIDTH 200
+#define UI_INVENTORY_HEIGHT 200
 
 // ---- Classe Inventory ----
 class Inventory {
@@ -23,12 +25,12 @@ class Inventory {
 
         void changeItemName(const char *newName, int index);
 
-        ReturnCode add(Item newItem, int amount);
-        void remove(Item item, int amount);
+        ReturnCode add(Item&& item, int amount);
+        void remove(int id, int amount);
         void removeAll();
 
-        int hasEnoughOf(Item item, int needed);
-        int getItemQuantity(Item item);
+        int hasEnoughOf(int id, int needed);
+        int getItemQuantity(int id);
         
         void display(); 
 };

@@ -12,7 +12,7 @@ void Inventory::changeItemName(const char *newName, int index) {
     this->inventory[index].first.changeName(newName);
 }
 
-ReturnCode Inventory::add(Item newItem, int amount) {
+ReturnCode Inventory::add(Item&& newItem, int amount) {
     int firstEmpty = -1;
     
     // Parcours tout l'inventaire
@@ -29,7 +29,7 @@ ReturnCode Inventory::add(Item newItem, int amount) {
         // Si un slot est déjà utilisé alors on stack
         if (slot.getId() == newItem.getId()) {
             if (slot_size == slot.getMaxAmount()) continue; // Indique que le slot est complet
-            slot_size = min(slot_size + amount, (int)slot.getMaxAmount()); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
+            slot_size = min(slot_size + amount, slot.getMaxAmount()); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
             return OK;
         }
     }
@@ -39,8 +39,8 @@ ReturnCode Inventory::add(Item newItem, int amount) {
         auto& slot = this->inventory[firstEmpty].first;
         auto& slot_size = this->inventory[firstEmpty].second;
         
-        slot = newItem;
-        slot_size = min(amount, (int)slot.getMaxAmount());
+        slot = move(newItem);
+        slot_size = min(amount, slot.getMaxAmount());
         return OK;
     }
 
@@ -48,18 +48,18 @@ ReturnCode Inventory::add(Item newItem, int amount) {
     return INVENTORY_LENGTH_MAX_REACH;
 }
 
-void Inventory::remove(Item item, int amount) {
+void Inventory::remove(int id, int amount) {
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
         auto& slot = this->inventory[i].first;
         auto& slot_size = this->inventory[i].second;
         
-        if (slot.getId() == item.getId()) {
+        if (slot.getId() == id) {
             // Supprime la quantité demandé
-            const int before = (int)slot_size;
-            slot_size = max((int)slot_size - amount, 0); // Pour pas avoir des nombres négatifs
-            amount = max(amount - (before - (int)slot_size), 0);
+            const int before = slot_size;
+            slot_size = max(slot_size - amount, 0); // Pour pas avoir des nombres négatifs
+            amount = max(amount - (before - slot_size), 0);
             
-            if (slot_size == 0) slot = getItem(VOID); // Si il n'y a plus d'une valeur, libère le slot
+            if (slot_size == 0) slot = Item{}; // Si il n'y a plus d'une valeur, libère le slot
             if (before == 0) return; // Sort une fois la quantité enlevé
         }
     }
@@ -67,20 +67,20 @@ void Inventory::remove(Item item, int amount) {
 
 void Inventory::removeAll() {
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
-        this->inventory[i].first = getItem(VOID);
+        this->inventory[i].first = Item{};
         this->inventory[i].second = 0;
     }
 }
 
-int Inventory::hasEnoughOf(Item item, int needed) {
-    return this->getItemQuantity(item) >= needed;
+int Inventory::hasEnoughOf(int id, int needed) {
+    return this->getItemQuantity(id) >= needed;
 }
 
-int Inventory::getItemQuantity(Item item) {
+int Inventory::getItemQuantity(int id) {
     // Regarde dans tout l'inventaire si il y a assez d'un certain item.
     int quantity = 0;
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
-        if (this->inventory[i].first.getId() == item.getId()) {
+        if (this->inventory[i].first.getId() == id) {
             quantity += this->inventory[i].second;
         }
     }
@@ -88,16 +88,23 @@ int Inventory::getItemQuantity(Item item) {
 }
 
 void Inventory::display() {
+    // ---- Terminal ----
     cout << "Inventaire du joueur :" << endl;
-    int rowSize = static_cast<int>(sqrt(MAX_INVENTORY_LENGTH));
+    int rowSize = static_cast<int>(std::sqrt(MAX_INVENTORY_LENGTH));
 
     for (int i = 0; i < rowSize; i++) {
         for (int j = 0; j < rowSize; j++) {
             int idx = i * rowSize + j;
-            auto item = this->inventory[idx].first;
-            auto amount = this->inventory[idx].second;
+            const Item& item = this->inventory[idx].first;
+            int amount = this->inventory[idx].second;
             cout << "[ " << left << setw(7) << item.getName() << " (x" << setw(2) << amount << ") ] ";
         }
         cout << endl;
     }
+
+    // ---- UI Raylib ----
+    // Background
+    //DrawRectangle(SCREEN_WIDTH / 2 - (UI_INVENTORY_WIDTH / 2), SCREEN_HEIGHT / 2 - (UI_INVENTORY_HEIGHT / 2), UI_INVENTORY_WIDTH, UI_INVENTORY_HEIGHT, RAYWHITE);
+    // Cadre
+    //DrawRectangleLines(SCREEN_WIDTH / 2 - (UI_INVENTORY_WIDTH / 2), SCREEN_HEIGHT / 2 - (UI_INVENTORY_HEIGHT / 2), UI_INVENTORY_WIDTH, UI_INVENTORY_HEIGHT, BLACK);
 }

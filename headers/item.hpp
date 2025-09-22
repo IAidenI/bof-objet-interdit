@@ -10,13 +10,17 @@
 #define ID_APPLE  67
 
 // Taille maximal autorisé dans l'inventaire pour les items
+#define MAX_VOID   0
 #define MAX_POTATO 32
 #define MAX_CARROT 16
 #define MAX_APPLE  1
 
+#define ITEM_POTATO_TEXTURE "assets/player.png"
+#define ITEM_CARROT_TEXTURE "assets/player.png"
+#define ITEM_APPLE_TEXTURE  "assets/player.png"
+
 // ---- Structure pour les objets ----
 typedef enum {
-    VOID,
     POTATO,
     CARROT,
     APPLE
@@ -25,19 +29,26 @@ typedef enum {
 // ---- Classe Objets ----
 class Item : public Entity {
     private:
-        // Long long pour mettre sur 8 octets et rendre plus lisible sur gdb
-        long long id;
-        long long max_amount;
+        int id;
+        int max_amount;
 
     public:
         // Constructeur par défaut
         Item() = default;
 
-        Item(long long id, const char *name, long long max_amount, Hitbox hb, Color hitboxColor);
+        Item(int id, const char *name, long long max_amount, Hitbox hb, const char *texture);
+
+        // Pas de copie
+        Item(const Item&) = delete;
+        Item& operator=(const Item&) = delete;
+
+        // Move
+        Item(Item&&) noexcept = default;
+        Item& operator=(Item&&) noexcept = default;
 
         // Getters
-        const long long getId() const { return this->id; };
-        const long long getMaxAmount() const { return this->max_amount; };
+        const int getId() const { return this->id; };
+        const int getMaxAmount() const { return this->max_amount; };
 };
 
 Item getItem(ItemType item);

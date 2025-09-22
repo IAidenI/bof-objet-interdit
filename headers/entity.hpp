@@ -14,14 +14,24 @@ using namespace std;
 class Entity {
     private:
         Hitbox hitbox;
-        Color hitboxColor;
+        Texture2D texture;
         char name[MAX_NAME_LENGTH];
 
     public:
         // Constructeur par défaut
-        Entity() : hitbox({{0,0},0}), hitboxColor(MAGENTA) { name[0] = '\0'; }
+        Entity() : hitbox({{0,0},0}), texture{0} { name[0] = '\0'; }
         
-        Entity(const char *name, Hitbox hb, Color hitboxColor);
+        Entity(const char *name, Hitbox hb, const char *texture);
+
+        // Interdire la copie
+        Entity(const Entity&) = delete;
+        Entity& operator=(const Entity&) = delete;
+
+        // Autoriser le move
+        Entity(Entity&& other) noexcept;
+        Entity& operator=(Entity&& other) noexcept;
+
+        virtual ~Entity();
 
         // Setter
         void changeName(const char *newName); // Vulnérabilité
@@ -31,8 +41,8 @@ class Entity {
 
         // Getter
         const Hitbox getHitbox() const { return this->hitbox; };
-        const char *getName() const { return name; };
-        const Color getColor() const { return this->hitboxColor; }
+        const char *getName() const { return this->name; };
+        const Texture2D getTexture() const { return this->texture; };
 };
 
 #endif // ENTITIES_H
