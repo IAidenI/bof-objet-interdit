@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -g -lraylib
+CFLAGS = -Wall -g -I$(HEADERSDIR) -lraylib
 LDFLAGS =
 TARGET = bofgame
 SOURCEDIR = sources

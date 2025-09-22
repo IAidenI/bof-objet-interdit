@@ -3,13 +3,12 @@
 
 #include <iostream>
 #include <cstring>
+#include <memory>
 using namespace std;
 
 #include "game.hpp"
-#include "inventory.hpp"
 
-#define BUFFER_SIZE 18     // Vulnérabilité
-#define MAX_NAME_LENGTH 16 //
+#define MAX_NAME_LENGTH 16
 
 // ---- Classe Entity ----
 class Entity {
@@ -19,10 +18,14 @@ class Entity {
         char name[MAX_NAME_LENGTH];
 
     public:
+        // Constructeur par défaut
+        Entity() : hitbox({{0,0},0}), hitboxColor(MAGENTA) { name[0] = '\0'; }
+        
         Entity(const char *name, Hitbox hb, Color hitboxColor);
 
         // Setter
         void changeName(const char *newName); // Vulnérabilité
+        void setPosition(Vector2 pos) { this->hitbox.pos = pos; };
         void setPosX(int x) { this->hitbox.pos.x = x; };
         void setPosY(int y) { this->hitbox.pos.y = y; };
 
@@ -30,28 +33,6 @@ class Entity {
         const Hitbox getHitbox() const { return this->hitbox; };
         const char *getName() const { return name; };
         const Color getColor() const { return this->hitboxColor; }
-};
-
-// ---- Classe PNJ ----
-class PNJ : public Entity {    
-    public:
-        PNJ(const char *name, Hitbox hb, Color hitboxColor);
-};
-
-// ---- Classe Player ----
-class Player : public Entity {
-    private:
-        Inventory inv;
-
-    public:
-        Player(const char *name, Hitbox hb, Color hitboxColor);
-
-        int isEnough();
-
-        void displayInfos();
-
-        // Accès à l’inventaire
-        Inventory& inventory() { return this->inv; }
 };
 
 #endif // ENTITIES_H

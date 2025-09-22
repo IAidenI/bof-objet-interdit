@@ -5,6 +5,13 @@ Inventory::Inventory() {
     this->removeAll();
 }
 
+/*
+    /!\ Fonction vulnérable avec strcpy /!\
+*/
+void Inventory::changeItemName(const char *newName, int index) {
+    this->inventory[index].first.changeName(newName);
+}
+
 ReturnCode Inventory::add(Item newItem, int amount) {
     int firstEmpty = -1;
     
@@ -14,15 +21,15 @@ ReturnCode Inventory::add(Item newItem, int amount) {
         auto& slot_size = this->inventory[i].second;
 
         // Récupère l'index du premier slot vide
-        if (slot.id == ID_NONE) {
+        if (slot.getId() == ID_NONE) {
             if (firstEmpty == -1) firstEmpty = i;
             continue;
         }
 
         // Si un slot est déjà utilisé alors on stack
-        if (slot.id == newItem.id) {
-            if (slot_size == slot.max_amount) continue; // Indique que le slot est complet
-            slot_size = min(slot_size + amount, (int)slot.max_amount); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
+        if (slot.getId() == newItem.getId()) {
+            if (slot_size == slot.getMaxAmount()) continue; // Indique que le slot est complet
+            slot_size = min(slot_size + amount, (int)slot.getMaxAmount()); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
             return OK;
         }
     }
@@ -33,7 +40,7 @@ ReturnCode Inventory::add(Item newItem, int amount) {
         auto& slot_size = this->inventory[firstEmpty].second;
         
         slot = newItem;
-        slot_size = min(amount, (int)slot.max_amount);
+        slot_size = min(amount, (int)slot.getMaxAmount());
         return OK;
     }
 
@@ -46,13 +53,13 @@ void Inventory::remove(Item item, int amount) {
         auto& slot = this->inventory[i].first;
         auto& slot_size = this->inventory[i].second;
         
-        if (slot.id == item.id) {
+        if (slot.getId() == item.getId()) {
             // Supprime la quantité demandé
             const int before = (int)slot_size;
             slot_size = max((int)slot_size - amount, 0); // Pour pas avoir des nombres négatifs
             amount = max(amount - (before - (int)slot_size), 0);
             
-            if (slot_size == 0) slot = ITEM[VOID]; // Si il n'y a plus d'une valeur, libère le slot
+            if (slot_size == 0) slot = getItem(VOID); // Si il n'y a plus d'une valeur, libère le slot
             if (before == 0) return; // Sort une fois la quantité enlevé
         }
     }
@@ -60,7 +67,7 @@ void Inventory::remove(Item item, int amount) {
 
 void Inventory::removeAll() {
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
-        this->inventory[i].first = ITEM[VOID];
+        this->inventory[i].first = getItem(VOID);
         this->inventory[i].second = 0;
     }
 }
@@ -73,7 +80,7 @@ int Inventory::getItemQuantity(Item item) {
     // Regarde dans tout l'inventaire si il y a assez d'un certain item.
     int quantity = 0;
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
-        if (this->inventory[i].first.id == item.id) {
+        if (this->inventory[i].first.getId() == item.getId()) {
             quantity += this->inventory[i].second;
         }
     }
@@ -89,7 +96,7 @@ void Inventory::display() {
             int idx = i * rowSize + j;
             auto item = this->inventory[idx].first;
             auto amount = this->inventory[idx].second;
-            cout << "[ " << left << setw(7) << item.name << " (x" << setw(2) << amount << ") ] ";
+            cout << "[ " << left << setw(7) << item.getName() << " (x" << setw(2) << amount << ") ] ";
         }
         cout << endl;
     }
