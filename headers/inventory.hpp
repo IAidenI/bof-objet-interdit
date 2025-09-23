@@ -8,12 +8,18 @@
 #include <iomanip>
 using namespace std;
 
-#include "game.hpp"
 #include "item.hpp"
 
 #define MAX_INVENTORY_LENGTH 9
 #define UI_INVENTORY_WIDTH 200
 #define UI_INVENTORY_HEIGHT 200
+
+typedef enum {
+    // Globale
+    OK,
+    // Inventaire
+    INVENTORY_LENGTH_MAX_REACH,
+} ReturnCode;
 
 // ---- Classe Inventory ----
 class Inventory {
@@ -25,7 +31,7 @@ class Inventory {
 
         void changeItemName(const char *newName, int index);
 
-        ReturnCode add(Item&& item, int amount);
+        ReturnCode add(Item item, int amount);
         void remove(int id, int amount);
         void removeAll();
 

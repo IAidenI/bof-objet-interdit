@@ -12,7 +12,7 @@ void Inventory::changeItemName(const char *newName, int index) {
     this->inventory[index].first.changeName(newName);
 }
 
-ReturnCode Inventory::add(Item&& newItem, int amount) {
+ReturnCode Inventory::add(Item newItem, int amount) {
     int firstEmpty = -1;
     
     // Parcours tout l'inventaire
@@ -39,7 +39,7 @@ ReturnCode Inventory::add(Item&& newItem, int amount) {
         auto& slot = this->inventory[firstEmpty].first;
         auto& slot_size = this->inventory[firstEmpty].second;
         
-        slot = move(newItem);
+        slot = newItem;
         slot_size = min(amount, slot.getMaxAmount());
         return OK;
     }

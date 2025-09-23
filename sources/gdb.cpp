@@ -11,13 +11,6 @@ GDB::GDB(uintptr_t rbp_main, uint16_t offset){
     this->positionY = base + 0x04;
     this->radius    = base + 0x08;
 
-    // Color (RGBA sur 4 octets)
-    this->color = base + 0x0C;
-    this->r = color + 0x00;
-    this->g = color + 0x01;
-    this->b = color + 0x02;
-    this->a = color + 0x03;  // si tu veux l’afficher aussi
-
     // name[12] (aligné à 0x10)
     this->name = base + 0x10;
 
@@ -46,7 +39,6 @@ void GDB::displayStack() {
     cout << "    @positionX = 0x" << hex << this->positionX << " ; value = " << dec << getFloatFromAddress(this->positionX) << endl;
     cout << "    @positionY = 0x" << hex << this->positionY << " ; value = " << dec << getFloatFromAddress(this->positionY) << endl;
     cout << "    @raduis = 0x" << hex << this->radius << " ; value = " << dec << getFloatFromAddress(this->radius) << endl;
-    cout << "    @color = 0x" << hex << this->color << " ; value = (" << dec << (int)getUint8FromAddress(this->r) << ", " << (int)getUint8FromAddress(this->g) << ", " << (int)getUint8FromAddress(this->b) << ", " << (int)getUint8FromAddress(this->a) << ")\n";
     cout << "    @name = 0x" << hex << this->name << " ; value = " << getStringFromAddress(this->name) << endl;
     cout << "    @inventory = 0x" << hex << this->inventory << " ; value = " << dec << getIntFromAddress(this->inventory) << endl;
 }

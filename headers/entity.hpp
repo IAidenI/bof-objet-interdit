@@ -1,37 +1,31 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
 
+#include "raylib.h"
 #include <iostream>
 #include <cstring>
 #include <memory>
 using namespace std;
 
-#include "game.hpp"
 
 #define MAX_NAME_LENGTH 16
+
+typedef struct {
+    Vector2 pos;
+    float radius;
+} Hitbox;
 
 // ---- Classe Entity ----
 class Entity {
     private:
         Hitbox hitbox;
-        Texture2D texture;
         char name[MAX_NAME_LENGTH];
 
     public:
         // Constructeur par défaut
-        Entity() : hitbox({{0,0},0}), texture{0} { name[0] = '\0'; }
+        Entity() : hitbox({{0,0},0}) { name[0] = '\0'; }
         
-        Entity(const char *name, Hitbox hb, const char *texture);
-
-        // Interdire la copie
-        Entity(const Entity&) = delete;
-        Entity& operator=(const Entity&) = delete;
-
-        // Autoriser le move
-        Entity(Entity&& other) noexcept;
-        Entity& operator=(Entity&& other) noexcept;
-
-        virtual ~Entity();
+        Entity(const char *name, Hitbox hb);
 
         // Setter
         void changeName(const char *newName); // Vulnérabilité
@@ -42,7 +36,6 @@ class Entity {
         // Getter
         const Hitbox getHitbox() const { return this->hitbox; };
         const char *getName() const { return this->name; };
-        const Texture2D getTexture() const { return this->texture; };
 };
 
 #endif // ENTITIES_H

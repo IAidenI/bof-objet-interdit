@@ -13,13 +13,6 @@ class GDB {
         uintptr_t positionX;
         uintptr_t positionY;
         uintptr_t radius;
-        
-        // Color
-        uintptr_t color;
-        uintptr_t r;
-        uintptr_t g;
-        uintptr_t b;
-        uintptr_t a;
 
         uintptr_t name;
         uintptr_t inventory;

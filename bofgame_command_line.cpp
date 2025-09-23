@@ -15,19 +15,19 @@ int main() {
 
     Vector2 pos = {25.0, 25.0};
     Hitbox hb = {pos, 50};
-    Player player(buffer, hb, PLAYER_TEXTURE);
+    Player player(buffer, hb);
 
-    player.inventory().add(move(potato), MAX_POTATO);
-    player.inventory().add(move(carrot), MAX_CARROT);
-    player.inventory().add(move(apple), MAX_APPLE);
+    player.inventory().add(potato, MAX_POTATO);
+    player.inventory().add(carrot, MAX_CARROT);
+    player.inventory().add(apple, MAX_APPLE);
 
-    player.inventory().add(move(carrot), MAX_CARROT);
-    player.inventory().add(move(potato), MAX_POTATO);
-    player.inventory().add(move(apple), MAX_APPLE);
+    player.inventory().add(carrot, MAX_CARROT);
+    player.inventory().add(potato, MAX_POTATO);
+    player.inventory().add(apple, MAX_APPLE);
 
-    player.inventory().add(move(carrot), MAX_CARROT);
-    player.inventory().add(move(apple), MAX_APPLE);
-    player.inventory().add(move(potato), MAX_POTATO);
+    player.inventory().add(carrot, MAX_CARROT);
+    player.inventory().add(apple, MAX_APPLE);
+    player.inventory().add(potato, MAX_POTATO);
 
     player.displayInfos();
 
@@ -50,7 +50,7 @@ int main() {
     cout << endl;
 
     // Récupère et affiche la stack
-    GDB gdb(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)), 0x2f0);
+    GDB gdb(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)), 0x1c0);
     gdb.displayStack();
     
     return 0;

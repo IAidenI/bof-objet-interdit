@@ -6,6 +6,13 @@
 
 #define PLAYER_TEXTURE "assets/player.png"
 
+// ---- Textures ----
+#define PLAYER_FRAME_W  32
+#define PLAYER_FRAME_H  32
+#define PLAYER_COLS     4
+#define PLAYER_ROW_IDLE 0
+#define PLAYER_ROW_MOVE 1
+
 // ---- Classe Player ----
 class Player : public Entity {
     private:
@@ -15,15 +22,7 @@ class Player : public Entity {
         // Constructeur par défaut
         Player() = default;
 
-        Player(const char *name, Hitbox hb, const char *texture);
-
-        // Pas de copie
-        Player(const Player&) = delete;
-        Player& operator=(const Player&) = delete;
-
-        // Move ok
-        Player(Player&&) noexcept = default;
-        Player& operator=(Player&&) noexcept = default;
+        Player(const char *name, Hitbox hb);
 
         int isEnough();
 
