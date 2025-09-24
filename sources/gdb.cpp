@@ -11,8 +11,8 @@ GDB::GDB(uintptr_t rbp_main, uint16_t offset){
     this->positionY = base + 0x04;
     this->radius    = base + 0x08;
 
-    // name[12] (aligné à 0x10)
-    this->name = base + 0x10;
+    // name[12] (aligné à 0x0c)
+    this->name = base + 0x0c;
 
     // inventory (aligné à 0x20)
     this->inventory = base + 0x20;

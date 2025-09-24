@@ -5,32 +5,14 @@
 
 int main() {
     // ---- Check si les fichiers sont présents ----
-    const char* requiredTextures[] = {
-        // Joueur
-        PLAYER_TEXTURE,
-        // PNJ
-        PNJ_FARMER_TEXTURE,
-        PNJ_SORCERER_TEXTURE,
-        PNJ_GUARD_TEXTURE,
-        // Objets
-        ITEM_POTATO_TEXTURE,
-        ITEM_CARROT_TEXTURE,
-        ITEM_APPLE_TEXTURE,
-    };
-
-    for (const char* texPath : requiredTextures) {
-        if (!FileExists(texPath)) {
-            std::cerr << texPath << " introuvable." << std::endl;
-            return 1;
-        }
-    }
 
     // ---- Textures/Fonts ----
     const char *textures[TEX_MAX] = {
         // Objets
         ITEM_POTATO_TEXTURE,
-        ITEM_CARROT_TEXTURE,
-        ITEM_APPLE_TEXTURE,
+        ITEM_POTATO_STATIC_TEXTURE,
+        ITEM_CARROT_STATIC_TEXTURE,
+        ITEM_APPLE_STATIC_TEXTURE,
         // PNJ
         PNJ_FARMER_TEXTURE,
         PNJ_GUARD_TEXTURE,
@@ -38,16 +20,32 @@ int main() {
         // Joueur
         PLAYER_TEXTURE,
         // Autre
-        DIALOGUE_TEXTURE
+        DIALOGUE_TEXTURE,
+        INVENTORY_TEXTURE
     };
     const char *fonts[FONT_MAX] = {
-        "assets/fonts/ByteBounce.ttf",
+        ENTITY_FONT,
+        DIALOGUE_FONT
     };
+
+    for (const char* texPath : textures) {
+        if (!FileExists(texPath)) {
+            std::cerr << texPath << " introuvable." << std::endl;
+            return 1;
+        }
+    }
+
+    for (const char* texPath : fonts) {
+        if (!FileExists(texPath)) {
+            std::cerr << texPath << " introuvable." << std::endl;
+            return 1;
+        }
+    }
 
     // ---- Début du jeu ----
     Game game(textures, fonts);
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && !game.hasEnded()) {
         game.handlePlayerMovements();
 
         game.handlePlayerInput();
@@ -56,11 +54,14 @@ int main() {
         BeginDrawing();
             ClearBackground(RED);
 
+            game.displayCommands();
             game.displayPNJ();
             game.displayItems();
             game.playerInteractions();
             game.displayPlayer();
             game.dialogue();
+            game.renderInventory();
+            game.resetRequests();
         EndDrawing();
     }
 

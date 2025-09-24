@@ -72,7 +72,7 @@ void Inventory::removeAll() {
     }
 }
 
-int Inventory::hasEnoughOf(int id, int needed) {
+bool Inventory::hasEnoughOf(int id, int needed) {
     return this->getItemQuantity(id) >= needed;
 }
 
@@ -88,9 +88,10 @@ int Inventory::getItemQuantity(int id) {
 }
 
 void Inventory::display() {
-    // ---- Terminal ----
     cout << "Inventaire du joueur :" << endl;
     int rowSize = static_cast<int>(std::sqrt(MAX_INVENTORY_LENGTH));
+
+    printf("[ DEBUG ] id : %d\n", this->inventory[0].first.getId());
 
     for (int i = 0; i < rowSize; i++) {
         for (int j = 0; j < rowSize; j++) {
@@ -101,10 +102,4 @@ void Inventory::display() {
         }
         cout << endl;
     }
-
-    // ---- UI Raylib ----
-    // Background
-    //DrawRectangle(SCREEN_WIDTH / 2 - (UI_INVENTORY_WIDTH / 2), SCREEN_HEIGHT / 2 - (UI_INVENTORY_HEIGHT / 2), UI_INVENTORY_WIDTH, UI_INVENTORY_HEIGHT, RAYWHITE);
-    // Cadre
-    //DrawRectangleLines(SCREEN_WIDTH / 2 - (UI_INVENTORY_WIDTH / 2), SCREEN_HEIGHT / 2 - (UI_INVENTORY_HEIGHT / 2), UI_INVENTORY_WIDTH, UI_INVENTORY_HEIGHT, BLACK);
 }

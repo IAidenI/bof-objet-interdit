@@ -11,9 +11,6 @@
 #define SCREEN_WIDTH 1200
 #define SCREEN_HEIGHT 900
 
-#define UI_DIALOGUE_WIDTH 700
-#define UI_DIALOGUE_HEIGHT 100
-
 // Paramètres du jeu
 #define PLAYER_SPEED 4 
 #define POTATO_AVAILABLE 8
@@ -21,12 +18,31 @@
 // Définitions des couleurs
 #define HITBOX_COLOR CLITERAL(Color){ 184, 184, 184, 102 }
 
+// Dialogues
+#define UI_DIALOGUE_WIDTH  700
+#define UI_DIALOGUE_HEIGHT 100
+
+#define UI_DIALOGUE_CONTENT_WIDTH  597
+#define UI_DIALOGUE_CONTENT_HEIGHT 88
+
+#define DIALOGUE_POS_X (SCREEN_WIDTH / 2 - (UI_DIALOGUE_WIDTH / 2))
+#define DIALOGUE_POS_Y (SCREEN_HEIGHT - UI_DIALOGUE_HEIGHT - 5.0f) // 5.0f padding du bas
+
+#define DIALOGUE_CONTENT_POS_X (DIALOGUE_POS_X + 110)
+#define DIALOGUE_CONTENT_POS_Y (DIALOGUE_POS_Y + 15)
+
+#define DIALOGUE_CONTENT_END_X (DIALOGUE_POS_X + 97 + UI_DIALOGUE_CONTENT_WIDTH)
+#define DIALOGUE_CONTENT_END_Y (DIALOGUE_POS_Y + 6 + UI_DIALOGUE_CONTENT_HEIGHT)
+
 #define DIALOGUE_TEXTURE "assets/dialogue.png"
 
 // ---- Structure texture/font ----
+#define ENTITY_FONT   "assets/fonts/ByteBounce.ttf"
+#define DIALOGUE_FONT "assets/fonts/Jersey10-Regular.ttf"
+
 typedef struct {
     Font font;
-    const char *text;
+    string text;
     float font_size;
     float spacing;
     Color color;
@@ -35,8 +51,9 @@ typedef struct {
 typedef enum {
     // Objets
     TEX_POTATO,
-    TEX_CARROT,
-    TEX_APPLE,
+    TEX_POTATO_STATIC,
+    TEX_CARROT_STATIC,
+    TEX_APPLE_STATIC,
     // PNJ
     TEX_FARMER,
     TEX_GUARD,
@@ -45,12 +62,14 @@ typedef enum {
     TEX_PLAYER,
     // Autre
     TEX_DIALOGUE,
+    TEX_SLOT,
     // Sentinelle pour savoir la taille
     TEX_MAX
 } TextureID;
 
 typedef enum {
-    BASIC,
+    ENTITY_LABEL,
+    DIALOGUE_LABEL,
     // Sentinelle pour savoir la taille
     FONT_MAX
 } FontID;
@@ -119,10 +138,9 @@ class Game {
         AnimationState potatoAnim;
 
         // Les Requêtes
-        bool displayHitbox = false;
-        bool displayInventory = false;
+        bool hitboxRequest = false;
+        bool inventoryRequest = false;
         bool dialogueRequest = false;
-
 
         // ---- Les informations sur les sprites ----
         // Le joueur
@@ -140,19 +158,30 @@ class Game {
 
         // Autre
         bool isMoving = false;
+        bool isPause = false;
         DialogueInfo displayDialogue;
+        bool gameEnded = false;
+
+        void dialogueContinue(TextStyle label);
+        bool dialogueChoice(TextStyle label);
     public:
         Game(const char **texturesPath, const char **fontPath);
         
         void handlePlayerMovements();
         void handlePlayerInput();
         
+        void displayCommands();
         void displayPNJ();
         void displayItems();
         void displayPlayer();
 
         void playerInteractions();
         void dialogue();
+
+        void renderInventory();
+
+        void resetRequests();
+        bool hasEnded() const { return this->gameEnded; }
 
         ~Game();
 };

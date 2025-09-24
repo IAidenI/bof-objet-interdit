@@ -16,8 +16,10 @@
 #define MAX_APPLE  1
 
 #define ITEM_POTATO_TEXTURE "assets/potato.png"
-#define ITEM_CARROT_TEXTURE "assets/carrot.png"
-#define ITEM_APPLE_TEXTURE  "assets/apple.png"
+
+#define ITEM_POTATO_STATIC_TEXTURE "assets/potato_static.png"
+#define ITEM_CARROT_STATIC_TEXTURE "assets/carrot.png"
+#define ITEM_APPLE_STATIC_TEXTURE  "assets/apple.png"
 
 // ---- Textures ----
 #define POTATO_FRAME_W  19

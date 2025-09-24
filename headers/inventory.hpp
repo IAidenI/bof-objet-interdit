@@ -14,6 +14,10 @@ using namespace std;
 #define UI_INVENTORY_WIDTH 200
 #define UI_INVENTORY_HEIGHT 200
 
+#define INVENTORY_BACKGROUND_COLOR CLITERAL(Color){ 84, 61, 89, 255 }
+
+#define INVENTORY_TEXTURE "assets/inventory.png"
+
 typedef enum {
     // Globale
     OK,
@@ -35,10 +39,12 @@ class Inventory {
         void remove(int id, int amount);
         void removeAll();
 
-        int hasEnoughOf(int id, int needed);
+        bool hasEnoughOf(int id, int needed);
         int getItemQuantity(int id);
         
         void display(); 
+
+        Item getItem(int idx) { return this->inventory[idx].first; };
 };
 
 #endif // INVENTORY_H
