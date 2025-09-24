@@ -41,10 +41,13 @@ class Inventory {
 
         bool hasEnoughOf(int id, int needed);
         int getItemQuantity(int id);
+
+        bool isEmpty();
         
         void display(); 
 
         Item getItem(int idx) { return this->inventory[idx].first; };
+        void settem(Item item, int idx) { this->inventory[idx].first = item; };
 };
 
 #endif // INVENTORY_H

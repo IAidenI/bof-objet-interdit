@@ -3,6 +3,7 @@
 
 #define AMOUNT_TO_FINISH_GAME 32
 
+#include <algorithm>
 #include "PNJ.hpp"
 #include "player.hpp"
 
@@ -12,8 +13,10 @@
 #define SCREEN_HEIGHT 900
 
 // Paramètres du jeu
-#define PLAYER_SPEED 4 
+#define PLAYER_SPEED 4
 #define POTATO_AVAILABLE 8
+
+#define INVENTORY_SCALE 5.0f
 
 // Définitions des couleurs
 #define HITBOX_COLOR CLITERAL(Color){ 184, 184, 184, 102 }
@@ -156,12 +159,21 @@ class Game {
         SpriteSheetInfo carrotSprite = {CARROT_FRAME_W, CARROT_FRAME_H, CARROT_COLS, CARROT_ROW_IDLE, CARROT_ROW_IDLE};
         SpriteSheetInfo appleSprite = {APPLE_FRAME_W, APPLE_FRAME_H, APPLE_COLS, APPLE_ROW_IDLE, APPLE_ROW_IDLE};
 
+        // Dialogue
+        DialogueInfo displayDialogue;
+        char *newName = nullptr;
+        int  invSelectorIndex = 0;
+        bool invSelectorVisible = false;
+        int sorcererStep = 0;
+
         // Autre
         bool isMoving = false;
         bool isPause = false;
-        DialogueInfo displayDialogue;
         bool gameEnded = false;
 
+        void getNewName();
+        void changeItemName();
+        void moveInvSelector(int dx, int dy);
         void dialogueContinue(TextStyle label);
         bool dialogueChoice(TextStyle label);
     public:
@@ -186,6 +198,7 @@ class Game {
         ~Game();
 };
 
+void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color);
 void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Vector2 pos, bool moving, SpriteSheetInfo entitySprite, Color color);
 void DrawStaticItem(const Texture2D& texture, Vector2 pos, float scale);
 void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text);

@@ -29,17 +29,19 @@ make clean && make
 
 ## 📌 État du projet (TODO / DONE)
 ### ✅ Fait
-- Prototype (PoC) en console fonctionnel : lecture du nom, remplissage d'inventaire, appel des fonctions `inventory().add()`, `inventory().hasEnoughOf()` et affichage d'informations.
+- Prototype (PoC) en console fonctionnel : lecture du nom, remplissage d'inventaire, appel des fonctions `inventory().add()`, `inventory().hasEnoughOf()` et affichage d'informations. (bofgame_command_line)
 - Définitions d'entités de base (`Player`, `Item`, `Inventory`, `Hitbox`, `Position`) et headers dans `headers/`.
-- Menu permettant de visualiser le contenu de la stack
+- Menu permettant de visualiser le contenu de la stack (en ligne de commande)
 - Main minimal démontrant la vulnérabilité.
-- Debut de l'intégration de **raylib**
+- Système de dialogues avec choix (version simple pour l'instant) implémenté.
+- Premier PoC avec UI réalisé, pour se faire, récupèrer 32 patates, les renommer en CCCCCCCCCCCCCCCC puis voir le garde
 
 ### 🔜 À faire / Améliorations prévues
-- Intégrer l'interface graphique avec **raylib**.
-- Créer des assets : PNG pour le joueur et les PNJ, polices et icônes.
-- Implémenter le système de dialogues avec choix et conséquences.
-- Compléter et stabiliser le système d'inventaire (UI, drag & drop si besoin).
+- Ajouter un visuel de la stack pour mieux voir ce qu'il se passe
+- Ajouter un bandeau invormatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
+- Faire le dialogue avec le fermier
+- Peut être un menu start/end
+- Asset du background + peut être améliorer dse assets existantes
 - Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
 
 ## ⚠️ Avertissement

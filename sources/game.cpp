@@ -74,16 +74,27 @@ void Game::handlePlayerMovements() {
 }
 
 void Game::handlePlayerInput() {
-    if (this->isPause) return;
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        printf("[ DEBUG ] Position : %.2fx%.2f\n", GetMousePosition().x, GetMousePosition().y);
+    }
 
-    if (IsKeyPressed(KEY_I)) this->inventoryRequest = !this->inventoryRequest;;
+    if (this->inventoryRequest && this->invSelectorVisible) {
+        int rowSize = static_cast<int>(sqrt(static_cast<float>(MAX_INVENTORY_LENGTH)));
+        if (rowSize * rowSize < MAX_INVENTORY_LENGTH) rowSize += 1;
+        if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) this->invSelectorIndex = (this->invSelectorIndex + 1) % MAX_INVENTORY_LENGTH;
+        if (IsKeyPressed(KEY_LEFT)  || IsKeyPressed(KEY_A)) this->invSelectorIndex = (this->invSelectorIndex - 1 + MAX_INVENTORY_LENGTH) % MAX_INVENTORY_LENGTH;
+        if (IsKeyPressed(KEY_DOWN)  || IsKeyPressed(KEY_S)) this->invSelectorIndex = (this->invSelectorIndex + rowSize) % MAX_INVENTORY_LENGTH;
+        if (IsKeyPressed(KEY_UP)    || IsKeyPressed(KEY_W)) this->invSelectorIndex = (this->invSelectorIndex - rowSize + MAX_INVENTORY_LENGTH) % MAX_INVENTORY_LENGTH;
+    }
+
+    if (IsKeyPressed(KEY_I)) {
+        this->inventoryRequest = !this->inventoryRequest;
+        this->isPause = !this->isPause;
+    }
     if (IsKeyPressed(KEY_F)) this->player.inventory().display();
 
     if (IsKeyPressed(KEY_E)) this->dialogueRequest = true;
     if (IsKeyPressed(KEY_H)) this->hitboxRequest = !this->hitboxRequest;
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        printf("[ DEBUG ] Position : %.2fx%.2f\n", GetMousePosition().x, GetMousePosition().y);
-    }
 }
 
 void Game::displayCommands() {
@@ -197,22 +208,21 @@ void Game::renderInventory() {
 
     // --- Texture et centrage de la fenêtre d'inventaire ---
     Texture2D inventory = this->tmgr[TEX_SLOT];
-    float scale = 5.0f;
 
-    float inventoryW = inventory.width  * scale;
-    float inventoryH = inventory.height * scale;
+    float inventoryW = inventory.width  * INVENTORY_SCALE;
+    float inventoryH = inventory.height * INVENTORY_SCALE;
 
     Vector2 pos = {
         SCREEN_WIDTH  / 2.0f - inventoryW / 2.0f,
         SCREEN_HEIGHT / 2.0f - inventoryH / 2.0f
     };
 
-    DrawTextureEx(inventory, pos, 0.0f, scale, WHITE);
+    DrawTextureEx(inventory, pos, 0.0f, INVENTORY_SCALE, WHITE);
 
     // --- Paramètres des items ---
-    Vector2 itemPos = { pos.x + 5.0f * scale, pos.y + 5.0f * scale }; // premier slot
-    float itemScale = scale * 0.88f;
-    float gap = 3.0f * scale;
+    Vector2 itemPos = { pos.x + 5.0f * INVENTORY_SCALE, pos.y + 5.0f * INVENTORY_SCALE }; // premier slot
+    float itemScale = INVENTORY_SCALE * 0.88f;
+    float gap = 3.0f * INVENTORY_SCALE;
 
     // On prend la patate comme référence de taille de cellule
     const Texture2D potatoTex = this->tmgr[TEX_POTATO_STATIC];
@@ -223,7 +233,7 @@ void Game::renderInventory() {
 
     // --- Grille ---
     const int totalSlots = MAX_INVENTORY_LENGTH;
-    int rowSize = static_cast<int>(std::sqrt(static_cast<float>(totalSlots)));
+    int rowSize = static_cast<int>(sqrt(static_cast<float>(totalSlots)));
     if (rowSize * rowSize < totalSlots) rowSize += 1; // dernière ligne partielle si besoin
 
     for (int i = 0; i < rowSize; ++i) {
@@ -254,6 +264,21 @@ void Game::renderInventory() {
             }
         }
     }
+
+    if (this->invSelectorVisible) {
+        int i = this->invSelectorIndex / rowSize;
+        int j = this->invSelectorIndex % rowSize;
+
+        Vector2 selPos = {
+            itemPos.x + j * (cellW + gap),
+            itemPos.y + i * (cellH + gap)
+        };
+
+        Rectangle r = { selPos.x, selPos.y, cellW, cellH };
+        float cornerLen   = 6.0f * INVENTORY_SCALE;
+        float cornerThick = 2.0f * INVENTORY_SCALE;
+        DrawCornerMarkers(r, cornerLen, cornerThick, GOLD);
+    }
 }
 
 void Game::dialogue() {
@@ -268,7 +293,7 @@ void Game::dialogue() {
             basic.text = "Vous récoltez " + to_string(POTATO_AVAILABLE) + " patate.";
             DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
             
-            basic.text = "Continue [Press space]";
+            basic.text = "Terminer [Press space]";
             basic.font_size = 18.0f;
             if (dialogueChoice(basic)) {
                 this->isPause = false;
@@ -282,7 +307,7 @@ void Game::dialogue() {
             basic.text = "Je suis un fermier.";
             DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
             
-            basic.text = "Continue [Press space]";
+            basic.text = "Terminer [Press space]";
             if (dialogueChoice(basic)) {
                 this->isPause = false;
                 this->displayDialogue.request = false;
@@ -297,7 +322,7 @@ void Game::dialogue() {
             basic.text = hasEnough ? string("Bravo, vous avez assez de ") + this->apple.getName() + ". Vous avez terminé le jeu." : string("Vous n'avez pas assez de ") + this->apple.getName() + " (Vous avez " + to_string(quantity) + "/" + to_string(AMOUNT_TO_FINISH_GAME) + ")";
             DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
             
-            basic.text = "Continue [Press space]";
+            basic.text = "Terminer [Press space]";
             if (dialogueChoice(basic)) {
                 this->isPause = false;
                 this->displayDialogue.request = false;
@@ -307,13 +332,81 @@ void Game::dialogue() {
         }
         case SORCERER: {
             DrawDialogueFrame(tmgr[TEX_DIALOGUE], tmgr[TEX_SORCERER], this->sorcererAnim, this->sorcererSprite, BLUE);
-            basic.text = "Je suis un sorcier.";
-            DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
-            
-            basic.text = "Continue [Press space]";
-            if (dialogueChoice(basic)) {
-                this->isPause = false;
-                this->displayDialogue.request = false;
+            if (this->player.inventory().isEmpty()) this->sorcererStep = 4;
+            switch (sorcererStep) {
+                case 0: {
+                    basic.text = "Vous souhaitez renommer un objet de votre inventaire ?";
+                    DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
+                    
+                    basic.text = "Très bien.";
+                    Vector2 labelSize = MeasureTextEx(basic.font, basic.text.c_str(), basic.font_size, basic.spacing);
+                    DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y + labelSize.y}, basic.font_size, basic.spacing, basic.color);            
+                    
+                    basic.text = "Continue [Press space]";
+                    if (dialogueChoice(basic)) sorcererStep = 1;
+                    break;
+                }
+                case 1: {
+                    this->inventoryRequest = true;
+                    this->invSelectorVisible = true;
+
+                    basic.text = "Séléctionnez le avec ZQSD ou les flêches.";
+                    DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
+
+                    basic.text = "Valider [Press space]";
+                    if (dialogueChoice(basic)) {
+                        this->inventoryRequest = false;
+                        this->invSelectorVisible = false;
+                        sorcererStep = 2;
+                    }
+                    break;
+                }
+                case 2: {
+                    getNewName();
+
+                    basic.text = "Saisissez le nouveau nom.";
+                    DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
+
+                    basic.text = "Valider [Press enter]";
+                    dialogueChoice(basic);
+                    if (this->newName != nullptr) {
+                        Item item = this->player.inventory().getItem(this->invSelectorIndex);
+                        item.changeName(this->newName);
+                        this->player.inventory().settem(item, this->invSelectorIndex);
+                        this->invSelectorIndex = 0;
+                        sorcererStep = 3;
+                    }
+                    break;
+                }
+                case 3: {
+                    basic.text = "Vous avez renomé votre objet en :";
+                    DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
+                    
+                    basic.text = string(this->newName);
+                    Vector2 labelSize = MeasureTextEx(basic.font, basic.text.c_str(), basic.font_size, basic.spacing);
+                    DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y + labelSize.y}, basic.font_size, basic.spacing, basic.color);            
+                    
+                    basic.text = "Terminer [Press space]";
+                    if (dialogueChoice(basic)) {
+                        this->isPause = false;
+                        this->displayDialogue.request = false;
+                        this->newName = nullptr;
+                        sorcererStep = 0; // reset
+                    }
+                    break;
+                }
+                case 4: {
+                    basic.text = "Vous n'avez aucun objet à renommer.";
+                    DrawTextEx(basic.font, basic.text.c_str(), {DIALOGUE_CONTENT_POS_X, DIALOGUE_CONTENT_POS_Y}, basic.font_size, basic.spacing, basic.color);
+
+                    basic.text = "Continue [Press space]";
+                    if (dialogueChoice(basic)) {
+                        this->isPause = false;
+                        this->displayDialogue.request = false;
+                        sorcererStep = 0; // reset
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -321,6 +414,52 @@ void Game::dialogue() {
             // TODO un truc en mode c'est pas sensé arrivé
             break;
         }
+    }
+}
+
+void Game::getNewName() {
+    static char buffer[BUFFER_SIZE] = {0}; // texte en cours
+    static int length = 0;                 // longueur actuelle
+    static bool active = true;
+
+    // Dimensions
+    float boxW = 400;
+    float boxH = 60;
+    float posX = SCREEN_WIDTH  / 2.0f - boxW / 2.0f;
+    float posY = SCREEN_HEIGHT / 2.0f - boxH / 2.0f;
+
+    // Fond
+    DrawRectangleRounded({posX, posY, boxW, boxH}, 0.2f, 10, Fade(LIGHTGRAY, 0.8f));
+    DrawRectangleRoundedLines({posX, posY, boxW, boxH}, 0.2f, 10, DARKGRAY);
+
+    // Input clavier
+    if (active) {
+        int key = GetCharPressed();
+        while (key > 0) {
+            if (key >= 32 && key <= 125 && length < BUFFER_SIZE - 1) {
+                buffer[length++] = (char)key;
+                buffer[length] = '\0'; // termine la chaîne
+            }
+            key = GetCharPressed();
+        }
+        if (IsKeyPressed(KEY_BACKSPACE) && length > 0) {
+            buffer[--length] = '\0';
+        }
+    }
+
+    // Affiche le texte
+    Vector2 textSize = MeasureTextEx(this->fmgr[0], buffer, 30, 2);
+    DrawTextEx(this->fmgr[0], buffer, {posX + 10, posY + boxH/2 - textSize.y/2}, 30, 2, BLACK);
+
+    // Curseur clignotant
+    if (((int)(GetTime()*2)) % 2 == 0) {
+        DrawTextEx(this->fmgr[0], "|", {posX + 15 + textSize.x, posY + boxH/2 - textSize.y/2}, 30, 2, DARKGRAY);
+    }
+
+    // Validation avec Entrée
+    if (IsKeyPressed(KEY_ENTER)) {
+        active = false;
+        this->newName = buffer;
     }
 }
 
@@ -355,6 +494,22 @@ Game::~Game() {
     }
 
     CloseWindow();
+}
+
+// --- Helper: coins en L autour d'un rectangle ---
+void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color) {
+    // Top-left
+    DrawLineEx({r.x, r.y}, {r.x + len, r.y}, thick, color);
+    DrawLineEx({r.x, r.y}, {r.x, r.y + len}, thick, color);
+    // Top-right
+    DrawLineEx({r.x + r.width - len, r.y}, {r.x + r.width, r.y}, thick, color);
+    DrawLineEx({r.x + r.width, r.y}, {r.x + r.width, r.y + len}, thick, color);
+    // Bottom-left
+    DrawLineEx({r.x, r.y + r.height - len}, {r.x, r.y + r.height}, thick, color);
+    DrawLineEx({r.x, r.y + r.height}, {r.x + len, r.y + r.height}, thick, color);
+    // Bottom-right
+    DrawLineEx({r.x + r.width - len, r.y + r.height}, {r.x + r.width, r.y + r.height}, thick, color);
+    DrawLineEx({r.x + r.width, r.y + r.height - len}, {r.x + r.width, r.y + r.height}, thick, color);
 }
 
 void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Vector2 pos, bool moving, SpriteSheetInfo entitySprite, Color color) {

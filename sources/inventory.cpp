@@ -87,6 +87,15 @@ int Inventory::getItemQuantity(int id) {
     return quantity;
 }
 
+bool Inventory::isEmpty() {
+    for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
+        if (this->inventory[i].first.getId() != ID_NONE) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Inventory::display() {
     cout << "Inventaire du joueur :" << endl;
     int rowSize = static_cast<int>(std::sqrt(MAX_INVENTORY_LENGTH));
