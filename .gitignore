@@ -1,0 +1,9 @@
+.gitignore
+.vscode
+
+# Fichiers objets compilés
+*.o
+
+# Binaire final
+bofgame
+bofgame.exe
