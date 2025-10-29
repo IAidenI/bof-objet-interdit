@@ -50,7 +50,7 @@ int main() {
     cout << endl;
 
     // Récupère et affiche la stack
-    GDB gdb(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)), 0x1c0);
+    GDB gdb(reinterpret_cast<uintptr_t>(&player));
     gdb.displayStack();
     
     return 0;

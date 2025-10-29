@@ -41,7 +41,7 @@ class Inventory {
 
         bool hasEnoughOf(int id, int needed);
         int getItemQuantity(int id);
-
+        int getSlotQuantity(int idx) { return this->inventory[idx].second; };
         bool isEmpty();
         
         void display(); 

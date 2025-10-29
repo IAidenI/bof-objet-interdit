@@ -4,8 +4,10 @@
 #define AMOUNT_TO_FINISH_GAME 32
 
 #include <algorithm>
+#include <vector>
 #include "PNJ.hpp"
 #include "player.hpp"
+#include "gdb.hpp"
 
 #define BUFFER_SIZE 18     // Vulnérabilité
 
@@ -20,6 +22,7 @@
 
 // Définitions des couleurs
 #define HITBOX_COLOR CLITERAL(Color){ 184, 184, 184, 102 }
+#define BEIGE_LIGHT CLITERAL(Color){ 230, 210, 170, 255 }
 
 // Dialogues
 #define UI_DIALOGUE_WIDTH  700
@@ -37,11 +40,13 @@
 #define DIALOGUE_CONTENT_END_X (DIALOGUE_POS_X + 97 + UI_DIALOGUE_CONTENT_WIDTH)
 #define DIALOGUE_CONTENT_END_Y (DIALOGUE_POS_Y + 6 + UI_DIALOGUE_CONTENT_HEIGHT)
 
+#define BACKGROUND       "assets/background.png"
 #define DIALOGUE_TEXTURE "assets/dialogue.png"
 
 // ---- Structure texture/font ----
 #define ENTITY_FONT   "assets/fonts/ByteBounce.ttf"
 #define DIALOGUE_FONT "assets/fonts/Jersey10-Regular.ttf"
+#define INFO_FONT     "assets/fonts/CascadiaCode-Regular.ttf"
 
 typedef struct {
     Font font;
@@ -52,6 +57,7 @@ typedef struct {
 } TextStyle;
 
 typedef enum {
+    TEX_BACKGROUND,
     // Objets
     TEX_POTATO,
     TEX_POTATO_STATIC,
@@ -73,6 +79,7 @@ typedef enum {
 typedef enum {
     ENTITY_LABEL,
     DIALOGUE_LABEL,
+    INFO_LABEL,
     // Sentinelle pour savoir la taille
     FONT_MAX
 } FontID;
@@ -107,6 +114,13 @@ typedef struct {
     bool request = false;
     DialogueEntity entity = ITEM;
 } DialogueInfo;
+
+// ---- Structures affichage stack ----
+typedef struct {
+    string text;
+    Color color;
+} Segment;
+using Line = vector<Segment>;
 
 class Game {
     private:
@@ -144,6 +158,7 @@ class Game {
         bool hitboxRequest = false;
         bool inventoryRequest = false;
         bool dialogueRequest = false;
+        bool stackRequest = true;
 
         // ---- Les informations sur les sprites ----
         // Le joueur
@@ -166,6 +181,12 @@ class Game {
         bool invSelectorVisible = false;
         int sorcererStep = 0;
 
+        // Affichage stack
+        bool stackShowMore = false;
+        bool stackShowMoreHover = false;
+        int  invPage = 0;
+        Rectangle invBtnPrev, invBtnNext = {0}; 
+
         // Autre
         bool isMoving = false;
         bool isPause = false;
@@ -176,12 +197,16 @@ class Game {
         void moveInvSelector(int dx, int dy);
         void dialogueContinue(TextStyle label);
         bool dialogueChoice(TextStyle label);
+
+        // GDB
+        GDB gdb;
     public:
         Game(const char **texturesPath, const char **fontPath);
         
         void handlePlayerMovements();
         void handlePlayerInput();
         
+        void displayBackground();
         void displayCommands();
         void displayPNJ();
         void displayItems();
@@ -191,6 +216,8 @@ class Game {
         void dialogue();
 
         void renderInventory();
+        void renderStack();
+        void renderStack2();
 
         void resetRequests();
         bool hasEnded() const { return this->gameEnded; }
@@ -203,5 +230,10 @@ void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Vector2 
 void DrawStaticItem(const Texture2D& texture, Vector2 pos, float scale);
 void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text);
 void DrawDialogueFrame(Texture2D dialogue, Texture2D entity, AnimationState entityAnim, SpriteSheetInfo entitySprite, Color color);
+void DrawInfoFrame(int posX, int posY, int rectW, int rectH);
+float MeasureLineWidth(const Line& line, Font font, float fontSize, float spacing);
+float MeasureTotalHeight(size_t lineCount, float fontSize, float lineGap);
+void DrawLineSegments(const Line& line, Font font, Vector2 pos, float fontSize, float spacing);
+void DrawLineSegmentsInteractive(Line& line, Font font, Vector2 pos, float fontSize, float spacing, bool& hoverFlag, bool& toggleFlag);
 
 #endif // GAME_H

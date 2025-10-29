@@ -8,6 +8,7 @@ int main() {
 
     // ---- Textures/Fonts ----
     const char *textures[TEX_MAX] = {
+        BACKGROUND,
         // Objets
         ITEM_POTATO_TEXTURE,
         ITEM_POTATO_STATIC_TEXTURE,
@@ -25,7 +26,8 @@ int main() {
     };
     const char *fonts[FONT_MAX] = {
         ENTITY_FONT,
-        DIALOGUE_FONT
+        DIALOGUE_FONT,
+        INFO_FONT
     };
 
     for (const char* texPath : textures) {
@@ -54,7 +56,9 @@ int main() {
         BeginDrawing();
             ClearBackground(RED);
 
+            game.displayBackground();
             game.displayCommands();
+            game.renderStack();
             game.displayPNJ();
             game.displayItems();
             game.playerInteractions();
