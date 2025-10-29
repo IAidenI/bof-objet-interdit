@@ -8,55 +8,50 @@
 #include "PNJ.hpp"
 #include "player.hpp"
 #include "gdb.hpp"
+#include "raylib-utils.hpp"
 
-#define BUFFER_SIZE 18     // Vulnérabilité
+inline constexpr int MAX_INPUT_CHARS = 18;     // Vulnérabilité
 
-#define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 900
+inline constexpr int SCREEN_WIDTH  = 1200;
+inline constexpr int SCREEN_HEIGHT = 900;
 
 // Paramètres du jeu
-#define PLAYER_SPEED 4
-#define POTATO_AVAILABLE 8
+inline constexpr int PLAYER_SPEED     = 4;
+inline constexpr int POTATO_AVAILABLE = 8;
 
-#define INVENTORY_SCALE 5.0f
-
-// Définitions des couleurs
-#define HITBOX_COLOR CLITERAL(Color){ 184, 184, 184, 102 }
-#define BEIGE_LIGHT CLITERAL(Color){ 230, 210, 170, 255 }
+inline constexpr float INVENTORY_SCALE = 5.0f;
 
 // Dialogues
-#define UI_DIALOGUE_WIDTH  700
-#define UI_DIALOGUE_HEIGHT 100
+inline constexpr int UI_DIALOGUE_WIDTH  = 700;
+inline constexpr int UI_DIALOGUE_HEIGHT = 100;
 
-#define UI_DIALOGUE_CONTENT_WIDTH  597
-#define UI_DIALOGUE_CONTENT_HEIGHT 88
+inline constexpr int UI_DIALOGUE_CONTENT_WIDTH  = 597;
+inline constexpr int UI_DIALOGUE_CONTENT_HEIGHT = 88;
 
-#define DIALOGUE_POS_X (SCREEN_WIDTH / 2 - (UI_DIALOGUE_WIDTH / 2))
-#define DIALOGUE_POS_Y (SCREEN_HEIGHT - UI_DIALOGUE_HEIGHT - 5.0f) // 5.0f padding du bas
+inline constexpr int DIALOGUE_POS_X = (SCREEN_WIDTH / 2 - (UI_DIALOGUE_WIDTH / 2));
+inline constexpr int DIALOGUE_POS_Y = (SCREEN_HEIGHT - UI_DIALOGUE_HEIGHT - 5.0f); // 5.0f padding du bas
 
-#define DIALOGUE_CONTENT_POS_X (DIALOGUE_POS_X + 110)
-#define DIALOGUE_CONTENT_POS_Y (DIALOGUE_POS_Y + 15)
+inline constexpr int DIALOGUE_CONTENT_POS_X = (DIALOGUE_POS_X + 110);
+inline constexpr int DIALOGUE_CONTENT_POS_Y = (DIALOGUE_POS_Y + 15);
 
-#define DIALOGUE_CONTENT_END_X (DIALOGUE_POS_X + 97 + UI_DIALOGUE_CONTENT_WIDTH)
-#define DIALOGUE_CONTENT_END_Y (DIALOGUE_POS_Y + 6 + UI_DIALOGUE_CONTENT_HEIGHT)
+inline constexpr int DIALOGUE_CONTENT_END_X = (DIALOGUE_POS_X + 97 + UI_DIALOGUE_CONTENT_WIDTH);
+inline constexpr int DIALOGUE_CONTENT_END_Y = (DIALOGUE_POS_Y + 6 + UI_DIALOGUE_CONTENT_HEIGHT);
 
-#define BACKGROUND       "assets/background.png"
-#define DIALOGUE_TEXTURE "assets/dialogue.png"
+inline constexpr const char *BACKGROUND       = "assets/background.png";
+inline constexpr const char *DIALOGUE_TEXTURE = "assets/dialogue.png";
 
 // ---- Structure texture/font ----
-#define ENTITY_FONT   "assets/fonts/ByteBounce.ttf"
-#define DIALOGUE_FONT "assets/fonts/Jersey10-Regular.ttf"
-#define INFO_FONT     "assets/fonts/CascadiaCode-Regular.ttf"
+inline constexpr const char *ENTITY_FONT   = "assets/fonts/ByteBounce.ttf";
+inline constexpr const char *DIALOGUE_FONT = "assets/fonts/Jersey10-Regular.ttf";
+inline constexpr const char *INFO_FONT     = "assets/fonts/Inconsolata-Regular.ttf";
 
-typedef struct {
-    Font font;
-    string text;
-    float font_size;
-    float spacing;
-    Color color;
-} TextStyle;
+inline constexpr Frame START_FRAME = { 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT };
 
-typedef enum {
+// ---- Tailles de base supporté pour les fonts ----
+const int FONT_SIZES[] = { 15, 16, 20, 22, 25, 40 };
+const int FONT_SIZE_COUNT = sizeof(FONT_SIZES) / sizeof(FONT_SIZES[0]);
+
+enum TextureID {
     TEX_BACKGROUND,
     // Objets
     TEX_POTATO,
@@ -74,59 +69,52 @@ typedef enum {
     TEX_SLOT,
     // Sentinelle pour savoir la taille
     TEX_MAX
-} TextureID;
+};
 
-typedef enum {
+enum FontID {
     ENTITY_LABEL,
     DIALOGUE_LABEL,
     INFO_LABEL,
     // Sentinelle pour savoir la taille
     FONT_MAX
-} FontID;
+};
 
 // ---- Structures animations ----
-typedef struct {
+struct AnimationState {
     int frame = 0;
     float timer = 0.0f;
     bool facingRight = false;
     float frameTimeIdle = 0.12f;
     float frameTimeMove = 0.12f;
     float scale = 4.0f;
-} AnimationState;
+};
 
-typedef struct {
+struct SpriteSheetInfo {
     const int frameW;
     const int frameH;
     const int frameCols;
     const int rowIdle;
     const int rowMove;
-} SpriteSheetInfo;
+};
 
 // ---- Structures dialogues ----
-typedef enum {
+enum DialogueEntity {
     ITEM,
     FARMER,
     GUARD,
     SORCERER
-} DialogueEntity;
+};
 
-typedef struct {
+struct DialogueInfo {
     bool request = false;
     DialogueEntity entity = ITEM;
-} DialogueInfo;
-
-// ---- Structures affichage stack ----
-typedef struct {
-    string text;
-    Color color;
-} Segment;
-using Line = vector<Segment>;
+};
 
 class Game {
     private:
         // Les managers
         Texture2D tmgr[TEX_MAX];
-        Font fmgr[FONT_MAX];
+        Font fmgr[FONT_MAX][FONT_SIZE_COUNT];
 
         // ---- Entités ----
         // Le joueur
@@ -158,7 +146,7 @@ class Game {
         bool hitboxRequest = false;
         bool inventoryRequest = false;
         bool dialogueRequest = false;
-        bool stackRequest = true;
+        bool stackRequest = false;
 
         // ---- Les informations sur les sprites ----
         // Le joueur
@@ -176,7 +164,7 @@ class Game {
 
         // Dialogue
         DialogueInfo displayDialogue;
-        char *newName = nullptr;
+        TextStyle newName;
         int  invSelectorIndex = 0;
         bool invSelectorVisible = false;
         int sorcererStep = 0;
@@ -202,6 +190,7 @@ class Game {
         GDB gdb;
     public:
         Game(const char **texturesPath, const char **fontPath);
+        Font& getFont(FontID id, int size);
         
         void handlePlayerMovements();
         void handlePlayerInput();
@@ -226,14 +215,10 @@ class Game {
 };
 
 void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color);
-void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Vector2 pos, bool moving, SpriteSheetInfo entitySprite, Color color);
-void DrawStaticItem(const Texture2D& texture, Vector2 pos, float scale);
+void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, SpriteSheetInfo entitySprite, Color color);
+void DrawStaticItem(const Texture2D& texture, Position pos, float scale);
 void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text);
 void DrawDialogueFrame(Texture2D dialogue, Texture2D entity, AnimationState entityAnim, SpriteSheetInfo entitySprite, Color color);
 void DrawInfoFrame(int posX, int posY, int rectW, int rectH);
-float MeasureLineWidth(const Line& line, Font font, float fontSize, float spacing);
-float MeasureTotalHeight(size_t lineCount, float fontSize, float lineGap);
-void DrawLineSegments(const Line& line, Font font, Vector2 pos, float fontSize, float spacing);
-void DrawLineSegmentsInteractive(Line& line, Font font, Vector2 pos, float fontSize, float spacing, bool& hoverFlag, bool& toggleFlag);
 
 #endif // GAME_H

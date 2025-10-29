@@ -1,18 +1,10 @@
-# =========================
-# = Makefile Windows/Unix =
-# =========================
-
 # ================== Config commune ==================
 CC         = g++
 TARGET     = bofgame
 SOURCEDIR  = sources
 HEADERSDIR = headers
 
-# Toutes les sources du dossier + le fichier principal à la racine
 SOURCES := $(wildcard $(SOURCEDIR)/*.cpp) $(TARGET).cpp
-
-SOURCES := $(filter-out $(MAIN_EXCLUDES), $(SOURCES))
-
 OBJECTS := $(SOURCES:.cpp=.o)
 
 CFLAGS  = -Wall -g -I$(HEADERSDIR)
@@ -21,23 +13,25 @@ LDLIBS  =
 
 # ================== Détection plateforme ==================
 ifeq ($(OS),Windows_NT)
-  # ---- Windows (MinGW / w64devkit fourni par raylib) ----
-  EXE      := .exe
+  EXE := .exe
   RAYLIB_DIR ?= C:/raylib
 
-  CFLAGS  += -I$(RAYLIB_DIR)/include
+  CFLAGS  += -I$(RAYLIB_DIR)/include -I$(RAYLIB_DIR)/raylib/src
+
   LDFLAGS += -L$(RAYLIB_DIR)/lib/win64
   LDLIBS  += -lraylib -lopengl32 -lgdi32 -lwinmm
 
-  # rm portable sous Windows
-  RM      := rm -f
-else
-  # ---- Linux ----
-  EXE      :=
-  
-  LDLIBS  += -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+  RM := rm -f
 
-  RM      := rm -f
+  RUN_PREFIX :=
+else
+  EXE :=
+
+  LDLIBS += -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+
+  RM := rm -f
+
+  RUN_PREFIX := ./
 endif
 
 # ================== Règles ==================
@@ -60,4 +54,4 @@ clean:
 	-$(RM) $(OBJECTS)
 
 run: $(TARGET)$(EXE)
-	./$(TARGET)$(EXE)
+	$(RUN_PREFIX)$(TARGET)$(EXE)

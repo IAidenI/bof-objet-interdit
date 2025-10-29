@@ -31,15 +31,25 @@ int main() {
     };
 
     for (const char* texPath : textures) {
+        if (texPath == nullptr) {
+            cerr << "[ ERREUR ] Chemin de police " << texPath << " détecté." << endl;
+            return 1;
+        }
+
         if (!FileExists(texPath)) {
-            std::cerr << texPath << " introuvable." << std::endl;
+            cerr << texPath << " introuvable." << endl;
             return 1;
         }
     }
 
     for (const char* texPath : fonts) {
+        if (texPath == nullptr) {
+            cerr << "[ ERREUR ] Chemin de police " << texPath << " détecté." << endl;
+            return 1;
+        }
+
         if (!FileExists(texPath)) {
-            std::cerr << texPath << " introuvable." << std::endl;
+            cerr << texPath << " introuvable." << endl;
             return 1;
         }
     }
@@ -57,14 +67,17 @@ int main() {
             ClearBackground(RED);
 
             game.displayBackground();
-            game.displayCommands();
-            game.renderStack();
             game.displayPNJ();
             game.displayItems();
+            
             game.playerInteractions();
             game.displayPlayer();
             game.dialogue();
+
+            game.displayCommands();
+            game.renderStack();
             game.renderInventory();
+            
             game.resetRequests();
         EndDrawing();
     }
