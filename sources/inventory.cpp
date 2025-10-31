@@ -12,13 +12,13 @@ void Inventory::changeItemName(const char *newName, int index) {
     this->inventory[index].first.changeName(newName);
 }
 
-ReturnCode Inventory::add(Item newItem, int amount) {
+bool Inventory::add(const Item newItem, int amount) {
     int firstEmpty = -1;
     
     // Parcours tout l'inventaire
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
         auto& slot = this->inventory[i].first;
-        auto& slot_size = this->inventory[i].second;
+        auto& slotSize = this->inventory[i].second;
 
         // Récupère l'index du premier slot vide
         if (slot.getId() == ID_NONE) {
@@ -28,38 +28,38 @@ ReturnCode Inventory::add(Item newItem, int amount) {
 
         // Si un slot est déjà utilisé alors on stack
         if (slot.getId() == newItem.getId()) {
-            if (slot_size == slot.getMaxAmount()) continue; // Indique que le slot est complet
-            slot_size = min(slot_size + amount, slot.getMaxAmount()); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
-            return OK;
+            if (slotSize == slot.getMaxAmount()) continue; // Indique que le slot est complet
+            slotSize = min(slotSize + amount, slot.getMaxAmount()); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
+            return false;
         }
     }
 
     // Ajoute au slot suivant le nouvelle item
     if (firstEmpty != -1) {
         auto& slot = this->inventory[firstEmpty].first;
-        auto& slot_size = this->inventory[firstEmpty].second;
+        auto& slotSize = this->inventory[firstEmpty].second;
         
         slot = newItem;
-        slot_size = min(amount, slot.getMaxAmount());
-        return OK;
+        slotSize = min(amount, slot.getMaxAmount());
+        return false;
     }
 
     // Inventaire plein
-    return INVENTORY_LENGTH_MAX_REACH;
+    return true;
 }
 
 void Inventory::remove(int id, int amount) {
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
         auto& slot = this->inventory[i].first;
-        auto& slot_size = this->inventory[i].second;
+        auto& slotSize = this->inventory[i].second;
         
         if (slot.getId() == id) {
             // Supprime la quantité demandé
-            const int before = slot_size;
-            slot_size = max(slot_size - amount, 0); // Pour pas avoir des nombres négatifs
-            amount = max(amount - (before - slot_size), 0);
+            const int before = slotSize;
+            slotSize = max(slotSize - amount, 0); // Pour pas avoir des nombres négatifs
+            amount = max(amount - (before - slotSize), 0);
             
-            if (slot_size == 0) slot = Item{}; // Si il n'y a plus d'une valeur, libère le slot
+            if (slotSize == 0) slot = Item{}; // Si il n'y a plus d'une valeur, libère le slot
             if (before == 0) return; // Sort une fois la quantité enlevé
         }
     }
@@ -99,8 +99,6 @@ bool Inventory::isEmpty() {
 void Inventory::display() {
     cout << "Inventaire du joueur :" << endl;
     int rowSize = static_cast<int>(std::sqrt(MAX_INVENTORY_LENGTH));
-
-    printf("[ DEBUG ] id : %d\n", this->inventory[0].first.getId());
 
     for (int i = 0; i < rowSize; i++) {
         for (int j = 0; j < rowSize; j++) {

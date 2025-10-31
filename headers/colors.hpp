@@ -1,6 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+inline constexpr Color COLOR_INVENTORY_BACKGROUND    = CLITERAL(Color){ 84, 61, 89, 255 };
+
+// ---- Input box ----
 inline constexpr Color COLOR_INPUT_BOX_TEXT          = MAROON;
 inline constexpr Color COLOR_INPUT_BOX_FOCUS         = CLITERAL(Color){ 255, 255, 255,  64 };
 inline constexpr Color COLOR_INPUT_BOX_BACKGROUND    = LIGHTGRAY;

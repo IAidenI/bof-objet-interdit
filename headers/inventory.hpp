@@ -10,20 +10,11 @@ using namespace std;
 
 #include "item.hpp"
 
-#define MAX_INVENTORY_LENGTH 9
-#define UI_INVENTORY_WIDTH 200
-#define UI_INVENTORY_HEIGHT 200
-
-#define INVENTORY_BACKGROUND_COLOR CLITERAL(Color){ 84, 61, 89, 255 }
-
-#define INVENTORY_TEXTURE "assets/inventory.png"
-
-typedef enum {
-    // Globale
-    OK,
-    // Inventaire
-    INVENTORY_LENGTH_MAX_REACH,
-} ReturnCode;
+// ---- Paramètre pour l'affichage de l'inventaire ----
+inline constexpr int         MAX_INVENTORY_LENGTH = 9;
+inline constexpr int         UI_INVENTORY_WIDTH   = 200;
+inline constexpr int         UI_INVENTORY_HEIGHT  = 200;
+inline constexpr const char *INVENTORY_TEXTURE    = "assets/inventory.png";
 
 // ---- Classe Inventory ----
 class Inventory {
@@ -35,7 +26,7 @@ class Inventory {
 
         void changeItemName(const char *newName, int index);
 
-        ReturnCode add(Item item, int amount);
+        bool add(const Item item, int amount);
         void remove(int id, int amount);
         void removeAll();
 
@@ -47,7 +38,7 @@ class Inventory {
         void display(); 
 
         Item getItem(int idx) { return this->inventory[idx].first; };
-        void settem(Item item, int idx) { this->inventory[idx].first = item; };
+        void setItem(const Item item, int idx) { this->inventory[idx].first = item; };
 };
 
 #endif // INVENTORY_H

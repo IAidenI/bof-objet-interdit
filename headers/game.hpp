@@ -1,8 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-#define AMOUNT_TO_FINISH_GAME 32
-
 #include <algorithm>
 #include <vector>
 #include "PNJ.hpp"
@@ -10,7 +8,9 @@
 #include "gdb.hpp"
 #include "raylib-utils.hpp"
 
-inline constexpr int MAX_INPUT_CHARS = 18;     // Vulnérabilité
+inline constexpr int AMOUNT_TO_FINISH_GAME = 32;
+
+inline constexpr int MAX_INPUT_CHARS = 17;     // Vulnérabilité
 
 inline constexpr int SCREEN_WIDTH  = 1200;
 inline constexpr int SCREEN_HEIGHT = 900;
@@ -90,11 +90,11 @@ struct AnimationState {
 };
 
 struct SpriteSheetInfo {
-    const int frameW;
-    const int frameH;
-    const int frameCols;
-    const int rowIdle;
-    const int rowMove;
+    int frameW;
+    int frameH;
+    int frameCols;
+    int rowIdle;
+    int rowMove;
 };
 
 // ---- Structures dialogues ----
@@ -150,17 +150,17 @@ class Game {
 
         // ---- Les informations sur les sprites ----
         // Le joueur
-        SpriteSheetInfo playerSprite = {PLAYER_FRAME_W, PLAYER_FRAME_H, PLAYER_COLS, PLAYER_ROW_IDLE, PLAYER_ROW_MOVE};
+        const SpriteSheetInfo playerSprite = {PLAYER_FRAME_W, PLAYER_FRAME_H, PLAYER_COLS, PLAYER_ROW_IDLE, PLAYER_ROW_MOVE};
 
         // Les PNJ
-        SpriteSheetInfo farmerSprite = {FARMER_FRAME_W, FARMER_FRAME_H, FARMER_COLS, FARMER_ROW_IDLE, FARMER_ROW_IDLE};
-        SpriteSheetInfo guardSprite = {GUARD_FRAME_W, GUARD_FRAME_H, GUARD_COLS, GUARD_ROW_IDLE, GUARD_ROW_IDLE};
-        SpriteSheetInfo sorcererSprite = {SORCERER_FRAME_W, SORCERER_FRAME_H, SORCERER_COLS, SORCERER_ROW_IDLE, SORCERER_ROW_IDLE};
+        const SpriteSheetInfo farmerSprite = {FARMER_FRAME_W, FARMER_FRAME_H, FARMER_COLS, FARMER_ROW_IDLE, FARMER_ROW_IDLE};
+        const SpriteSheetInfo guardSprite = {GUARD_FRAME_W, GUARD_FRAME_H, GUARD_COLS, GUARD_ROW_IDLE, GUARD_ROW_IDLE};
+        const SpriteSheetInfo sorcererSprite = {SORCERER_FRAME_W, SORCERER_FRAME_H, SORCERER_COLS, SORCERER_ROW_IDLE, SORCERER_ROW_IDLE};
 
         // Les objets
-        SpriteSheetInfo potatoSprite = {POTATO_FRAME_W, POTATO_FRAME_H, POTATO_COLS, POTATO_ROW_IDLE, POTATO_ROW_IDLE};
-        SpriteSheetInfo carrotSprite = {CARROT_FRAME_W, CARROT_FRAME_H, CARROT_COLS, CARROT_ROW_IDLE, CARROT_ROW_IDLE};
-        SpriteSheetInfo appleSprite = {APPLE_FRAME_W, APPLE_FRAME_H, APPLE_COLS, APPLE_ROW_IDLE, APPLE_ROW_IDLE};
+        const SpriteSheetInfo potatoSprite = {POTATO_FRAME_W, POTATO_FRAME_H, POTATO_COLS, POTATO_ROW_IDLE, POTATO_ROW_IDLE};
+        const SpriteSheetInfo carrotSprite = {CARROT_FRAME_W, CARROT_FRAME_H, CARROT_COLS, CARROT_ROW_IDLE, CARROT_ROW_IDLE};
+        const SpriteSheetInfo appleSprite = {APPLE_FRAME_W, APPLE_FRAME_H, APPLE_COLS, APPLE_ROW_IDLE, APPLE_ROW_IDLE};
 
         // Dialogue
         DialogueInfo displayDialogue;

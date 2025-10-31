@@ -10,14 +10,14 @@ int main() {
     const char *textures[TEX_MAX] = {
         BACKGROUND,
         // Objets
-        ITEM_POTATO_TEXTURE,
-        ITEM_POTATO_STATIC_TEXTURE,
-        ITEM_CARROT_STATIC_TEXTURE,
-        ITEM_APPLE_STATIC_TEXTURE,
+        POTATO_TEXTURE,
+        POTATO_STATIC_TEXTURE,
+        CARROT_STATIC_TEXTURE,
+        APPLE_STATIC_TEXTURE,
         // PNJ
-        PNJ_FARMER_TEXTURE,
-        PNJ_GUARD_TEXTURE,
-        PNJ_SORCERER_TEXTURE,
+        FARMER_TEXTURE,
+        GUARD_TEXTURE,
+        SORCERER_TEXTURE,
         // Joueur
         PLAYER_TEXTURE,
         // Autre
@@ -72,11 +72,11 @@ int main() {
             
             game.playerInteractions();
             game.displayPlayer();
-            game.dialogue();
 
             game.displayCommands();
             game.renderStack();
             game.renderInventory();
+            game.dialogue();
             
             game.resetRequests();
         EndDrawing();

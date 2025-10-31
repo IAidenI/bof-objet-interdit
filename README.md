@@ -35,14 +35,24 @@ make clean && make
 - Main minimal démontrant la vulnérabilité.
 - Système de dialogues avec choix (version simple pour l'instant) implémenté.
 - Premier PoC avec UI réalisé, pour se faire, récupèrer 32 patates, les renommer en CCCCCCCCCCCCCCCC puis voir le garde
+- Asset pour le background
+- Visuel de la stack
 
 ### 🔜 À faire / Améliorations prévues
-- Ajouter un visuel de la stack pour mieux voir ce qu'il se passe
-- Ajouter un bandeau invormatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
+**Urgent :**
 - Faire le dialogue avec le fermier
-- Peut être un menu start/end
-- Asset du background + peut être améliorer dse assets existantes
+- Affichage de la stack : ajout pour le survol de la souris, des informations complémentaire (A quoi correspond la valeur, sa correspondance en ASCII etc...)
+- Application trop lent à charger à cause des font/textures qui chargent
+
+**A faire :**
+- Refactor logique et design des dialogues
 - Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
+- Peut être un menu start/end
+
+**Optionelles :**
+- Ajouter un bandeau invormatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
+- Peut être améliorer des assets existantes
+- Survol de la souris dans l'inventaire affiche les infos de l'item
 
 ## ⚠️ Avertissement
 Ce projet contient volontairement une vulnérabilité à des fins **pédagogiques**. **Ne reproduisez pas** ces techniques sur des systèmes réels ou en production sans autorisation explicite. Utilisez ce projet uniquement pour apprendre et expérimenter dans un environnement contrôlé.

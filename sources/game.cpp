@@ -1,10 +1,10 @@
 #include "game.hpp"
 
 Game::Game(const char **texturesPath, const char **fontPath) 
-: player("Vous", {{675, 440}, 80}),
-  farmer("Fermier", {{770, 630}, 80}),
-  guard("Garde", {{580, 300}, 80}),
-  sorcerer("Sorcier", {{350, 490}, 80}),
+: player("Vous", { { 600.0f, 500.0f }, 80.0f }),
+  farmer("Fermier", { { 770.0f, 630.0f }, 80.0f }),
+  guard("Garde", { { 580.0f, 300.0f }, 80.0f }),
+  sorcerer("Sorcier", { { 350.0f, 490.0f }, 80.0f }),
   gdb(reinterpret_cast<uintptr_t>(&this->player)) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "BOF : L'objet interdit");
     SetTargetFPS(60);
@@ -27,7 +27,7 @@ Game::Game(const char **texturesPath, const char **fontPath)
     this->apple  = getItem(APPLE);
 
     // Initialisation des patates
-    Position initialPosition = {270, 740};
+    Position initialPosition = { 270.0f, 740.0f };
     int spacingX = 200;  // distance horizontale
     int spacingY = 100;  // distance verticale
     int cols     = 4;    // 4 par ligne
@@ -40,24 +40,20 @@ Game::Game(const char **texturesPath, const char **fontPath)
         float y = initialPosition.y + row * spacingY;
 
         this->potato[i] = getItem(POTATO);
-        this->potato[i].setPosition({x, y});
+        this->potato[i].setPosition({ x, y });
     }
 
     // ---- Initialisation des animations ----
-    this->playerAnim = {0, 0.0f, true, 0.12f, 0.12f, 3.0f};
+    this->playerAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.12f, .frameTimeMove = 0.12f, .scale = 3.0f };
 
-    this->farmerAnim = {0, 0.0f, false, 0.12f, 0.0f, 4.0f};
-    this->guardAnim = {0, 0.0f, true, 0.15f, 0.0f, 4.0f};
-    this->sorcererAnim = {0, 0.0f, true, 0.12f, 0.0f, 4.0f};
+    this->farmerAnim = { .frame = 0, .timer = 0.0f, .facingRight = false, .frameTimeIdle = 0.12f, .frameTimeMove = 0.0f, .scale = 4.0f };
+    this->guardAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.15f, .frameTimeMove = 0.0f, .scale = 4.0f };
+    this->sorcererAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.12f, .frameTimeMove = 0.0f, .scale = 4.0f };
 
-    this->potatoAnim = {0, 0.0f, true, 1.0f, 0.0f, 4.0f};
+    this->potatoAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 1.0f, .frameTimeMove = 0.0f, .scale = 4.0f };
 
     // ---- Initialise la saisie utilisateur ----
-    this->newName.font = &this->getFont(INFO_LABEL, 40);
-    this->newName.text = "";
-    this->newName.fontSize = 40.0f;
-    this->newName.spacing = 2.0f;
-    this->newName.color = COLOR_INPUT_BOX_TEXT;
+    this->newName = { .font = &this->getFont(INFO_LABEL, 40), .text = "", .fontSize = 40.0f, .spacing = 2.0f, .color = COLOR_INPUT_BOX_TEXT };
 }
 
 Font& Game::getFont(FontID id, int size) {
@@ -378,132 +374,15 @@ void Game::renderInventory() {
 void Game::renderStack() {
     if (!this->stackRequest) return;
 
-    /*
-    
-    -- Stack informations --
-
-    */
-
     TextStyle cardTitle = { &this->getFont(INFO_LABEL, 25), "Stack Trace", 25.0f, 2.0f, COLOR_STACK_TEXT };
-    vector<vector<InfoSegment>> cardContent = {        
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "00 00 00 00 00 00 00 00", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), ". . . . . . . .",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "00 00 00 00 00 00 00 00", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), ". . . . . . . .",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-
-        { 
-            { { &this->getFont(INFO_LABEL, 16), "0x00007ffe6bf7c3f0",      16.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 16), " : ",                     16.0f, 2.0f, COLOR_STACK_TEXT } },
-            { { &this->getFont(INFO_LABEL, 16), "41 41 41 41 41 41 41 41", 16.0f, 2.0f, COLOR_STACK_HEXA } },
-            { { &this->getFont(INFO_LABEL, 16), " | ",                     16.0f, 2.0f, COLOR_STACK_SPLIT } },
-            { { &this->getFont(INFO_LABEL, 16), "A A A A A A A A",         16.0f, 2.0f, COLOR_STACK_ASCII } },
-            { { &this->getFont(INFO_LABEL, 16), " |",                      16.0f, 2.0f, COLOR_STACK_SPLIT } },
-        },
-    };
-
-    vector<vector<InfoSegment>> data = {
-        {
-            { { &this->getFont(INFO_LABEL, 22), "Voici un pseudo affichage de la stack, pour plus de ", 22.0f, 1.0f, COLOR_STACK_TEXT } }
-        },
-
-        {
-            { { &this->getFont(INFO_LABEL, 22), "détails ouvrir gdb et faire x/x $rsp.", 22.0f, 1.0f, COLOR_STACK_TEXT } },
-        }
-    };
+    TextStyle style = { &this->getFont(INFO_LABEL, 16), "", 16.0f, 2.0f, RAYWHITE };
+    vector<vector<InfoSegment>> cardContent = this->gdb.getFormatedStack(style);
 
     vector<Card> cards = {
         { cardTitle, cardContent, { .position = TOP_LEFT } },
     };
 
-    vector<DataSection> dataSection = {
-        { data, { .position = BOT_LEFT }  },
-    };
-    DrawInfoSection(cards, dataSection, TOP_RIGHT, START_FRAME);
+    DrawCard({ cardTitle, cardContent, { .position = TOP_RIGHT } }, START_FRAME, 0.05f);
 }
 
 void Game::dialogue() {
@@ -596,7 +475,9 @@ void Game::dialogue() {
                     if (dialogueChoice(basic)) {
                         Item item = this->player.inventory().getItem(this->invSelectorIndex);
                         item.changeName(this->newName.text.c_str());
-                        this->player.inventory().settem(item, this->invSelectorIndex);
+                        this->player.inventory().getItem(this->invSelectorIndex).displayInfos();
+                        this->player.inventory().setItem(item, this->invSelectorIndex);
+                        this->player.inventory().getItem(this->invSelectorIndex).displayInfos();
                         this->invSelectorIndex = 0;
                         sorcererStep = 3;
                     }
@@ -698,7 +579,6 @@ Game::~Game() {
     CloseWindow();
 }
 
-// --- Helper: coins en L autour d'un rectangle ---
 void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color) {
     // Top-left
     DrawLineEx({r.x, r.y}, {r.x + len, r.y}, thick, color);

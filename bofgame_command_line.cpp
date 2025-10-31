@@ -5,6 +5,32 @@
 #include "gdb.hpp"
 
 int main() {
+    Item potato = getItem(CARROT);
+    Item apple = getItem(APPLE);
+
+    Vector2 pos = {27.0, 13.0};
+    Hitbox hb = {pos, 50};
+    Player player("Player", hb);
+
+    for (size_t i = 0; i < MAX_INVENTORY_LENGTH; i++) {
+        if (i == MAX_INVENTORY_LENGTH - 1) {
+            player.inventory().add(apple, MAX_POTATO);
+        } else if (player.inventory().add(potato, MAX_POTATO)) {
+            printf("[ WARNING ] Inventaire plein.\n");
+        }
+    }
+
+    player.displayInfos();
+
+    // Récupère et affiche la stack
+    GDB gdb(reinterpret_cast<uintptr_t>(&player));
+    gdb.displayStack();
+    TextStyle style = { .text = "title", .fontSize = 25.0f, .spacing = 2.0f, .color = RED };
+    gdb.displayInfoSegment(gdb.getFormatedStack(style));
+    
+    return 0;
+
+    /*
     char buffer[BUFFER_SIZE];
     cout << "Saisir votre nom: " << endl;
     cin.getline(buffer, BUFFER_SIZE);
@@ -54,4 +80,5 @@ int main() {
     gdb.displayStack();
     
     return 0;
+    */
 }

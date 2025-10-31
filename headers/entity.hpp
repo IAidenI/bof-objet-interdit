@@ -6,14 +6,14 @@
 #include <cstring>
 #include <memory>
 using namespace std;
+using Position = Vector2;
 
+inline constexpr int MAX_NAME_LENGTH = 16;
 
-#define MAX_NAME_LENGTH 16
-
-typedef struct {
-    Vector2 pos;
+struct Hitbox {
+    Position pos;
     float radius;
-} Hitbox;
+};
 
 // ---- Classe Entity ----
 class Entity {
@@ -23,18 +23,17 @@ class Entity {
 
     public:
         // Constructeur par défaut
-        Entity() : hitbox({{0,0},0}) { name[0] = '\0'; }
-        
+        Entity() : hitbox({ { 0, 0 }, 0 }) { name[0] = '\0'; }
         Entity(const char *name, Hitbox hb);
 
         // Setter
         void changeName(const char *newName); // Vulnérabilité
-        void setPosition(Vector2 pos) { this->hitbox.pos = pos; };
-        void setPosX(int x) { this->hitbox.pos.x = x; };
-        void setPosY(int y) { this->hitbox.pos.y = y; };
+        void setPosition(Position pos) { this->hitbox.pos = pos; };
+        void setPosX(float x) { this->hitbox.pos.x = x; };
+        void setPosY(float y) { this->hitbox.pos.y = y; };
 
         // Getter
-        const Hitbox getHitbox() const { return this->hitbox; };
+        Hitbox getHitbox() const { return this->hitbox; };
         const char *getName() const { return this->name; };
 };
 
