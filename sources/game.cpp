@@ -374,15 +374,29 @@ void Game::renderInventory() {
 void Game::renderStack() {
     if (!this->stackRequest) return;
 
+    // Titre
     TextStyle cardTitle = { &this->getFont(INFO_LABEL, 25), "Stack Trace", 25.0f, 2.0f, COLOR_STACK_TEXT };
+    
+    // Contenu
     TextStyle style = { &this->getFont(INFO_LABEL, 16), "", 16.0f, 2.0f, RAYWHITE };
     vector<vector<InfoSegment>> cardContent = this->gdb.getFormatedStack(style);
 
-    vector<Card> cards = {
-        { cardTitle, cardContent, { .position = TOP_LEFT } },
+    // Affichage
+    Frame tmp = {
+        START_FRAME.x,
+        START_FRAME.y,
+        START_FRAME.width
     };
+    HoverValues ret = DrawCard({ cardTitle, cardContent, { .position = TOP_RIGHT } }, tmp, 0.05f);
+    
+    // Hover
+    if (ret.offset != SIZE_MAX) {
+        TextStyle styleHoverTitle = { &this->getFont(INFO_LABEL, 19), "", 19.0f, 2.0f, COLOR_TOOLTIP_TITLE };
+        TextStyle styleHoverContent = { &this->getFont(INFO_LABEL, 15), "", 15.0f, 2.0f, COLOR_TOOLTIP_LABEL };
 
-    DrawCard({ cardTitle, cardContent, { .position = TOP_RIGHT } }, START_FRAME, 0.05f);
+        vector<vector<InfoSegment>> dataHover = this->gdb.getMoreInfo(ret.offset, styleHoverTitle, styleHoverContent);
+        DrawToolTip(dataHover, ret.frame, { 8.0f, 8.0f });
+    }
 }
 
 void Game::dialogue() {

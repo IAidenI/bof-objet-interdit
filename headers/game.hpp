@@ -48,7 +48,7 @@ inline constexpr const char *INFO_FONT     = "assets/fonts/Inconsolata-Regular.t
 inline constexpr Frame START_FRAME = { 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT };
 
 // ---- Tailles de base supporté pour les fonts ----
-const int FONT_SIZES[] = { 15, 16, 20, 22, 25, 40 };
+const int FONT_SIZES[] = { 15, 16, 19, 20, 22, 25, 40 };
 const int FONT_SIZE_COUNT = sizeof(FONT_SIZES) / sizeof(FONT_SIZES[0]);
 
 enum TextureID {

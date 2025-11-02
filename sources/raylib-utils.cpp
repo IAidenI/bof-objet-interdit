@@ -37,6 +37,27 @@ Size GetFrameMaxSize(const vector<vector<InfoSegment>>& content, Padding padIn, 
     return { width + 2.0f * padIn.x, height + 2.0f * padIn.y };
 }
 
+// Calcul la taille maximale dont aura besoin une frame en prenant en compte une branche
+Size GetFrameMaxSizeWithBranch(const vector<vector<InfoSegment>>& content, Padding padIn, float interline, float indentAfterTitle, float titleInterline) {
+    float maxLineW = 0.0f;
+    float totalH   = 0.0f;
+
+    if (content.empty()) return { 2.0f*padIn.x, 2.0f*padIn.y + interline };
+
+    for (size_t i = 0; i < content.size(); ++i) {
+        Size s = GetMaxLineSize(content[i]);
+        float effectiveW = s.x + ((i == 0) ? 0.0f : indentAfterTitle);
+        maxLineW = fmaxf(maxLineW, effectiveW);
+
+        totalH += s.y;
+        if (i + 1 < content.size()) totalH += interline;
+    }
+
+    if (content.size() >= 2) totalH += (titleInterline - interline);
+
+    return { maxLineW + 2.0f*padIn.x, totalH + 2.0f*padIn.y };
+}
+
 // Calcul la position et la taille d'une frame
 Frame GetFrame(const vector<vector<InfoSegment>>& content, WindowPosition position, Frame parentFrame, Padding padIn, Margins padOut, float interline) {
     // Récupère la taille de la frame
@@ -291,7 +312,7 @@ Frame GetInfoFrame(const vector<Card>& cards, const vector<DataSection>& dataSec
 }
 
 // Dessine une card personalisé
-void DrawCard(const Card& card, Frame parentFrame, float roundness, int segments) {
+HoverValues DrawCard(const Card& card, Frame parentFrame, float roundness, int segments) {
     // ---- Calcul des frames ----
     CardLayout frames = GetCardFrame(card, parentFrame);
 
@@ -311,14 +332,31 @@ void DrawCard(const Card& card, Frame parentFrame, float roundness, int segments
 
     // ---- Le contenu ----
     Position contentPosition = { frames.content.x + card.config.padIn.x, frames.title.y + frames.title.height + card.config.padIn.y };
+
+    // Variable pour garder l'info-bulle
+    HoverValues segHover;
     for (const auto& line : card.content) {
         float maxContentHeight = 0.0f;
         for (const auto& seg : line) {
+            Size textSize = MeasureTextStyled(seg.textStyle);
+            
+            // Hover
+            Position mousPos = GetMousePosition();
+            Frame valueFrame = { contentPosition.x, contentPosition.y, textSize.x, textSize.y };
+            bool hovered = CheckCollisionPointRec(mousPos, valueFrame);
+
+            if (hovered && seg.offset != SIZE_MAX) {
+                DrawRectangleRounded(valueFrame, titleRoundness, segments, COLOR_VALUE_HOOVER);
+                DrawRectangleRoundedLinesEx(valueFrame, titleRoundness, segments, card.config.stroke, COLOR_STACK_BORDER);
+
+                segHover.offset = seg.offset;
+                segHover.frame = valueFrame;
+            }
+
             // Affiche le texte
             DrawTextStyled(seg.textStyle, contentPosition);
 
             // Calcul la position suivante
-            Size textSize = MeasureTextStyled(seg.textStyle);
             contentPosition.x += textSize.x;
             maxContentHeight = fmaxf(textSize.y, maxContentHeight);
         }
@@ -326,6 +364,8 @@ void DrawCard(const Card& card, Frame parentFrame, float roundness, int segments
         contentPosition.x = frames.content.x + card.config.padIn.x;
         contentPosition.y += maxContentHeight + card.config.interline;
     }
+    
+    return segHover;
 }
 
 // Dessine une section avec des cards et des zones de textes
@@ -533,4 +573,92 @@ void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding p
     };
     Size informationSize = MeasureTextStyled(information);
     DrawTextStyled(information, { SCREEN_SIZE.x / 2.0f - informationSize.x / 2.0f, frame.y + frame.height + 20.0f });
+}
+
+// Dessine un bandeau informatif pour un hover
+void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn, float roundness, int segments, float stroke, float interline) {
+    // ---- Calcul de la position et de la taille nécessaire ----
+    float branchPad    = 12.0f;
+    float branchStroke = 4.0f;
+    float indentAfterTitle = 2.0f * branchPad + branchStroke;
+    float titleInterline   = 2.0f * interline;
+
+    Size size = GetFrameMaxSizeWithBranch(data, padIn, interline, indentAfterTitle, titleInterline);
+    Frame frame = {
+        parentFrame.x,
+        parentFrame.y + parentFrame.height,
+        size.x,
+        size.y
+    };
+    frame = AlignToPixels(frame);
+
+    // ---- Affichage du fond ----
+    DrawRectangleRounded(frame, roundness, segments, COLOR_TOOLTIP_BACKGROUND);
+    DrawRectangleRoundedLinesEx(frame, roundness, segments, stroke, COLOR_TOOLTIP_BORDER);
+
+    // ---- Affiche le titre ----
+    Position contentPosition = { frame.x + padIn.x, frame.y + padIn.y };
+    const TextStyle& title = data[0][0].textStyle;
+
+    const Size titleSize = MeasureTextStyled(title);
+    DrawTextStyled(title, contentPosition);
+
+    // Décalage pour la branche
+    float branchHeight = 0.0f;
+    contentPosition.x += indentAfterTitle;
+    contentPosition.y += titleSize.y + titleInterline;
+
+    // ---- Affiche les valeurs ----
+    vector<int> branchPoint;
+    branchPoint.reserve(data.size() - 1);
+
+    const float startX = contentPosition.x;
+    for (size_t i = 1; i < data.size(); ++i) {
+        float lineHeight = 0.0f;
+
+        for (const auto& seg : data[i]) {
+            DrawTextStyled(seg.textStyle, contentPosition);
+
+            Size size = MeasureTextStyled(seg.textStyle);
+            contentPosition.x += size.x;
+            lineHeight = fmaxf(lineHeight, size.y);
+        }
+
+        // Ajout de la position pour la branche
+        branchPoint.push_back(contentPosition.y + 0.75 * lineHeight - branchStroke);
+
+        // Passe à la ligne suivante
+        contentPosition.x = startX;
+        contentPosition.y += lineHeight + interline;
+        branchHeight += (i < data.size() - 1 ? lineHeight : 0.75f * lineHeight) + interline;
+    }
+
+    // ---- Affichage de la branche ----
+    // Affiche la branche principale
+    contentPosition.x = frame.x + padIn.x + branchPad - 0.5f * branchStroke;
+    contentPosition.y = frame.y + padIn.y + titleSize.y + interline;
+
+    Frame branchFrame = {
+        contentPosition.x,
+        contentPosition.y,
+        branchStroke,
+        branchHeight
+    };
+    branchFrame = AlignToPixels(branchFrame);
+
+    // 1.0f pour avoir un demi cercle parfait
+    DrawRectangleRounded(branchFrame, 1.0f, 32, COLOR_TOOLTIP_BRANCH);
+ 
+    // Affichage les sous branches
+    Frame lastFork = {
+        branchFrame.x,
+        0.0f,
+        branchPad,
+        branchStroke
+    };
+
+    for (size_t i = 0; i < branchPoint.size(); i++) {
+        lastFork.y = branchPoint[i];
+        DrawRectangleRounded(lastFork, 1.0f, 32, COLOR_TOOLTIP_BRANCH);
+    }
 }

@@ -52,17 +52,17 @@ inline Size MeasureTextStyled(TextStyle data) {
 
 struct InfoSegment {
     TextStyle textStyle;
-    bool isTitle = false;
+    size_t offset = SIZE_MAX;
 };
 
 // ---- Position dans une frame ----
-typedef enum {
+enum WindowPosition {
     TOP_LEFT,
     TOP_RIGHT,
     BOT_RIGHT,
     BOT_LEFT,
     CENTER
-} WindowPosition;
+};
 
 // ---- Informations pour dessiner une card ----
 struct CardConfig {
@@ -94,6 +94,12 @@ struct CardLayout {
     Frame content;
 };
 
+// Pour le hover dans la card
+struct HoverValues {
+    size_t offset = SIZE_MAX;
+    Frame frame = { 0.0f };
+};
+
 // ---- Informations pour la section de texte ----
 struct DataConfig {
     // Position dans la frame
@@ -102,6 +108,7 @@ struct DataConfig {
     // Général
     Color color    = COLOR_STACK_CARD_BACKGROUND;
     float stroke   = DEFAULT_STROKE;
+
 
     // Contenu
     Padding padIn   = DEFAULT_PAD_IN;
@@ -125,16 +132,18 @@ inline Frame AlignToPixels(Frame f) {
 
 Size GetMaxLineSize(const vector<InfoSegment>& line); // Calcul les dimenssions maximal pour une ligne
 Size GetFrameMaxSize(const vector<vector<InfoSegment>>& content, Padding padIn, float interline); // Calcul la taille maximale dont aura besoin une frame
+Size GetFrameMaxSizeWithBranch(const vector<vector<InfoSegment>>& content, Padding padIn, float interline, float indentAfterTitle, float titleInterline); // Calcul la taille maximale dont aura besoin une frame en prenant en compte une branche
 
 Frame GetFrame(const vector<vector<InfoSegment>>& content, WindowPosition position, Frame parentFrame, Padding padIn, Margins padOut, float interline); // Calcul la position et la taille d'une frame
 Frame GetFrameTitle(const TextStyle& title, Frame parentFrame, WindowPosition parentPosition, float titleOffset, Padding padTitle, Margins padFrame, float stroke); // Calcul la position et la taille d'une frame pour un titre
 CardLayout GetCardFrame(const Card& card, Frame parentFrame); // Calcul la frame d'une card (titre + contenu)
 Frame GetInfoFrame(const vector<Card>& cards, const vector<DataSection>& dataSection, WindowPosition position, Frame parentFrame, Padding padIn, Margins padOut); // Calcul la frame pour la section information
 
-void DrawCard(const Card& card, Frame parentFrame, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS); // Permet de dessiner une card
+HoverValues DrawCard(const Card& card, Frame parentFrame, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS); // Permet de dessiner une card
 void DrawDataSection(const DataSection& data, Frame parentFrame, float roundness = DEFAULT_SEGMENTS, int segments = DEFAULT_SEGMENTS); // Dessine une section avec des cards et des zones de textes
 void DrawInfoSection(const vector<Card>& cards, const vector<DataSection>& dataSection, WindowPosition position, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT, float interline = DEFAULT_INTERLINE, float stroke = DEFAULT_STROKE); // Dessine une section avec des cards et des zones de textes
 
 void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding padIn = DEFAULT_PAD_IN, float stroke = DEFAULT_STROKE); // Dessine une saisie utilisateur
+void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE);
 
 #endif // UTILS_H
