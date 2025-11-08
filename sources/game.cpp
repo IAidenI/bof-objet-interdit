@@ -23,11 +23,11 @@ Game::Game(const char **texturesPath, const char **fontPath)
     for (char32_t ch : FR_CHARS) cps.push_back((int)ch);
     
     for (int i = 0; i < FONT_MAX; ++i) {
-        fmgr[i][0] = LoadFontEx(fontPath[i], BIG_SIZE, cps.data(), cps.size());
+        fmgr[i][0] = LoadFontEx(fontPath[i], SMALL_SIZE, cps.data(), cps.size());
         SetTextureFilter(fmgr[i][0].texture, TEXTURE_FILTER_BILINEAR);
 
-        fmgr[i][1] = LoadFontEx(fontPath[i], SMALL_SIZE, cps.data(), cps.size());
-        SetTextureFilter(fmgr[i][1].texture, TEXTURE_FILTER_TRILINEAR);
+        fmgr[i][1] = LoadFontEx(fontPath[i], BIG_SIZE, cps.data(), cps.size());
+        SetTextureFilter(fmgr[i][1].texture, TEXTURE_FILTER_BILINEAR);
     }
 
     // ---- Initialisation des objets ----
@@ -65,9 +65,9 @@ Game::Game(const char **texturesPath, const char **fontPath)
 }
 
 Font& Game::getFont(FontID id, int size) {
-    const int threshold = SMALL_SIZE + static_cast<int>(std::round((BIG_SIZE - SMALL_SIZE) / 2.0f));
+    //const int threshold = SMALL_SIZE + static_cast<int>(round((BIG_SIZE - SMALL_SIZE) / 2.0f));
 
-    int index = (size < threshold) ? 0 : 1;
+    int index = (size < SMALL_SIZE) ? 0 : 1;
     return this->fmgr[id][index];
 }
 
