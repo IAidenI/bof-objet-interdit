@@ -42,7 +42,6 @@ make clean && make
 **Urgent :**
 - Faire le dialogue avec le fermier
 - Affichage de la stack : ajout pour le survol de la souris, des informations complémentaire (A quoi correspond la valeur, sa correspondance en ASCII etc...)
-- Application trop lent à charger à cause des font/textures qui chargent
 
 **A faire :**
 - Refactor logique et design des dialogues

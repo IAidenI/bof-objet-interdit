@@ -7,7 +7,7 @@ HEADERSDIR = headers
 SOURCES := $(wildcard $(SOURCEDIR)/*.cpp) $(TARGET).cpp
 OBJECTS := $(SOURCES:.cpp=.o)
 
-CFLAGS  = -Wall -g -std=c++20 -I$(HEADERSDIR)
+CFLAGS  = -Wall -g -std=c++20 -I$(HEADERSDIR) # Pour minimiser la console -mwindows
 LDFLAGS =
 LDLIBS  =
 

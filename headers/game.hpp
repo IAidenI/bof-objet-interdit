@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <time.h>
+
 #include <algorithm>
 #include <vector>
 #include "PNJ.hpp"
@@ -15,13 +17,13 @@ inline constexpr int MAX_INPUT_CHARS = 17;     // Vulnérabilité
 inline constexpr int SCREEN_WIDTH  = 1200;
 inline constexpr int SCREEN_HEIGHT = 900;
 
-// Paramètres du jeu
+// ---- Paramètres du jeu ----
 inline constexpr int PLAYER_SPEED     = 4;
 inline constexpr int POTATO_AVAILABLE = 8;
 
 inline constexpr float INVENTORY_SCALE = 5.0f;
 
-// Dialogues
+// ---- Dialogues ----
 inline constexpr int UI_DIALOGUE_WIDTH  = 700;
 inline constexpr int UI_DIALOGUE_HEIGHT = 100;
 
@@ -37,6 +39,8 @@ inline constexpr int DIALOGUE_CONTENT_POS_Y = (DIALOGUE_POS_Y + 15);
 inline constexpr int DIALOGUE_CONTENT_END_X = (DIALOGUE_POS_X + 97 + UI_DIALOGUE_CONTENT_WIDTH);
 inline constexpr int DIALOGUE_CONTENT_END_Y = (DIALOGUE_POS_Y + 6 + UI_DIALOGUE_CONTENT_HEIGHT);
 
+// ---- Assets ----
+inline constexpr const char *ICON             = "assets/icon.png";
 inline constexpr const char *BACKGROUND       = "assets/background.png";
 inline constexpr const char *DIALOGUE_TEXTURE = "assets/dialogue.png";
 
@@ -44,12 +48,16 @@ inline constexpr const char *DIALOGUE_TEXTURE = "assets/dialogue.png";
 inline constexpr const char *ENTITY_FONT   = "assets/fonts/ByteBounce.ttf";
 inline constexpr const char *DIALOGUE_FONT = "assets/fonts/Jersey10-Regular.ttf";
 inline constexpr const char *INFO_FONT     = "assets/fonts/Inconsolata-Regular.ttf";
+inline constexpr int SMALL_SIZE      = 20;
+inline constexpr int BIG_SIZE        = 50;
+inline constexpr int FONT_SIZE_COUNT = 2;
+// ASCII + accents FR courants
+static const char32_t FR_CHARS[] = U" !\"#$%&'()*+,-./0123456789:;<=>?@"
+                                   U"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"
+                                   U"abcdefghijklmnopqrstuvwxyz{|}~"
+                                   U"àâäçéèêëîïôöùûüÿÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸ’«»œŒ";
 
 inline constexpr Frame START_FRAME = { 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT };
-
-// ---- Tailles de base supporté pour les fonts ----
-const int FONT_SIZES[] = { 15, 16, 19, 20, 22, 25, 40 };
-const int FONT_SIZE_COUNT = sizeof(FONT_SIZES) / sizeof(FONT_SIZES[0]);
 
 enum TextureID {
     TEX_BACKGROUND,

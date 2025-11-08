@@ -8,6 +8,9 @@ Game::Game(const char **texturesPath, const char **fontPath)
   gdb(reinterpret_cast<uintptr_t>(&this->player)) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "BOF : L'objet interdit");
     SetTargetFPS(60);
+    Image icon = LoadImage(ICON);
+    SetWindowIcon(icon);
+    UnloadImage(icon);
 
     // ---- Initialisation des textures ----
     for (int i = 0; i < TEX_MAX; i++) {
@@ -15,11 +18,16 @@ Game::Game(const char **texturesPath, const char **fontPath)
     }
 
     // ---- Initialisation de fonts ----
-    for (int i = 0; i < FONT_MAX; i++) {
-        for (int j = 0; j < FONT_SIZE_COUNT; j++) {
-            int size = FONT_SIZES[j];
-            fmgr[i][j] = LoadFontEx(fontPath[i], size, 0, 250);
-        }
+    vector<int> cps;
+    cps.reserve(size(FR_CHARS));
+    for (char32_t ch : FR_CHARS) cps.push_back((int)ch);
+    
+    for (int i = 0; i < FONT_MAX; ++i) {
+        fmgr[i][0] = LoadFontEx(fontPath[i], BIG_SIZE, cps.data(), cps.size());
+        SetTextureFilter(fmgr[i][0].texture, TEXTURE_FILTER_BILINEAR);
+
+        fmgr[i][1] = LoadFontEx(fontPath[i], SMALL_SIZE, cps.data(), cps.size());
+        SetTextureFilter(fmgr[i][1].texture, TEXTURE_FILTER_TRILINEAR);
     }
 
     // ---- Initialisation des objets ----
@@ -57,13 +65,10 @@ Game::Game(const char **texturesPath, const char **fontPath)
 }
 
 Font& Game::getFont(FontID id, int size) {
-    for (int j = 0; j < FONT_SIZE_COUNT; j++) {
-        if (FONT_SIZES[j] == size) {
-            return this->fmgr[id][j];
-        }
-    }
-    // Renvoyer la taille la plus proche
-    return this->fmgr[id][0];
+    const int threshold = SMALL_SIZE + static_cast<int>(std::round((BIG_SIZE - SMALL_SIZE) / 2.0f));
+
+    int index = (size < threshold) ? 0 : 1;
+    return this->fmgr[id][index];
 }
 
 void Game::handlePlayerMovements() {
@@ -395,7 +400,7 @@ void Game::renderStack() {
         TextStyle styleHoverContent = { &this->getFont(INFO_LABEL, 15), "", 15.0f, 2.0f, COLOR_TOOLTIP_LABEL };
 
         vector<vector<InfoSegment>> dataHover = this->gdb.getMoreInfo(ret.offset, styleHoverTitle, styleHoverContent);
-        DrawToolTip(dataHover, ret.frame, { 8.0f, 8.0f });
+        DrawToolTip(dataHover, ret.frame, SCREEN_WIDTH, { 8.0f, 8.0f });
     }
 }
 

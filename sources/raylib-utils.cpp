@@ -576,7 +576,7 @@ void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding p
 }
 
 // Dessine un bandeau informatif pour un hover
-void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn, float roundness, int segments, float stroke, float interline) {
+void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int SCREEN_WIDTH, Padding padIn, float roundness, int segments, float stroke, float interline) {
     // ---- Calcul de la position et de la taille nécessaire ----
     float branchPad    = 12.0f;
     float branchStroke = 4.0f;
@@ -590,6 +590,11 @@ void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Pad
         size.x,
         size.y
     };
+
+    // Fait en sort qu'il soit toujours afficher même si il sort de l'écran
+    if (frame.x + frame.width > SCREEN_WIDTH) {
+        frame.x = SCREEN_WIDTH - frame.width - (SCREEN_WIDTH - (parentFrame.x + parentFrame.width));
+    }
     frame = AlignToPixels(frame);
 
     // ---- Affichage du fond ----

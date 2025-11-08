@@ -144,6 +144,6 @@ void DrawDataSection(const DataSection& data, Frame parentFrame, float roundness
 void DrawInfoSection(const vector<Card>& cards, const vector<DataSection>& dataSection, WindowPosition position, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT, float interline = DEFAULT_INTERLINE, float stroke = DEFAULT_STROKE); // Dessine une section avec des cards et des zones de textes
 
 void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding padIn = DEFAULT_PAD_IN, float stroke = DEFAULT_STROKE); // Dessine une saisie utilisateur
-void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE);
+void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int SCREEN_WIDTH, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE);
 
 #endif // UTILS_H
