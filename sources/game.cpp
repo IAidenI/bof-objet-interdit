@@ -292,6 +292,7 @@ void Game::renderInventory() {
                 case ID_POTATO: {
                     DrawTextureEx(potatoTex, cellPos, 0.0f, itemScale, WHITE);
                     DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
+                    DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
                     
                     // Ton texte
                     string txt = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
@@ -314,6 +315,7 @@ void Game::renderInventory() {
                 case ID_CARROT: {
                     DrawTextureEx(carrotTex, cellPos, 0.0f, itemScale, WHITE);
                     DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
+                    DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
                     
                     // Ton texte
                     string txt = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
@@ -336,6 +338,7 @@ void Game::renderInventory() {
                 case ID_APPLE: {
                     DrawTextureEx(appleTex, cellPos, 0.0f, itemScale, WHITE);
                     DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
+                    DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
                     
                     // Ton texte
                     string txt = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
