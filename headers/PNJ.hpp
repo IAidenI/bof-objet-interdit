@@ -4,23 +4,23 @@
 #include "entity.hpp"
 
 // ---- Textures ----
-inline constexpr int         FARMER_FRAME_W     = 32;
-inline constexpr int         FARMER_FRAME_H     = 32;
-inline constexpr int         FARMER_COLS        = 4;
-inline constexpr int         FARMER_ROW_IDLE    = 0;
-inline constexpr const char *FARMER_TEXTURE = "assets/farmer.png";
+inline constexpr float       FARMER_FRAME_W  = 32.0f;
+inline constexpr float       FARMER_FRAME_H  = 32.0f;
+inline constexpr float       FARMER_COLS     = 4.0f;
+inline constexpr float       FARMER_ROW_IDLE = 0.0f;
+inline constexpr const char *FARMER_TEXTURE  = "assets/farmer.png";
 
-inline constexpr int         GUARD_FRAME_W     = 32;
-inline constexpr int         GUARD_FRAME_H     = 32;
-inline constexpr int         GUARD_COLS        = 5;
-inline constexpr int         GUARD_ROW_IDLE    = 0;
-inline constexpr const char *GUARD_TEXTURE = "assets/guard.png";
+inline constexpr float       GUARD_FRAME_W  = 32.0f;
+inline constexpr float       GUARD_FRAME_H  = 32.0f;
+inline constexpr float       GUARD_COLS     = 5.0f;
+inline constexpr float       GUARD_ROW_IDLE = 0.0f;
+inline constexpr const char *GUARD_TEXTURE  = "assets/guard.png";
 
-inline constexpr int         SORCERER_FRAME_W     = 32;
-inline constexpr int         SORCERER_FRAME_H     = 32;
-inline constexpr int         SORCERER_COLS        = 5;
-inline constexpr int         SORCERER_ROW_IDLE    = 0;
-inline constexpr const char *SORCERER_TEXTURE = "assets/sorcerer.png";
+inline constexpr float       SORCERER_FRAME_W  = 32.0f;
+inline constexpr float       SORCERER_FRAME_H  = 32.0f;
+inline constexpr float       SORCERER_COLS     = 5.0f;
+inline constexpr float       SORCERER_ROW_IDLE = 0.0f;
+inline constexpr const char *SORCERER_TEXTURE  = "assets/sorcerer.png";
 
 // ---- Classe PNJ ----
 class PNJ : public Entity {    

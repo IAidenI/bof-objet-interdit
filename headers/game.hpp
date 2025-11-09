@@ -87,24 +87,6 @@ enum FontID {
     FONT_MAX
 };
 
-// ---- Structures animations ----
-struct AnimationState {
-    int frame = 0;
-    float timer = 0.0f;
-    bool facingRight = false;
-    float frameTimeIdle = 0.12f;
-    float frameTimeMove = 0.12f;
-    float scale = 4.0f;
-};
-
-struct SpriteSheetInfo {
-    int frameW;
-    int frameH;
-    int frameCols;
-    int rowIdle;
-    int rowMove;
-};
-
 // ---- Structures dialogues ----
 enum DialogueEntity {
     ITEM,
@@ -158,23 +140,25 @@ class Game {
 
         // ---- Les informations sur les sprites ----
         // Le joueur
-        const SpriteSheetInfo playerSprite = {PLAYER_FRAME_W, PLAYER_FRAME_H, PLAYER_COLS, PLAYER_ROW_IDLE, PLAYER_ROW_MOVE};
+        const SpriteSheetInfo playerSprite = { PLAYER_FRAME_W, PLAYER_FRAME_H, PLAYER_COLS, PLAYER_ROW_IDLE, PLAYER_ROW_MOVE};
 
         // Les PNJ
-        const SpriteSheetInfo farmerSprite = {FARMER_FRAME_W, FARMER_FRAME_H, FARMER_COLS, FARMER_ROW_IDLE, FARMER_ROW_IDLE};
-        const SpriteSheetInfo guardSprite = {GUARD_FRAME_W, GUARD_FRAME_H, GUARD_COLS, GUARD_ROW_IDLE, GUARD_ROW_IDLE};
-        const SpriteSheetInfo sorcererSprite = {SORCERER_FRAME_W, SORCERER_FRAME_H, SORCERER_COLS, SORCERER_ROW_IDLE, SORCERER_ROW_IDLE};
+        const SpriteSheetInfo farmerSprite = { FARMER_FRAME_W, FARMER_FRAME_H, FARMER_COLS, FARMER_ROW_IDLE, FARMER_ROW_IDLE };
+        const SpriteSheetInfo guardSprite = { GUARD_FRAME_W, GUARD_FRAME_H, GUARD_COLS, GUARD_ROW_IDLE, GUARD_ROW_IDLE };
+        const SpriteSheetInfo sorcererSprite = { SORCERER_FRAME_W, SORCERER_FRAME_H, SORCERER_COLS, SORCERER_ROW_IDLE, SORCERER_ROW_IDLE };
 
         // Les objets
-        const SpriteSheetInfo potatoSprite = {POTATO_FRAME_W, POTATO_FRAME_H, POTATO_COLS, POTATO_ROW_IDLE, POTATO_ROW_IDLE};
-        const SpriteSheetInfo carrotSprite = {CARROT_FRAME_W, CARROT_FRAME_H, CARROT_COLS, CARROT_ROW_IDLE, CARROT_ROW_IDLE};
-        const SpriteSheetInfo appleSprite = {APPLE_FRAME_W, APPLE_FRAME_H, APPLE_COLS, APPLE_ROW_IDLE, APPLE_ROW_IDLE};
+        const SpriteSheetInfo potatoSprite = { POTATO_FRAME_W, POTATO_FRAME_H, POTATO_COLS, POTATO_ROW_IDLE, POTATO_ROW_IDLE };
+        const SpriteSheetInfo carrotSprite = { CARROT_FRAME_W, CARROT_FRAME_H, CARROT_COLS, CARROT_ROW_IDLE, CARROT_ROW_IDLE };
+        const SpriteSheetInfo appleSprite = { APPLE_FRAME_W, APPLE_FRAME_H, APPLE_COLS, APPLE_ROW_IDLE, APPLE_ROW_IDLE };
 
         // Dialogue
         DialogueInfo displayDialogue;
         TextStyle newName;
         int  invSelectorIndex = 0;
         bool invSelectorVisible = false;
+        bool renameInit = true;
+        bool isTyping = false;
         int sorcererStep = 0;
 
         // Affichage stack
@@ -192,7 +176,6 @@ class Game {
         void changeItemName();
         void moveInvSelector(int dx, int dy);
         void dialogueContinue(TextStyle label);
-        bool dialogueChoice(TextStyle label);
 
         // GDB
         GDB gdb;
@@ -223,7 +206,6 @@ class Game {
 };
 
 void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color);
-void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, SpriteSheetInfo entitySprite, Color color);
 void DrawStaticItem(const Texture2D& texture, Position pos, float scale);
 void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text);
 void DrawDialogueFrame(Texture2D dialogue, Texture2D entity, AnimationState entityAnim, SpriteSheetInfo entitySprite, Color color);

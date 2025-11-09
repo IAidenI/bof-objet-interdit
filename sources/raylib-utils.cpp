@@ -667,3 +667,126 @@ void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int
         DrawRectangleRounded(lastFork, 1.0f, 32, COLOR_TOOLTIP_BRANCH);
     }
 }
+
+// Dessine une image animé
+void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, const SpriteSheetInfo& entitySprite, Color color) {
+    // Avancer l’animation
+    anim.timer += GetFrameTime();
+    float targetFrameTime = moving ? anim.frameTimeMove : anim.frameTimeIdle;
+    while (anim.timer >= targetFrameTime) {
+        anim.timer -= targetFrameTime;
+        anim.frame = fmod(anim.frame + 1.0f, entitySprite.frameCols);
+    }
+
+    // Ligne à utiliser de la texture
+    int row = moving ? entitySprite.rowMove : entitySprite.rowIdle;
+
+    // Rectangle source
+    Frame src = {
+        anim.frame * entitySprite.frameW,
+        row * entitySprite.frameH,
+        entitySprite.frameW,
+        entitySprite.frameH
+    };
+
+    if (!anim.facingRight) {
+        src.width = -src.width;
+        src.x += entitySprite.frameW;
+    }
+
+    // Destination
+    Frame dst = {
+        pos.x,
+        pos.y,
+        entitySprite.frameW * anim.scale,
+        entitySprite.frameH * anim.scale
+    };
+    Position origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+    DrawTexturePro(texture, src, dst, origin, 0.0f, color);
+}
+
+// Dessine un bandeau pour un dialogue
+void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, Size SCREEN_SIZE, IconProfile& profile, Padding padInFrameContent, Padding padInContent, Size iconFrameSize, float roundness, int segments, float stroke, float interline) {
+    // ---- Calcul de la frame ----
+    Size frameSize = GetFrameMaxSize(data, padInContent, interline);
+
+    Frame frame = {
+        0.0f,
+        0.0f,
+        frameSize.x + iconFrameSize.x + 2.0f * padInContent.x + 2.0f * padInFrameContent.x,
+        frameSize.y + 2.0f * padInContent.y + 2.0f * padInFrameContent.y
+    };
+
+    // Si les tailles calculer ne sont pas acceptable
+    float defaultSize = 700.0f;
+    if (frame.width < defaultSize) frame.width = defaultSize;
+    if (frame.height < iconFrameSize.y) frame.height = iconFrameSize.y;
+    frame.x = SCREEN_SIZE.x / 2.0f - frame.width / 2.0f;
+    frame.y = SCREEN_SIZE.y - frame.height - 1;
+    frame = AlignToPixels(frame);
+
+    // ---- Affichage du fond global ----
+    DrawRectangleRounded(frame, roundness, segments, COLOR_DIALOGUE_BACKGROUND);
+    DrawRectangleRoundedLinesEx(frame, roundness, segments, stroke, COLOR_DIALOGUE_BORDER);
+
+    Frame contentFrame = {
+        frame.x + stroke + iconFrameSize.x,
+        frame.y + stroke + padInFrameContent.y,
+        frame.width - stroke - padInFrameContent.x - iconFrameSize.x,
+        frame.height - 2.0f * stroke - 2.0f * padInFrameContent.y
+    };
+
+    // ---- Affichage du fond pour les textes ----
+    DrawRectangleRounded(contentFrame, roundness, segments, COLOR_DIALOGUE_CONTENT_BACKGROUND);
+    DrawRectangleRoundedLinesEx(contentFrame, roundness, segments, stroke, COLOR_DIALOGUE_CONTENT_BORDER);
+
+    // ---- Affiche le dialogue ----
+    Position contentPosition = { contentFrame.x + padInContent.x, contentFrame.y + padInContent.y };
+    for (const auto& line : data) {
+        float maxContentHeight = 0.0f;
+        for (const auto& seg : line) {
+            // Affiche le texte
+            DrawTextStyled(seg.textStyle, contentPosition);
+
+            // Calcul la position suivante
+            Size textSize = MeasureTextStyled(seg.textStyle);
+            contentPosition.x += textSize.x;
+            maxContentHeight = fmaxf(textSize.y, maxContentHeight);
+        }
+        // Passe à la ligne suivante
+        contentPosition.x = contentFrame.x + padInContent.x;
+        contentPosition.y += maxContentHeight + interline;
+    }
+
+    // ---- Affiche le texte "Continue" ----
+    Size continueSize = MeasureTextStyled(continueData);
+    Position continuePosition = { contentFrame.x + contentFrame.width - continueSize.x - padInContent.x, contentFrame.y + contentFrame.height - continueSize.y - padInContent.y };
+    DrawTextStyled(continueData, continuePosition);
+
+    // ---- Affiche l'image de profile ----
+    // Destination (où et quelle taille à l'écran)
+    Frame frameDest = {
+        frame.x,
+        frame.y,
+        iconFrameSize.x,
+        iconFrameSize.y
+    };
+
+    // Source (on prend toute la texture)
+    /*Frame frameSrc = { 0, 0, profile.dialogue.width, profile.dialogue.height };
+
+    // Afficher texture redimensionnée dans rec
+    DrawTexturePro(profile.dialogue, frameSrc, frameDest, (Position){0, 0}, 0.0f, WHITE);
+
+    */// Calcul la position du profil
+    float squareSize = frameDest.height;  // hauteur de la texture affichée
+    if (squareSize > frameDest.width) squareSize = frameDest.width; // rester carré
+
+    Position center = {
+        frameDest.x + squareSize / 2.0f,
+        frameDest.y + squareSize / 2.0f
+    };
+
+    DrawAnimatedEntity(profile.entity, profile.entityAnim, center, false, profile.entitySprite, profile.color);
+}

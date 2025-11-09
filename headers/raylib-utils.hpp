@@ -22,16 +22,19 @@ using Margins = Spacing;
 
 // ---- Constantes ----
 // Card
-constexpr Padding DEFAULT_TITLE_PAD_IN  = { 5.0f, 3.0f };
-constexpr float   DEFAULT_TITLE_OFFSET  = 15.0f;
+inline constexpr Padding DEFAULT_TITLE_PAD_IN  = { 5.0f, 3.0f };
+inline constexpr float   DEFAULT_TITLE_OFFSET  = 15.0f;
 
-constexpr Padding DEFAULT_PAD_IN        = { 10.0f, 10.0f };
-constexpr Margins DEFAULT_PAD_OUT       = { 15.0f, 15.0f };
-constexpr float   DEFAULT_INTERLINE     = 5.0f;
+inline constexpr Padding DEFAULT_PAD_IN        = { 10.0f, 10.0f };
+inline constexpr Margins DEFAULT_PAD_OUT       = { 15.0f, 15.0f };
+inline constexpr float   DEFAULT_INTERLINE     = 5.0f;
 
-constexpr float   DEFAULT_ROUNDNESS     = 0.12f;
-constexpr int     DEFAULT_SEGMENTS      = 32;
-constexpr float   DEFAULT_STROKE        = 2.0f;
+inline constexpr float   DEFAULT_ROUNDNESS     = 0.12f;
+inline constexpr int     DEFAULT_SEGMENTS      = 32;
+inline constexpr float   DEFAULT_STROKE        = 2.0f;
+
+// Dialogue
+inline constexpr Size DEFAULT_ICON_SIZE = { 94.0f, 94.0f };
 
 // ---- Style pour les textes ----
 struct TextStyle {
@@ -121,6 +124,32 @@ struct DataSection {
     DataConfig config;
 };
 
+// ---- Structures animations ----
+struct AnimationState {
+    float frame = 0;
+    float timer = 0.0f;
+    bool facingRight = false;
+    float frameTimeIdle = 0.12f;
+    float frameTimeMove = 0.12f;
+    float scale = 4.0f;
+};
+
+struct SpriteSheetInfo {
+    float frameW;
+    float frameH;
+    float frameCols;
+    float rowIdle;
+    float rowMove;
+};
+
+// ---- Image de profile dialogue ----
+struct IconProfile {
+    Texture2D entity;
+    AnimationState entityAnim;
+    SpriteSheetInfo entitySprite;
+    Color color;
+};
+
 // ---- Pour arrondir les frames et ne pas avoir des demi pixels ----
 inline Frame AlignToPixels(Frame f) {
     f.x = roundf(f.x);
@@ -144,6 +173,9 @@ void DrawDataSection(const DataSection& data, Frame parentFrame, float roundness
 void DrawInfoSection(const vector<Card>& cards, const vector<DataSection>& dataSection, WindowPosition position, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT, float interline = DEFAULT_INTERLINE, float stroke = DEFAULT_STROKE); // Dessine une section avec des cards et des zones de textes
 
 void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding padIn = DEFAULT_PAD_IN, float stroke = DEFAULT_STROKE); // Dessine une saisie utilisateur
-void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int SCREEN_WIDTH, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE);
+void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int SCREEN_WIDTH, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau informatif pour un hover
+
+void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, const SpriteSheetInfo& entitySprite, Color color); // Dessine une image animé
+void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, Size SCREEN_SIZE, IconProfile& profile, Padding padInFrameContent = DEFAULT_TITLE_PAD_IN, Padding padInContent = DEFAULT_TITLE_PAD_IN, Size iconFrameSize = DEFAULT_ICON_SIZE, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau pour un dialogue
 
 #endif // UTILS_H

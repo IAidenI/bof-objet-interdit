@@ -4,6 +4,13 @@
 inline constexpr Color COLOR_INVENTORY_BACKGROUND    = CLITERAL(Color){  84,  61,  89, 255 };
 inline constexpr Color COLOR_VALUE_HOOVER            = CLITERAL(Color){  24,  76,  66, 255 };
 
+// ---- Dialogue ----
+inline constexpr Color COLOR_DIALOGUE_BACKGROUND         = BLACK;
+inline constexpr Color COLOR_DIALOGUE_BORDER             = WHITE;
+inline constexpr Color COLOR_DIALOGUE_CONTENT_BACKGROUND = CLITERAL(Color){  39,  71,  98, 255 };
+inline constexpr Color COLOR_DIALOGUE_CONTENT_BORDER     = CLITERAL(Color){  16,  51,  71, 255 };
+inline constexpr Color COLOR_DIALOGUE_CONTENT_TEXT       = WHITE;
+
 // ---- Input box ----
 inline constexpr Color COLOR_INPUT_BOX_TEXT          = MAROON;
 inline constexpr Color COLOR_INPUT_BOX_FOCUS         = CLITERAL(Color){ 255, 255, 255,  64 };

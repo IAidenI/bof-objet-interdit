@@ -42,11 +42,13 @@ make clean && make
 **Urgent :**
 - Faire le dialogue avec le fermier
 - Affichage de la stack : ajout pour le survol de la souris, des informations complémentaire (A quoi correspond la valeur, sa correspondance en ASCII etc...)
+- Mettre toutes les couleurs dans le bon header
 
 **A faire :**
 - Refactor logique et design des dialogues
 - Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
 - Peut être un menu start/end
+- Un hover sur l'inventaire avec les informations sur l'item (peut-être ajouter un pomme au lancement pour connaître son ID)
 
 **Optionelles :**
 - Ajouter un bandeau invormatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
