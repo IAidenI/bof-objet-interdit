@@ -33,6 +33,7 @@ Game::Game(const char **texturesPath, const char **fontPath)
     // ---- Initialisation des objets ----
     this->carrot = getItem(CARROT);
     this->apple  = getItem(APPLE);
+    this->apple.setPosition({ 1000.0f, 330.0f });
 
     // Initialisation des patates
     Position initialPosition = { 270.0f, 740.0f };
@@ -54,11 +55,12 @@ Game::Game(const char **texturesPath, const char **fontPath)
     // ---- Initialisation des animations ----
     this->playerAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.12f, .frameTimeMove = 0.12f, .scale = 3.0f };
 
-    this->farmerAnim = { .frame = 0, .timer = 0.0f, .facingRight = false, .frameTimeIdle = 0.12f, .frameTimeMove = 0.0f, .scale = 4.0f };
-    this->guardAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.15f, .frameTimeMove = 0.0f, .scale = 4.0f };
+    this->farmerAnim   = { .frame = 0, .timer = 0.0f, .facingRight = false, .frameTimeIdle = 0.12f, .frameTimeMove = 0.0f, .scale = 4.0f };
+    this->guardAnim    = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.15f, .frameTimeMove = 0.0f, .scale = 4.0f };
     this->sorcererAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.12f, .frameTimeMove = 0.0f, .scale = 4.0f };
 
     this->potatoAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 1.0f, .frameTimeMove = 0.0f, .scale = 4.0f };
+    this->appleAnim  = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.1f, .frameTimeMove = 0.0f, .scale = 3.0f };
 
     // ---- Initialise la saisie utilisateur ----
     this->newName = { .font = &this->getFont(INFO_LABEL, 40), .text = "", .fontSize = 40.0f, .spacing = 2.0f, .color = COLOR_INPUT_BOX_TEXT };
@@ -133,38 +135,38 @@ void Game::displayBackground() {
 }
 
 void Game::displayCommands() {
-    TextStyle cardTitle = { &this->getFont(INFO_LABEL, 25), "Commandes", 25.0f, 2.0f, COLOR_STACK_TEXT };
+    TextStyle cardTitle = { &this->getFont(INFO_LABEL, 25), "Commandes", 25.0f, 2.0f, COLOR_COMMANDS_ACTION };
     vector<vector<InfoSegment>> cardContent = {        
         { 
-            { { &this->getFont(INFO_LABEL, 20), "ZQSD / Flêches : ", 20.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 20), "Déplacement",       20.0f, 2.0f, COLOR_STACK_TEXT } },
+            { { &this->getFont(INFO_LABEL, 20), "ZQSD / Flêches : ", 20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->getFont(INFO_LABEL, 20), "Déplacement",       20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "E : ",      20.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 20), "Interagir", 20.0f, 2.0f, COLOR_STACK_TEXT } },
+            { { &this->getFont(INFO_LABEL, 20), "E : ",      20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->getFont(INFO_LABEL, 20), "Interagir", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "I : ",       20.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 20), "Inventaire", 20.0f, 2.0f, COLOR_STACK_TEXT } },
+            { { &this->getFont(INFO_LABEL, 20), "I : ",       20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->getFont(INFO_LABEL, 20), "Inventaire", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "F1 : ",          20.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 20), "Hitbox ON/OFF", 20.0f, 2.0f, COLOR_STACK_TEXT } },
+            { { &this->getFont(INFO_LABEL, 20), "F1 : ",          20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->getFont(INFO_LABEL, 20), "Hitbox ON/OFF", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "F2 : ",             20.0f, 2.0f, COLOR_STACK_ADDR } },
-            { { &this->getFont(INFO_LABEL, 20), "Affichage avancé", 20.0f, 2.0f, COLOR_STACK_TEXT } },
+            { { &this->getFont(INFO_LABEL, 20), "F2 : ",             20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->getFont(INFO_LABEL, 20), "Affichage avancé", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
     };
 
     Card card = {
         .title = cardTitle,
         .content = cardContent,
-        .config = { .position = TOP_LEFT }
+        .config = { .position = TOP_LEFT, .backgroundColor = COLOR_COMMANDS_BACKGROUND }
     };
 
     DrawCard(card, START_FRAME);
@@ -182,7 +184,12 @@ void Game::displayPNJ() {
 void Game::displayItems() {
     for (int i = 0; i < POTATO_AVAILABLE; i++) {
         if (this->hitboxRequest) DrawCircleV(this->potato[i].getHitbox().pos, this->potato[i].getHitbox().radius, HITBOX_COLOR);
-        DrawAnimatedEntity(tmgr[TEX_POTATO], this->potatoAnim, this->potato[i].getHitbox().pos, false, this->potatoSprite, WHITE);
+        DrawAnimatedEntity(this->tmgr[TEX_POTATO], this->potatoAnim, this->potato[i].getHitbox().pos, false, this->potatoSprite, WHITE);
+    }
+
+    if (!this->isAppleTaken) {
+        if (this->hitboxRequest) DrawCircleV(this->apple.getHitbox().pos, this->apple.getHitbox().radius, HITBOX_COLOR);
+        DrawAnimatedEntity(this->tmgr[TEX_APPLE], this->appleAnim, this->apple.getHitbox().pos, false, this->appleSprite, WHITE);
     }
 }
 
@@ -195,7 +202,7 @@ void Game::displayPlayer() {
 void Game::playerInteractions() {
     // Avec le fermier
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->farmer.getHitbox().pos, this->farmer.getHitbox().radius)) {
-        DrawInfoLabel(this->farmer.getHitbox(), FARMER_FRAME_H, { fmgr[ENTITY_LABEL], farmer.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->farmer.getHitbox(), FARMER_FRAME_H, { this->fmgr[ENTITY_LABEL], this->farmer.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = FARMER;
@@ -205,7 +212,7 @@ void Game::playerInteractions() {
     
     // Avec le garde
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->guard.getHitbox().pos, this->guard.getHitbox().radius)) {
-        DrawInfoLabel(this->guard.getHitbox(), GUARD_FRAME_H, { fmgr[ENTITY_LABEL], guard.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->guard.getHitbox(), GUARD_FRAME_H, { this->fmgr[ENTITY_LABEL], this->guard.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = GUARD;
@@ -215,7 +222,7 @@ void Game::playerInteractions() {
     
     // Avec le sorcier
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->sorcerer.getHitbox().pos, this->sorcerer.getHitbox().radius)) {
-        DrawInfoLabel(this->sorcerer.getHitbox(), SORCERER_FRAME_H, { fmgr[ENTITY_LABEL], sorcerer.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->sorcerer.getHitbox(), SORCERER_FRAME_H, { this->fmgr[ENTITY_LABEL], this->sorcerer.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = SORCERER;
@@ -226,10 +233,22 @@ void Game::playerInteractions() {
     // Avec les patates
     for (int i = 0; i < POTATO_AVAILABLE; ++i) {
         if (CheckCollisionCircles(this->player.getHitbox().pos, player.getHitbox().radius, this->potato[i].getHitbox().pos, this->potato[i].getHitbox().radius)) {
-            DrawInfoLabel(potato[i].getHitbox(), POTATO_FRAME_H, { fmgr[ENTITY_LABEL], potato[i].getName(), 15.0f, 2.0f, WHITE });
+            DrawInfoLabel(potato[i].getHitbox(), POTATO_FRAME_H, { this->fmgr[ENTITY_LABEL], this->potato[i].getName(), 15.0f, 2.0f, WHITE });
             if (this->dialogueRequest) {
                 this->displayDialogue.request = !this->displayDialogue.request;
-                this->displayDialogue.entity = ITEM;
+                this->displayDialogue.entity = ITEM_POTATO;
+                this->dialogueRequest = false;
+            }
+        }
+    }
+
+    // Avec la pomme
+    if (!this->isAppleTaken) {
+        if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->apple.getHitbox().pos, this->apple.getHitbox().radius)) {
+            DrawInfoLabel(this->apple.getHitbox(), APPLE_FRAME_H, { this->fmgr[ENTITY_LABEL], this->apple.getName(), 15.0f, 2.0f, WHITE });
+            if (this->dialogueRequest) {
+                this->displayDialogue.request = !this->displayDialogue.request;
+                this->displayDialogue.entity = ITEM_APPLE;
                 this->dialogueRequest = false;
             }
         }
@@ -269,100 +288,81 @@ void Game::renderInventory() {
     int rowSize = static_cast<int>(sqrt(static_cast<float>(totalSlots)));
     if (rowSize * rowSize < totalSlots) rowSize += 1; // dernière ligne partielle si besoin
 
+    bool isHover = false;
+    Rectangle hoveredRect = { 0 };
+    vector<vector<InfoSegment>> hoveredData;
     for (int i = 0; i < rowSize; ++i) {
         for (int j = 0; j < rowSize; ++j) {
             int idx = i * rowSize + j;
             if (idx >= totalSlots) break;
 
-            // Position du slot (coin haut-gauche)
             Position cellPos = {
                 itemPos.x + j * (cellW + gap),
                 itemPos.y + i * (cellH + gap)
             };
 
-            float radiusCircleInfo = 13.0f;
-            Position bottomRight = {
-                cellPos.x + cellW - radiusCircleInfo,
-                cellPos.y + cellH - radiusCircleInfo
+            // Hitbox du slot
+            Rectangle slotRect = { cellPos.x, cellPos.y, cellW, cellH };
+
+            const Item& item = this->player.inventory().getItem(idx);
+            if (item.getId() == ID_NONE) continue;
+
+            string slotQte = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
+
+            // --- Données tooltip pour le slot ---
+            vector<vector<InfoSegment>> data = {
+                { { { &this->getFont(INFO_LABEL, 20), item.getName(), 20.0f, 2.0f, COLOR_INVENTORY_NAME } } },
+                {
+                    { { &this->getFont(INFO_LABEL, 16), "ID : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                    { { &this->getFont(INFO_LABEL, 16), to_string(item.getId()), 16.0f, 2.0f, COLOR_INVENTORY_ID } }
+                },
+                {
+                    { { &this->getFont(INFO_LABEL, 16), "Quantité : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                    { { &this->getFont(INFO_LABEL, 16), slotQte, 16.0f, 2.0f, COLOR_INVENTORY_CURRENT_AMOUNT } }
+                },
+                {
+                    { { &this->getFont(INFO_LABEL, 16), "Quantité max : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                    { { &this->getFont(INFO_LABEL, 16), "x" + to_string(item.getMaxAmount()), 16.0f, 2.0f, COLOR_INVENTORY_MAX_AMOUNT } }
+                }
             };
 
-            // Récup item & affichage selon l'ID ainsi que le nombre de l'item
-            const Item& it = this->player.inventory().getItem(idx);
-            switch (it.getId()) {
-                case ID_POTATO: {
+            // --- Dessin de l’item ---
+            float radiusCircleInfo = 13.0f;
+            Position bottomRight = { cellPos.x + cellW - radiusCircleInfo, cellPos.y + cellH - radiusCircleInfo };
+
+            switch (item.getId()) {
+                case ID_POTATO:
                     DrawTextureEx(potatoTex, cellPos, 0.0f, itemScale, WHITE);
-                    DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
-                    DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
-                    
-                    // Ton texte
-                    string txt = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
-                    float fontSize = 17.0f;
-                    float spacing = 0.0f;
-
-                    // Mesurer la taille du texte
-                    Size textSize = MeasureTextEx(*this->fmgr[DIALOGUE_LABEL], txt.c_str(), fontSize, spacing);
-
-                    // Calculer la position pour centrer
-                    Position textPos = {
-                        bottomRight.x - textSize.x / 2,
-                        bottomRight.y - textSize.y / 2
-                    };
-
-                    // Dessiner le texte centré
-                    DrawTextEx(*this->fmgr[DIALOGUE_LABEL], txt.c_str(), textPos, fontSize, spacing, BLACK);
                     break;
-                }
-                case ID_CARROT: {
+                case ID_CARROT:
                     DrawTextureEx(carrotTex, cellPos, 0.0f, itemScale, WHITE);
-                    DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
-                    DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
-                    
-                    // Ton texte
-                    string txt = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
-                    float fontSize = 16.0f;
-                    float spacing = 0.0f;
-
-                    // Mesurer la taille du texte
-                    Size textSize = MeasureTextEx(*this->fmgr[DIALOGUE_LABEL], txt.c_str(), fontSize, spacing);
-
-                    // Calculer la position pour centrer
-                    Position textPos = {
-                        bottomRight.x - textSize.x / 2,
-                        bottomRight.y - textSize.y / 2
-                    };
-
-                    // Dessiner le texte centré
-                    DrawTextEx(*this->fmgr[DIALOGUE_LABEL], txt.c_str(), textPos, fontSize, spacing, BLACK);
                     break;
-                }
-                case ID_APPLE: {
+                case ID_APPLE:
                     DrawTextureEx(appleTex, cellPos, 0.0f, itemScale, WHITE);
-                    DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
-                    DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
-                    
-                    // Ton texte
-                    string txt = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
-                    float fontSize = 16.0f;
-                    float spacing = 0.0f;
-
-                    // Mesurer la taille du texte
-                    Size textSize = MeasureTextEx(*this->fmgr[DIALOGUE_LABEL], txt.c_str(), fontSize, spacing);
-
-                    // Calculer la position pour centrer
-                    Position textPos = {
-                        bottomRight.x - textSize.x / 2,
-                        bottomRight.y - textSize.y / 2
-                    };
-
-                    // Dessiner le texte centré
-                    DrawTextEx(*this->fmgr[DIALOGUE_LABEL], txt.c_str(), textPos, fontSize, spacing, BLACK);
                     break;
-                }
-                default:
-                    break;
+                default: break;
+            }
+
+            DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
+            DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
+
+            float fontSize = 17.0f;
+            float spacing = 0.0f;
+            Size textSize = MeasureTextEx(*this->fmgr[DIALOGUE_LABEL], slotQte.c_str(), fontSize, spacing);
+            Position textPos = { bottomRight.x - textSize.x / 2, bottomRight.y - textSize.y / 2 };
+            DrawTextEx(*this->fmgr[DIALOGUE_LABEL], slotQte.c_str(), textPos, fontSize, spacing, BLACK);
+
+            // --- Hover ---
+            if (CheckCollisionPointRec(GetMousePosition(), slotRect)) {
+                isHover    = true;
+                hoveredRect = slotRect;
+                hoveredData = move(data);
             }
         }
     }
+
+    // Affiche le hover
+    if (isHover) DrawItemToolTip(hoveredData, hoveredRect);
 
     // Sélécteur pour le dialogue du sorcier
     if (this->invSelectorVisible) {
@@ -405,7 +405,7 @@ void Game::renderStack() {
         TextStyle styleHoverContent = { &this->getFont(INFO_LABEL, 15), "", 15.0f, 2.0f, COLOR_TOOLTIP_LABEL };
 
         vector<vector<InfoSegment>> dataHover = this->gdb.getMoreInfo(ret.offset, styleHoverTitle, styleHoverContent);
-        DrawToolTip(dataHover, ret.frame, SCREEN_WIDTH, { 8.0f, 8.0f });
+        DrawToolTip(dataHover, ret.frame, { 8.0f, 8.0f });
     }
 }
 
@@ -416,20 +416,93 @@ void Game::dialogue() {
     TextStyle basic = {fmgr[DIALOGUE_LABEL], "", 25.0f, 2.0f, WHITE};
 
     switch (this->displayDialogue.entity) {
-        case ITEM: {
+        case ITEM_POTATO: {
             vector<vector<InfoSegment>> data = {
                 {
-                    { { &this->getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(POTATO_AVAILABLE) + " patate.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    { { &this->getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(POTATO_AVAILABLE) + " patates.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                 },
             };
 
-            IconProfile profile = { tmgr[TEX_POTATO], this->potatoAnim, this->potatoSprite, WHITE };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+            IconProfile profile = { this->tmgr[TEX_POTATO], this->potatoAnim, this->potatoSprite, WHITE };
+            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
                 this->displayDialogue.request = false;
                 this->player.inventory().add(this->potato[0], POTATO_AVAILABLE);
+            }
+            break;
+        }
+        case ITEM_APPLE: {
+            switch (this->appleStep) {
+                case 0: {
+                    vector<vector<InfoSegment>> data = {
+                        {
+                            { { &this->getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(this->apple.getMaxAmount()) + " pomme.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                        },
+                    };
+
+                    IconProfile profile = { this->tmgr[TEX_APPLE], this->appleAnim, this->appleSprite, WHITE };
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+
+                    if (IsKeyPressed(KEY_SPACE)) this->appleStep = 1;
+                    break;
+                }
+                case 1: {
+                    vector<vector<InfoSegment>> data = {
+                        {
+                            { { &this->getFont(DIALOGUE_LABEL, 25), "La pomme s'exite.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                        },
+                    };
+
+
+                    float speedTemp = this->appleAnim.frameTimeIdle;
+                    this->appleAnim.frameTimeIdle = 0.02;
+                    IconProfile profile = { this->tmgr[TEX_APPLE], this->appleAnim, this->appleSprite, WHITE };
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+
+                    if (IsKeyPressed(KEY_SPACE)) {
+                        this->appleStep = 2;
+                        this->appleAnim.frameTimeIdle = speedTemp;
+                    }
+                    break;
+                }
+                case 2: {
+                    vector<vector<InfoSegment>> data = {
+                        {
+                            { { &this->getFont(DIALOGUE_LABEL, 25), "La pomme s'est enfuit.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                        },
+                    };
+
+                    IconProfile profile = { };
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+
+
+                    if (IsKeyPressed(KEY_SPACE)) {
+                        this->appleStep = 0;
+                        this->isPause = false;
+                        this->displayDialogue.request = false;
+                        this->player.inventory().add(this->apple, this->apple.getMaxAmount());
+                        this->isAppleTaken = true;
+                    }
+                    break;
+                }
+                default: {
+                    vector<vector<InfoSegment>> data = {
+                        {
+                            { { &this->getFont(DIALOGUE_LABEL, 25), "Euuuh t'es pas sensé voir ce texte chef", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                        },
+                    };
+
+                    IconProfile profile = {this->tmgr[TEX_PLAYER], this->playerAnim, this->playerSprite, WHITE };
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+
+                    if (IsKeyPressed(KEY_SPACE)) {
+                        this->isPause = false;
+                        this->displayDialogue.request = false;
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -440,8 +513,8 @@ void Game::dialogue() {
                 },
             };
 
-            IconProfile profile = { tmgr[TEX_FARMER], this->farmerAnim, this->farmerSprite, WHITE };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+            IconProfile profile = { this->tmgr[TEX_FARMER], this->farmerAnim, this->farmerSprite, WHITE };
+            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
@@ -459,8 +532,8 @@ void Game::dialogue() {
                 },
             };
 
-            IconProfile profile = { tmgr[TEX_GUARD], this->guardAnim, this->guardSprite, RED };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+            IconProfile profile = { this->tmgr[TEX_GUARD], this->guardAnim, this->guardSprite, RED };
+            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
@@ -470,9 +543,9 @@ void Game::dialogue() {
             break;
         }
         case SORCERER: {
-            IconProfile profile = { tmgr[TEX_SORCERER], this->sorcererAnim, this->sorcererSprite, BLUE };
+            IconProfile profile = { this->tmgr[TEX_SORCERER], this->sorcererAnim, this->sorcererSprite, BLUE };
             if (this->player.inventory().isEmpty()) this->sorcererStep = 4;
-            switch (sorcererStep) {
+            switch (this->sorcererStep) {
                 case 0: {
                     vector<vector<InfoSegment>> data = {
                         {
@@ -480,9 +553,9 @@ void Game::dialogue() {
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
-                    if (IsKeyPressed(KEY_SPACE)) sorcererStep = 1;
+                    if (IsKeyPressed(KEY_SPACE)) this->sorcererStep = 1;
                     break;
                 }
                 case 1: {
@@ -495,14 +568,14 @@ void Game::dialogue() {
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Valider [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Valider [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) {
                         Item item = this->player.inventory().getItem(this->invSelectorIndex);
                         if (item.getId() != 0) {
                             this->inventoryRequest = false;
                             this->invSelectorVisible = false;
-                            sorcererStep = 2;
+                            this->sorcererStep = 2;
                         }
                     }
                     break;
@@ -514,7 +587,7 @@ void Game::dialogue() {
                         },  
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Valider [Press enter]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Valider [Press enter]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     Item item = this->player.inventory().getItem(this->invSelectorIndex);
                     if (this->renameInit) {
@@ -526,13 +599,11 @@ void Game::dialogue() {
 
                     if (IsKeyPressed(KEY_ENTER)) {
                         item.changeName(this->newName.text.c_str());
-                        this->player.inventory().getItem(this->invSelectorIndex).displayInfos();
                         this->player.inventory().setItem(item, this->invSelectorIndex);
-                        this->player.inventory().getItem(this->invSelectorIndex).displayInfos();
                         this->invSelectorIndex = 0;
                         this->renameInit = true;
                         this->isTyping = false;
-                        sorcererStep = 3;
+                        this->sorcererStep = 3;
                     }
                     break;
                 }
@@ -543,13 +614,13 @@ void Game::dialogue() {
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) {
                         this->isPause = false;
                         this->displayDialogue.request = false;
                         this->newName.text = "";
-                        sorcererStep = 0; // reset
+                        this->sorcererStep = 0; // reset
                     }
                     break;
                 }
@@ -560,12 +631,12 @@ void Game::dialogue() {
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) {
                         this->isPause = false;
                         this->displayDialogue.request = false;
-                        sorcererStep = 0; // reset
+                        this->sorcererStep = 0; // reset
                     }
                     break;
                 }
@@ -579,8 +650,8 @@ void Game::dialogue() {
                 },
             };
 
-            IconProfile profile = { tmgr[TEX_PLAYER], this->playerAnim, this->playerSprite, WHITE };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, { SCREEN_WIDTH, SCREEN_HEIGHT }, profile);
+            IconProfile profile = {this->tmgr[TEX_PLAYER], this->playerAnim, this->playerSprite, WHITE };
+            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
@@ -610,7 +681,7 @@ void Game::getNewName() {
     }
 
     // Affiche la box
-    DrawInputBox(this->newName, MAX_INPUT_CHARS, { SCREEN_WIDTH, SCREEN_HEIGHT });
+    DrawInputBox(this->newName, MAX_INPUT_CHARS);
 }
 
 void Game::resetRequests() {
@@ -631,49 +702,4 @@ Game::~Game() {
     }
 
     CloseWindow();
-}
-
-void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color) {
-    // Top-left
-    DrawLineEx({r.x, r.y}, {r.x + len, r.y}, thick, color);
-    DrawLineEx({r.x, r.y}, {r.x, r.y + len}, thick, color);
-    // Top-right
-    DrawLineEx({r.x + r.width - len, r.y}, {r.x + r.width, r.y}, thick, color);
-    DrawLineEx({r.x + r.width, r.y}, {r.x + r.width, r.y + len}, thick, color);
-    // Bottom-left
-    DrawLineEx({r.x, r.y + r.height - len}, {r.x, r.y + r.height}, thick, color);
-    DrawLineEx({r.x, r.y + r.height}, {r.x + len, r.y + r.height}, thick, color);
-    // Bottom-right
-    DrawLineEx({r.x + r.width - len, r.y + r.height}, {r.x + r.width, r.y + r.height}, thick, color);
-    DrawLineEx({r.x + r.width, r.y + r.height - len}, {r.x + r.width, r.y + r.height}, thick, color);
-}
-
-void DrawStaticItem(const Texture2D& texture, Position pos, float scale) {
-    // Source = texture entière
-    Frame src = { 0, 0, (float)texture.width, (float)texture.height };
-
-    // Destination = centré sur la hitbox
-    Frame dst = {
-        pos.x,  // centre X
-        pos.y,  // centre Y
-        texture.width * scale,
-        texture.height * scale
-    };
-
-    // Origine = le centre de la texture
-    Position origin = { dst.width / 2.0f, dst.height / 2.0f };
-
-    DrawTexturePro(texture, src, dst, origin, 0.0f, WHITE);
-}
-
-void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text) {
-    Size label_size = MeasureTextStyled(text);
-    float padding = 5.0f;
-
-    // Calcul la position
-    Position position;
-    position.x = entity.pos.x - (label_size.x / 2);
-    position.y = entity.pos.y - entitySize - label_size.y - padding;
-    
-    DrawTextStyled(text, position);
 }

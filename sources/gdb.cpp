@@ -45,13 +45,20 @@ string GDB::getValueString(int offset, size_t maxLen) {
     return out;
 }
 
-/*string GDB::getAddress(int offset) {
-    return format("0x{:0{}x}", this->rbp_address + offset, 2 * sizeof(uintptr_t));
-}
+size_t GDB::getDisplayNameOffset(size_t off) {
+    // Nom joueur
+    const size_t playerStart = PLAYER_NAME_OFFSET;
+    const size_t playerEnd   = PLAYER_NAME_OFFSET + sizeof(char) * MAX_NAME_LENGTH;
+    if (off >= playerStart && off < playerEnd) return playerStart;
 
-string GDB::getValueHex(int offset) {
-    return format("0x{:0{}x}", *reinterpret_cast<int*>(this->rbp_address + offset), sizeof(uintptr_t));
-}*/
+    // Nom des items des slots
+    for (int s = 0; s < MAX_INVENTORY_LENGTH; ++s) {
+        const size_t start = SLOT_ITEM_NAME_OFFSET(s);
+        const size_t end   = start + sizeof(char) * MAX_NAME_LENGTH;
+        if (off >= start && off < end) return start;
+    }
+    return off;
+}
 
 vector<vector<InfoSegment>> GDB::getFormatedStack(const TextStyle& style) {
     vector<vector<InfoSegment>> stack = {};
@@ -75,13 +82,13 @@ vector<vector<InfoSegment>> GDB::getFormatedStack(const TextStyle& style) {
             size_t currentOffset = offset + i * block;
             if (currentOffset >= STACK_SIZE) break;
 
-            size_t realOffset = currentOffset;
-            if (currentOffset > PLAYER_NAME_OFFSET && currentOffset < SLOT_1_ITEM_POS_X_OFFSET) currentOffset = PLAYER_NAME_OFFSET; 
+            const size_t realOffset    = currentOffset;
+            const size_t displayOffset = this->getDisplayNameOffset(currentOffset);
 
             // Ajout de la valeur
             line.push_back({
                 { style.font, this->getValueHex(realOffset), style.fontSize, style.spacing, COLOR_STACK_HEXA },
-                currentOffset
+                displayOffset
             });
 
             // Ajout de l'espace de séparation entre les valeurs

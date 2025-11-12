@@ -13,6 +13,7 @@ int main() {
         POTATO_TEXTURE,
         POTATO_STATIC_TEXTURE,
         CARROT_STATIC_TEXTURE,
+        APPLE_TEXTURE,
         APPLE_STATIC_TEXTURE,
         // PNJ
         FARMER_TEXTURE,

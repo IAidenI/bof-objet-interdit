@@ -1,16 +1,14 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <raylib.h>
-#include <raymath.h>
 #include <string>
 #include <iostream>
 #include <vector>
+#include <cstdint>
 #include "colors.hpp"
-using namespace std;
-using Frame = Rectangle;
-using Size = Vector2;
-using Position = Vector2;
+#include "item.hpp"
+#include "geometry.hpp"
+#include "game_settings.hpp"
 
 // ---- Padding ----
 struct Spacing {
@@ -73,7 +71,8 @@ struct CardConfig {
     WindowPosition position = TOP_LEFT;
 
     // Général
-    Color color  = COLOR_STACK_CARD_BACKGROUND;
+    Color backgroundColor  = COLOR_STACK_GLOBAL_BACKGROUND;
+    Color borderColor  = COLOR_STACK_BORDER;
     float stroke = DEFAULT_STROKE;
 
     // Titre
@@ -172,10 +171,16 @@ HoverValues DrawCard(const Card& card, Frame parentFrame, float roundness = DEFA
 void DrawDataSection(const DataSection& data, Frame parentFrame, float roundness = DEFAULT_SEGMENTS, int segments = DEFAULT_SEGMENTS); // Dessine une section avec des cards et des zones de textes
 void DrawInfoSection(const vector<Card>& cards, const vector<DataSection>& dataSection, WindowPosition position, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT, float interline = DEFAULT_INTERLINE, float stroke = DEFAULT_STROKE); // Dessine une section avec des cards et des zones de textes
 
-void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding padIn = DEFAULT_PAD_IN, float stroke = DEFAULT_STROKE); // Dessine une saisie utilisateur
-void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int SCREEN_WIDTH, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau informatif pour un hover
+void DrawInputBox(TextStyle name, int maxInputChars, Padding padIn = DEFAULT_PAD_IN, float stroke = DEFAULT_STROKE); // Dessine une saisie utilisateur
+void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un info-bulle pour un hover
+void DrawItemToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un info-bulle pour un item de l'inventaire
 
+void DrawStaticItem(const Texture2D& texture, Position pos, float scale); // Dessine une image statique
 void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, const SpriteSheetInfo& entitySprite, Color color); // Dessine une image animé
-void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, Size SCREEN_SIZE, IconProfile& profile, Padding padInFrameContent = DEFAULT_TITLE_PAD_IN, Padding padInContent = DEFAULT_TITLE_PAD_IN, Size iconFrameSize = DEFAULT_ICON_SIZE, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau pour un dialogue
+void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text); // Dessine au dessus d'une entité une étiquette d'information
+void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, IconProfile& profile, Padding padInFrameContent = DEFAULT_TITLE_PAD_IN, Padding padInContent = DEFAULT_TITLE_PAD_IN, Size iconFrameSize = DEFAULT_ICON_SIZE, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau pour un dialogue
+
+// Dessine des marqueurs dans les angles d'un rectangle
+void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color);
 
 #endif // UTILS_H

@@ -37,23 +37,20 @@ make clean && make
 - Premier PoC avec UI réalisé, pour se faire, récupèrer 32 patates, les renommer en CCCCCCCCCCCCCCCC puis voir le garde
 - Asset pour le background
 - Visuel de la stack
+- Affichage de la stack : ajout pour le survol de la souris, des informations complémentaire (A quoi correspond la valeur, sa correspondance en ASCII etc...)
+- Un hover sur l'inventaire avec les informations sur l'item (peut-être ajouter un pomme au lancement pour connaître son ID)
 
 ### 🔜 À faire / Améliorations prévues
 **Urgent :**
 - Faire le dialogue avec le fermier
-- Affichage de la stack : ajout pour le survol de la souris, des informations complémentaire (A quoi correspond la valeur, sa correspondance en ASCII etc...)
-- Mettre toutes les couleurs dans le bon header
 
 **A faire :**
-- Refactor logique et design des dialogues
 - Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
 - Peut être un menu start/end
-- Un hover sur l'inventaire avec les informations sur l'item (peut-être ajouter un pomme au lancement pour connaître son ID)
 
 **Optionelles :**
-- Ajouter un bandeau invormatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
+- Ajouter un bandeau informatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
 - Peut être améliorer des assets existantes
-- Survol de la souris dans l'inventaire affiche les infos de l'item
 
 ## ⚠️ Avertissement
 Ce projet contient volontairement une vulnérabilité à des fins **pédagogiques**. **Ne reproduisez pas** ces techniques sur des systèmes réels ou en production sans autorisation explicite. Utilisez ce projet uniquement pour apprendre et expérimenter dans un environnement contrôlé.

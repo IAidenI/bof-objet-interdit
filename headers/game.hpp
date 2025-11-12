@@ -9,35 +9,7 @@
 #include "player.hpp"
 #include "gdb.hpp"
 #include "raylib-utils.hpp"
-
-inline constexpr int AMOUNT_TO_FINISH_GAME = 32;
-
-inline constexpr int MAX_INPUT_CHARS = 17;     // Vulnérabilité
-
-inline constexpr int SCREEN_WIDTH  = 1200;
-inline constexpr int SCREEN_HEIGHT = 900;
-
-// ---- Paramètres du jeu ----
-inline constexpr int PLAYER_SPEED     = 4;
-inline constexpr int POTATO_AVAILABLE = 8;
-
-inline constexpr float INVENTORY_SCALE = 5.0f;
-
-// ---- Dialogues ----
-inline constexpr int UI_DIALOGUE_WIDTH  = 700;
-inline constexpr int UI_DIALOGUE_HEIGHT = 100;
-
-inline constexpr int UI_DIALOGUE_CONTENT_WIDTH  = 597;
-inline constexpr int UI_DIALOGUE_CONTENT_HEIGHT = 88;
-
-inline constexpr int DIALOGUE_POS_X = (SCREEN_WIDTH / 2 - (UI_DIALOGUE_WIDTH / 2));
-inline constexpr int DIALOGUE_POS_Y = (SCREEN_HEIGHT - UI_DIALOGUE_HEIGHT - 5.0f); // 5.0f padding du bas
-
-inline constexpr int DIALOGUE_CONTENT_POS_X = (DIALOGUE_POS_X + 110);
-inline constexpr int DIALOGUE_CONTENT_POS_Y = (DIALOGUE_POS_Y + 15);
-
-inline constexpr int DIALOGUE_CONTENT_END_X = (DIALOGUE_POS_X + 97 + UI_DIALOGUE_CONTENT_WIDTH);
-inline constexpr int DIALOGUE_CONTENT_END_Y = (DIALOGUE_POS_Y + 6 + UI_DIALOGUE_CONTENT_HEIGHT);
+#include "game_settings.hpp"
 
 // ---- Assets ----
 inline constexpr const char *ICON             = "assets/icon.png";
@@ -45,12 +17,12 @@ inline constexpr const char *BACKGROUND       = "assets/background.png";
 inline constexpr const char *DIALOGUE_TEXTURE = "assets/dialogue.png";
 
 // ---- Structure texture/font ----
-inline constexpr const char *ENTITY_FONT   = "assets/fonts/ByteBounce.ttf";
-inline constexpr const char *DIALOGUE_FONT = "assets/fonts/Jersey10-Regular.ttf";
-inline constexpr const char *INFO_FONT     = "assets/fonts/Inconsolata-Regular.ttf";
-inline constexpr int SMALL_SIZE      = 20;
-inline constexpr int BIG_SIZE        = 50;
-inline constexpr int FONT_SIZE_COUNT = 2;
+inline constexpr const char *ENTITY_FONT     = "assets/fonts/ByteBounce.ttf";
+inline constexpr const char *DIALOGUE_FONT   = "assets/fonts/Jersey10-Regular.ttf";
+inline constexpr const char *INFO_FONT       = "assets/fonts/Inconsolata-Regular.ttf";
+inline constexpr const int   SMALL_SIZE      = 20;
+inline constexpr const int   BIG_SIZE        = 50;
+inline constexpr const int   FONT_SIZE_COUNT = 2;
 // ASCII + accents FR courants
 static const char32_t FR_CHARS[] = U" !\"#$%&'()*+,-./0123456789:;<=>?@"
                                    U"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"
@@ -65,6 +37,7 @@ enum TextureID {
     TEX_POTATO,
     TEX_POTATO_STATIC,
     TEX_CARROT_STATIC,
+    TEX_APPLE,
     TEX_APPLE_STATIC,
     // PNJ
     TEX_FARMER,
@@ -89,7 +62,8 @@ enum FontID {
 
 // ---- Structures dialogues ----
 enum DialogueEntity {
-    ITEM,
+    ITEM_POTATO,
+    ITEM_APPLE,
     FARMER,
     GUARD,
     SORCERER
@@ -97,7 +71,7 @@ enum DialogueEntity {
 
 struct DialogueInfo {
     bool request = false;
-    DialogueEntity entity = ITEM;
+    DialogueEntity entity = ITEM_POTATO;
 };
 
 class Game {
@@ -119,6 +93,7 @@ class Game {
         Item potato[POTATO_AVAILABLE];
         Item carrot;
         Item apple;
+        bool isAppleTaken = false;
 
         // ---- Les Animations ----
         // Le joueur
@@ -131,6 +106,7 @@ class Game {
 
         // Les objets
         AnimationState potatoAnim;
+        AnimationState appleAnim;
 
         // Les Requêtes
         bool hitboxRequest = false;
@@ -160,6 +136,7 @@ class Game {
         bool renameInit = true;
         bool isTyping = false;
         int sorcererStep = 0;
+        int appleStep = 0;
 
         // Affichage stack
         bool stackShowMore = false;
@@ -204,11 +181,5 @@ class Game {
 
         ~Game();
 };
-
-void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color);
-void DrawStaticItem(const Texture2D& texture, Position pos, float scale);
-void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text);
-void DrawDialogueFrame(Texture2D dialogue, Texture2D entity, AnimationState entityAnim, SpriteSheetInfo entitySprite, Color color);
-void DrawInfoFrame(int posX, int posY, int rectW, int rectH);
 
 #endif // GAME_H

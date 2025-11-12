@@ -318,13 +318,13 @@ HoverValues DrawCard(const Card& card, Frame parentFrame, float roundness, int s
 
     // ---- Dessins ----
     // Dessin du fond + bord
-    DrawRectangleRounded(frames.content, roundness, segments, card.config.color);
-    DrawRectangleRoundedLinesEx(frames.content, roundness, segments, card.config.stroke, COLOR_STACK_BORDER);
+    DrawRectangleRounded(frames.content, roundness, segments, card.config.backgroundColor);
+    DrawRectangleRoundedLinesEx(frames.content, roundness, segments, card.config.stroke, card.config.borderColor);
 
     // Dessin du masque pour le titre
     float titleRoundness = 0.5f;
-    DrawRectangleRounded(frames.title, titleRoundness, segments, card.config.color);
-    DrawRectangleRoundedLinesEx(frames.title, titleRoundness, segments, card.config.stroke, COLOR_STACK_BORDER);
+    DrawRectangleRounded(frames.title, titleRoundness, segments, card.config.backgroundColor);
+    DrawRectangleRoundedLinesEx(frames.title, titleRoundness, segments, card.config.stroke, card.config.borderColor);
 
     // Dessin le titre par-dessus le masque
     Position titlePos = { frames.title.x + card.config.titlePad.x, frames.title.y + card.config.titlePad.y };
@@ -521,7 +521,7 @@ void DrawInfoSection(const vector<Card>& cards, const vector<DataSection>& dataS
 }
 
 // Dessine une saisie utilisateur
-void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding padIn, float stroke) {
+void DrawInputBox(TextStyle name, int maxInputChars, Padding padIn, float stroke) {
     // ---- Calcul la taille et position de l'input box ----
 
     // === TODO ===
@@ -531,15 +531,15 @@ void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding p
     tmp.text = string(maxInputChars, 'W');
     Size size = MeasureTextStyled(tmp);
     Frame frame = {
-        SCREEN_SIZE.x / 2.0f - ((size.x + 2.0f * padIn.x) / 2.0f),
-        SCREEN_SIZE.y / 2.0f - ((size.y + 2.0f * padIn.y) / 2.0f),
+        SCREEN_WIDTH / 2.0f - ((size.x + 2.0f * padIn.x) / 2.0f),
+        SCREEN_HEIGHT / 2.0f - ((size.y + 2.0f * padIn.y) / 2.0f),
         size.x + 2.0f * padIn.x,
         size.y + 2.0f * padIn.y
     };
     frame = AlignToPixels(frame);
 
     // ---- Dessine le focus ----
-    DrawRectangleRec({ 0.0f, 0.0f, SCREEN_SIZE.x, SCREEN_SIZE.y }, COLOR_INPUT_BOX_FOCUS);
+    DrawRectangleRec({ 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT }, COLOR_INPUT_BOX_FOCUS);
 
     // ---- Dessine l'input box
     DrawRectangleRec(frame, COLOR_INPUT_BOX_BACKGROUND);
@@ -572,11 +572,11 @@ void DrawInputBox(TextStyle name, int maxInputChars, Size SCREEN_SIZE, Padding p
         name.color
     };
     Size informationSize = MeasureTextStyled(information);
-    DrawTextStyled(information, { SCREEN_SIZE.x / 2.0f - informationSize.x / 2.0f, frame.y + frame.height + 20.0f });
+    DrawTextStyled(information, { SCREEN_WIDTH / 2.0f - informationSize.x / 2.0f, frame.y + frame.height + 20.0f });
 }
 
-// Dessine un bandeau informatif pour un hover
-void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int SCREEN_WIDTH, Padding padIn, float roundness, int segments, float stroke, float interline) {
+// Dessine un info-bulle pour un hover
+void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn, float roundness, int segments, float stroke, float interline) {
     // ---- Calcul de la position et de la taille nécessaire ----
     float branchPad    = 12.0f;
     float branchStroke = 4.0f;
@@ -668,6 +668,69 @@ void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, int
     }
 }
 
+// Dessine un info-bulle pour un item de l'inventaire
+void DrawItemToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn, float roundness, int segments, float stroke, float interline) {
+    Size size = GetFrameMaxSize(data, padIn, interline);
+    
+    Frame frame = {
+        parentFrame.x,
+        parentFrame.y + parentFrame.height,
+        size.x,
+        size.y
+    };
+    
+    // ---- Affichage du fond ----
+    DrawRectangleRounded(frame, roundness, segments, COLOR_INVENTORY_HOVER_BACKGROUND);
+    DrawRectangleRoundedLinesEx(frame, roundness, segments, stroke, COLOR_INVENTORY_HOVER_BORDER);
+
+    // ---- Affiche le triangle ----
+    float offsetX = -10.0f;
+
+    Vector2 p0 = { parentFrame.x + parentFrame.width / 2.0f - 10.0f + offsetX, parentFrame.y + parentFrame.height };
+    Vector2 p1 = { parentFrame.x + parentFrame.width / 2.0f + 10.0f + offsetX, parentFrame.y + parentFrame.height };
+    Vector2 p2 = { parentFrame.x + parentFrame.width / 2.0f + offsetX,         parentFrame.y + parentFrame.height + 10.0f };
+
+    DrawTriangle(p1, p0, p2, COLOR_INVENTORY_HOVER_BORDER);
+    
+    // ---- Affiche le contenu ----
+    Position contentPosition = { frame.x + padIn.x, frame.y + padIn.y };
+    for (const auto& line : data) {
+        float maxContentHeight = 0.0f;
+        for (const auto& seg : line) {
+            Size textSize = MeasureTextStyled(seg.textStyle);
+            
+            // Affiche le texte
+            DrawTextStyled(seg.textStyle, contentPosition);
+
+            // Calcul la position suivante
+            contentPosition.x += textSize.x;
+            maxContentHeight = fmaxf(textSize.y, maxContentHeight);
+        }
+        // Passe à la ligne suivante
+        contentPosition.x = frame.x + padIn.x;
+        contentPosition.y += maxContentHeight + interline;
+    }
+}
+
+// Dessine une image statique
+void DrawStaticItem(const Texture2D& texture, Position pos, float scale) {
+    // Source = texture entière
+    Frame src = { 0, 0, (float)texture.width, (float)texture.height };
+
+    // Destination = centré sur la hitbox
+    Frame dst = {
+        pos.x,  // centre X
+        pos.y,  // centre Y
+        texture.width * scale,
+        texture.height * scale
+    };
+
+    // Origine = le centre de la texture
+    Position origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+    DrawTexturePro(texture, src, dst, origin, 0.0f, WHITE);
+}
+
 // Dessine une image animé
 void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, const SpriteSheetInfo& entitySprite, Color color) {
     // Avancer l’animation
@@ -706,8 +769,21 @@ void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position
     DrawTexturePro(texture, src, dst, origin, 0.0f, color);
 }
 
+// Dessine au dessus d'une entité une étiquette d'information
+void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text) {
+    Size label_size = MeasureTextStyled(text);
+    float padding = 5.0f;
+
+    // Calcul la position
+    Position position;
+    position.x = entity.pos.x - (label_size.x / 2);
+    position.y = entity.pos.y - entitySize - label_size.y - padding;
+    
+    DrawTextStyled(text, position);
+}
+
 // Dessine un bandeau pour un dialogue
-void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, Size SCREEN_SIZE, IconProfile& profile, Padding padInFrameContent, Padding padInContent, Size iconFrameSize, float roundness, int segments, float stroke, float interline) {
+void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, IconProfile& profile, Padding padInFrameContent, Padding padInContent, Size iconFrameSize, float roundness, int segments, float stroke, float interline) {
     // ---- Calcul de la frame ----
     Size frameSize = GetFrameMaxSize(data, padInContent, interline);
 
@@ -722,8 +798,8 @@ void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& cont
     float defaultSize = 700.0f;
     if (frame.width < defaultSize) frame.width = defaultSize;
     if (frame.height < iconFrameSize.y) frame.height = iconFrameSize.y;
-    frame.x = SCREEN_SIZE.x / 2.0f - frame.width / 2.0f;
-    frame.y = SCREEN_SIZE.y - frame.height - 1;
+    frame.x = SCREEN_WIDTH / 2.0f - frame.width / 2.0f;
+    frame.y = SCREEN_HEIGHT - frame.height - 1;
     frame = AlignToPixels(frame);
 
     // ---- Affichage du fond global ----
@@ -766,27 +842,39 @@ void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& cont
 
     // ---- Affiche l'image de profile ----
     // Destination (où et quelle taille à l'écran)
-    Frame frameDest = {
-        frame.x,
-        frame.y,
-        iconFrameSize.x,
-        iconFrameSize.y
-    };
+    if (profile.entity.id > 0 && profile.entity.width > 0 && profile.entity.height > 0) {
+        Frame frameDest = {
+            frame.x,
+            frame.y,
+            iconFrameSize.x,
+            iconFrameSize.y
+        };
 
-    // Source (on prend toute la texture)
-    /*Frame frameSrc = { 0, 0, profile.dialogue.width, profile.dialogue.height };
+        // Calcul la position du profil
+        float squareSize = frameDest.height;  // hauteur de la texture affichée
+        if (squareSize > frameDest.width) squareSize = frameDest.width; // rester carré
 
-    // Afficher texture redimensionnée dans rec
-    DrawTexturePro(profile.dialogue, frameSrc, frameDest, (Position){0, 0}, 0.0f, WHITE);
+        Position center = {
+            frameDest.x + squareSize / 2.0f,
+            frameDest.y + squareSize / 2.0f
+        };
 
-    */// Calcul la position du profil
-    float squareSize = frameDest.height;  // hauteur de la texture affichée
-    if (squareSize > frameDest.width) squareSize = frameDest.width; // rester carré
+        DrawAnimatedEntity(profile.entity, profile.entityAnim, center, false, profile.entitySprite, profile.color);
+    }
+}
 
-    Position center = {
-        frameDest.x + squareSize / 2.0f,
-        frameDest.y + squareSize / 2.0f
-    };
-
-    DrawAnimatedEntity(profile.entity, profile.entityAnim, center, false, profile.entitySprite, profile.color);
+// Dessine des marqueurs dans les angles d'un rectangle
+void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color) {
+    // Top-left
+    DrawLineEx({r.x, r.y}, {r.x + len, r.y}, thick, color);
+    DrawLineEx({r.x, r.y}, {r.x, r.y + len}, thick, color);
+    // Top-right
+    DrawLineEx({r.x + r.width - len, r.y}, {r.x + r.width, r.y}, thick, color);
+    DrawLineEx({r.x + r.width, r.y}, {r.x + r.width, r.y + len}, thick, color);
+    // Bottom-left
+    DrawLineEx({r.x, r.y + r.height - len}, {r.x, r.y + r.height}, thick, color);
+    DrawLineEx({r.x, r.y + r.height}, {r.x + len, r.y + r.height}, thick, color);
+    // Bottom-right
+    DrawLineEx({r.x + r.width - len, r.y + r.height}, {r.x + r.width, r.y + r.height}, thick, color);
+    DrawLineEx({r.x + r.width, r.y + r.height - len}, {r.x + r.width, r.y + r.height}, thick, color);
 }

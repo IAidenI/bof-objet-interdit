@@ -1,19 +1,12 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
 
-#include "raylib.h"
 #include <iostream>
 #include <cstring>
 #include <memory>
-using namespace std;
-using Position = Vector2;
+#include "geometry.hpp"
 
 inline constexpr int MAX_NAME_LENGTH = 16;
-
-struct Hitbox {
-    Position pos;
-    float radius;
-};
 
 // ---- Classe Entity ----
 class Entity {

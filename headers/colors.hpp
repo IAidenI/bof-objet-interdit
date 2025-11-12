@@ -1,8 +1,16 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include "geometry.hpp"
+
 inline constexpr Color COLOR_INVENTORY_BACKGROUND    = CLITERAL(Color){  84,  61,  89, 255 };
 inline constexpr Color COLOR_VALUE_HOOVER            = CLITERAL(Color){  24,  76,  66, 255 };
+
+// ---- Commandes ----
+inline constexpr Color COLOR_COMMANDS_BACKGROUND = CLITERAL(Color){  12,  17,  20, 178 };
+inline constexpr Color COLOR_COMMANDS_BORDER     = BLACK;
+inline constexpr Color COLOR_COMMANDS_LABEL      = CLITERAL(Color){  92, 197, 184, 255 };
+inline constexpr Color COLOR_COMMANDS_ACTION     = CLITERAL(Color){ 255, 255, 255, 178 };
 
 // ---- Dialogue ----
 inline constexpr Color COLOR_DIALOGUE_BACKGROUND         = BLACK;
@@ -10,6 +18,15 @@ inline constexpr Color COLOR_DIALOGUE_BORDER             = WHITE;
 inline constexpr Color COLOR_DIALOGUE_CONTENT_BACKGROUND = CLITERAL(Color){  39,  71,  98, 255 };
 inline constexpr Color COLOR_DIALOGUE_CONTENT_BORDER     = CLITERAL(Color){  16,  51,  71, 255 };
 inline constexpr Color COLOR_DIALOGUE_CONTENT_TEXT       = WHITE;
+
+// ---- Inventaire ----
+inline constexpr Color COLOR_INVENTORY_HOVER_BACKGROUND = CLITERAL(Color){  20,  28,  32, 255 };
+inline constexpr Color COLOR_INVENTORY_HOVER_BORDER     = CLITERAL(Color){ 129, 179, 220, 255};
+inline constexpr Color COLOR_INVENTORY_NAME             = CLITERAL(Color){ 165, 186, 255, 178 };
+inline constexpr Color COLOR_INVENTORY_ID               = CLITERAL(Color){ 158, 225, 169, 255 };
+inline constexpr Color COLOR_INVENTORY_CURRENT_AMOUNT   = CLITERAL(Color){ 158, 225, 169, 255 };
+inline constexpr Color COLOR_INVENTORY_MAX_AMOUNT       = CLITERAL(Color){ 225, 118, 118, 255 };
+inline constexpr Color COLOR_INVENTORY_LABEL            = CLITERAL(Color){ 197, 198, 208, 178 };
 
 // ---- Input box ----
 inline constexpr Color COLOR_INPUT_BOX_TEXT          = MAROON;

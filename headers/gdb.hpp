@@ -17,14 +17,7 @@ inline constexpr size_t PLAYER_POS_Y_OFFSET  = PLAYER_POS_X_OFFSET  + sizeof(flo
 inline constexpr size_t PLAYER_RADIUS_OFFSET = PLAYER_POS_Y_OFFSET  + sizeof(float);
 inline constexpr size_t PLAYER_NAME_OFFSET   = PLAYER_RADIUS_OFFSET + sizeof(float);
 
-// ---- Offsets de référence pour l'inventaire ----
-inline constexpr size_t SLOT_1_ITEM_POS_X_OFFSET          = PLAYER_NAME_OFFSET             + sizeof(char) * MAX_NAME_LENGTH;
-inline constexpr size_t SLOT_1_ITEM_POS_Y_OFFSET          = SLOT_1_ITEM_POS_X_OFFSET       + sizeof(float);
-inline constexpr size_t SLOT_1_ITEM_RADIUS_OFFSET         = SLOT_1_ITEM_POS_Y_OFFSET       + sizeof(float);
-inline constexpr size_t SLOT_1_ITEM_NAME_OFFSET           = SLOT_1_ITEM_RADIUS_OFFSET      + sizeof(float);
-inline constexpr size_t SLOT_1_ITEM_ID_OFFSET             = SLOT_1_ITEM_NAME_OFFSET        + sizeof(char) * MAX_NAME_LENGTH;
-inline constexpr size_t SLOT_1_ITEM_MAX_AMOUNT_OFFSET     = SLOT_1_ITEM_ID_OFFSET          + sizeof(int);
-inline constexpr size_t SLOT_1_ITEM_CURRENT_AMOUNT_OFFSET = SLOT_1_ITEM_MAX_AMOUNT_OFFSET  + sizeof(int);
+inline constexpr size_t SLOT_ITEM_START = PLAYER_NAME_OFFSET + sizeof(char) * MAX_NAME_LENGTH;
 
 // ---- Deltas intra-slot (par rapport à la base du slot) ----
 inline constexpr size_t ITEM_POS_X_D          = 0;
@@ -36,10 +29,10 @@ inline constexpr size_t ITEM_MAX_AMOUNT_D     = ITEM_ID_D             + sizeof(i
 inline constexpr size_t ITEM_CURRENT_AMOUNT_D = ITEM_MAX_AMOUNT_D     + sizeof(int);
 
 // ---- Stride d’un slot (taille totale) ----
-inline constexpr size_t SLOT_STRIDE = ITEM_CURRENT_AMOUNT_D + sizeof(int);
+inline constexpr size_t SLOT_ITEM_END = ITEM_CURRENT_AMOUNT_D + sizeof(int);
 
 // ---- Accesseurs génériques pour n’importe quel slot i (0..8) ----
-constexpr size_t slot_base(int i) { return SLOT_1_ITEM_POS_X_OFFSET + static_cast<size_t>(i) * SLOT_STRIDE; }
+constexpr size_t slot_base(int i) { return SLOT_ITEM_START + static_cast<size_t>(i) * SLOT_ITEM_END; }
 
 constexpr size_t SLOT_ITEM_POS_X_OFFSET(int i)          { return slot_base(i) + ITEM_POS_X_D; }
 constexpr size_t SLOT_ITEM_POS_Y_OFFSET(int i)          { return slot_base(i) + ITEM_POS_Y_D; }
@@ -104,6 +97,7 @@ class GDB {
         string getAddress(int offset);
         string getValueHex(int offset);
         string getValueString(int offset, size_t maxLen = 32);
+        size_t getDisplayNameOffset(size_t off);
 
     public:
         GDB(uintptr_t rbp_address);
