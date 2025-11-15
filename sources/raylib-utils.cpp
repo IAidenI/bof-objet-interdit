@@ -686,9 +686,9 @@ void DrawItemToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame,
     // ---- Affiche le triangle ----
     float offsetX = -10.0f;
 
-    Vector2 p0 = { parentFrame.x + parentFrame.width / 2.0f - 10.0f + offsetX, parentFrame.y + parentFrame.height };
-    Vector2 p1 = { parentFrame.x + parentFrame.width / 2.0f + 10.0f + offsetX, parentFrame.y + parentFrame.height };
-    Vector2 p2 = { parentFrame.x + parentFrame.width / 2.0f + offsetX,         parentFrame.y + parentFrame.height + 10.0f };
+    Position p0 = { parentFrame.x + parentFrame.width / 2.0f - 10.0f + offsetX, parentFrame.y + parentFrame.height };
+    Position p1 = { parentFrame.x + parentFrame.width / 2.0f + 10.0f + offsetX, parentFrame.y + parentFrame.height };
+    Position p2 = { parentFrame.x + parentFrame.width / 2.0f + offsetX,         parentFrame.y + parentFrame.height + 10.0f };
 
     DrawTriangle(p1, p0, p2, COLOR_INVENTORY_HOVER_BORDER);
     
@@ -877,4 +877,154 @@ void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color) 
     // Bottom-right
     DrawLineEx({r.x + r.width - len, r.y + r.height}, {r.x + r.width, r.y + r.height}, thick, color);
     DrawLineEx({r.x + r.width, r.y + r.height - len}, {r.x + r.width, r.y + r.height}, thick, color);
+}
+
+// Dessine un item avec sa quantité en bas à droite
+void DrawItemWithQuantity(Position pos, TextStyle& itemQuantity, const Texture2D& texture, float itemScale, float radiusCircleInfo) {
+    // Affiche l'item
+    DrawTextureEx(texture, pos, 0.0f, itemScale, WHITE);
+
+    // Affiche sa quantité
+    Position bottomRight = { pos.x + texture.width * itemScale - radiusCircleInfo, pos.y + texture.height * itemScale - radiusCircleInfo };
+    DrawCircleV(bottomRight, radiusCircleInfo, COLOR_INVENTORY_CURRENT_AMOUNT_BACKGROUND);
+    DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
+
+    itemQuantity.text = "x" + itemQuantity.text;
+    Size textSize = MeasureTextStyled(itemQuantity);
+    Position textPos = { bottomRight.x - textSize.x / 2, bottomRight.y - textSize.y / 2 };
+    DrawTextStyled(itemQuantity, textPos);
+}
+
+Size GetButtonSize(TextStyle& data, Padding padIn) {
+    Size textSize = MeasureTextStyled(data);
+    return { textSize.x + 2.0f * padIn.x, textSize.y + 2.0f * padIn.y };
+}
+
+void DrawRoundedButton(TextStyle& data, Position position, Padding padIn, float roundness, int segments, float stroke) {
+    // Calcul de la taille
+    Size textSize = GetButtonSize(data, padIn);
+    Frame frame = {
+        position.x,
+        position.y,
+        textSize.x,
+        textSize.y
+    };
+
+    // Dessin du fond + bord
+    DrawRectangleRounded(frame, roundness, segments, COLOR_STORE_BUTTON_BACKGROUND);
+    DrawRectangleRoundedLinesEx(frame, roundness, segments, stroke, COLOR_STORE_BUTTON_BORDER);
+
+    // Affiche le texte
+    DrawTextStyled(data, { frame.x + padIn.x, frame.y + padIn.y });
+}
+
+void DrawRightArrow(Frame parentFrame, float thick, Color color) {
+    float tipWidth  = 10.0f;
+
+    float thickRect = thick / 3.0f;
+    Frame frame = {
+        parentFrame.x,
+        parentFrame.y + parentFrame.height / 2.0f - thickRect / 2.0f,
+        parentFrame.width - tipWidth,
+        thickRect
+    };
+    DrawRectangleRec(frame, color);
+
+    // Pointe
+    float centerY = parentFrame.y + parentFrame.height / 2.0f;
+    float tipBase = frame.x + frame.width;
+    Position p2 = { tipBase + tipWidth, centerY };
+    Position p0 = { tipBase, centerY - thick / 2.0f };  
+    Position p1 = { tipBase, centerY + thick / 2.0f };
+
+    DrawTriangle(p0, p1, p2, color);
+}
+
+// Dessine un magasin où l'utilisateur peut acheter des items
+void DrawStore(const TextStyle& title, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle, const Texture2D& potatoTex, const Texture2D& carrotTex, const Texture2D& appleTex, float roundness, int segments, float stroke) {
+    Frame frame = {
+        SCREEN_WIDTH / 2.0f - 150.0f,
+        SCREEN_HEIGHT / 2.0f - 100.0f,
+        400.0f,
+        200.0f
+    };
+
+    // ---- Dessin du fond + bord ----
+    DrawRectangleRounded(frame, roundness, segments, COLOR_STORE_BACKGROUND);
+    DrawRectangleRoundedLinesEx(frame, roundness, segments, stroke, COLOR_STORE_BORDER);
+
+    // ---- Dessin du triangle ----
+    Size textSize = MeasureTextStyled(title);
+
+    float titleMarginY = 10.0f;
+    float triWidth  = 10.0f;
+    float triHeight = 20.0f;
+
+    // Position du texte
+    Position titlePos = {
+        frame.x + 10.0f + triWidth + 10.0f,
+        frame.y + titleMarginY
+    };
+
+    float centerY = titlePos.y + textSize.y / 2.0f;
+    float marginX = 10.0f;
+
+    Position p2 = { frame.x + marginX + triWidth, centerY };
+    Position p0 = { frame.x + marginX, centerY - triHeight / 2.0f };  
+    Position p1 = { frame.x + marginX, centerY + triHeight / 2.0f };
+
+    DrawTriangle(p0, p1, p2, COLOR_STORE_BORDER);
+
+    // ---- Dessin du titre à côté du triangle ----
+    titlePos = {
+        p2.x + 10.0f,
+        titlePos.y
+    };
+
+    DrawTextStyled(title, titlePos);
+
+    // ---- Dessin des items ----
+    float itemScale = 3.0f;
+    float radiusCircleInfo = 10.0;
+    Padding tradePaddingX = { 50.0f, 20.0f };
+    Size titleSize = MeasureTextStyled(title);
+
+    // -- Patate --
+    // Item in
+    Position potatoPos = { frame.x + tradePaddingX.x, titlePos.y + titleSize.y + tradePaddingX.y };
+    quantity.text = "8";
+    //DrawRectangleRec({ potatoPos.x, potatoPos.y, (float)potatoTex.width * itemScale, (float)potatoTex.height * itemScale }, RED);
+    DrawItemWithQuantity(potatoPos, quantity, potatoTex, itemScale, radiusCircleInfo);
+
+    // Flèche
+    float arrowPadX = 20.0f;
+    Size arrowSize = { 100.0f, 20.0f };
+    Rectangle arrow = {
+        potatoPos.x + potatoTex.width * itemScale + arrowPadX,
+        potatoPos.y + (potatoTex.height * itemScale) / 2.0f - arrowSize.y / 2.0f,
+        arrowSize.x,
+        arrowSize.y
+    };
+    DrawRightArrow(arrow, 20.0f, COLOR_STORE_ARROW);
+
+    // Quantité actuelle / Quantité max
+    quantityRatio.text = "/";
+
+    // Item out
+    Position carrotPos = { arrow.x + arrow.width + arrowPadX, potatoPos.y };
+    quantity.text = "1";
+    //DrawRectangleRec({ carrotPos.x, carrotPos.y, (float)carrotTex.width * itemScale, (float)carrotTex.height * itemScale }, RED);
+    DrawItemWithQuantity(carrotPos, quantity, carrotTex, itemScale, radiusCircleInfo);
+
+    // Bouton achat
+    buttonStyle.text = "Buy";
+    float buttonPadX = 20.0f;
+    Padding buttonPad = { 7.0f, 5.0f };
+    Size buttonSize = GetButtonSize(buttonStyle, buttonPad);
+    Position buttonPos = { carrotPos.x + carrotTex.width * itemScale + buttonPadX, arrow.y + arrow.height / 2.0f - buttonSize.y / 2.0f };
+    DrawRoundedButton(buttonStyle, buttonPos, buttonPad, 0.6f);
+
+    // -- Carotte --
+
+    // -- Pomme --
 }

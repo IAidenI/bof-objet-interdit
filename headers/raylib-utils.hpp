@@ -34,6 +34,10 @@ inline constexpr float   DEFAULT_STROKE        = 2.0f;
 // Dialogue
 inline constexpr Size DEFAULT_ICON_SIZE = { 94.0f, 94.0f };
 
+// Items
+inline constexpr float DEFAULT_ITEM_SCALE  = INVENTORY_SCALE * 0.88f;
+inline constexpr float DEFAULT_ITEM_RADIUS = 13.0f;
+
 // ---- Style pour les textes ----
 struct TextStyle {
     Font *font;
@@ -180,7 +184,12 @@ void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position
 void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text); // Dessine au dessus d'une entité une étiquette d'information
 void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, IconProfile& profile, Padding padInFrameContent = DEFAULT_TITLE_PAD_IN, Padding padInContent = DEFAULT_TITLE_PAD_IN, Size iconFrameSize = DEFAULT_ICON_SIZE, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau pour un dialogue
 
-// Dessine des marqueurs dans les angles d'un rectangle
-void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color);
+void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color); // Dessine des marqueurs dans les angles d'un rectangle
+
+Size GetButtonSize(TextStyle& data, Padding padIn);
+void DrawRoundedButton(TextStyle& data, Position position, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE);
+void DrawRightArrow(Frame parentFrame, float thick, Color color);
+void DrawItemWithQuantity(Position pos, TextStyle& itemQuantity, const Texture2D& texture, float itemScale = DEFAULT_ITEM_SCALE, float radiusCircleInfo = DEFAULT_ITEM_RADIUS); // Dessine un item avec sa quantité en bas à droite
+void DrawStore(const TextStyle& title, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle, const Texture2D& potatoTex, const Texture2D& carrotTex, const Texture2D& appleTex, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
 
 #endif // UTILS_H

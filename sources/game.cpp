@@ -67,8 +67,6 @@ Game::Game(const char **texturesPath, const char **fontPath)
 }
 
 Font& Game::getFont(FontID id, int size) {
-    //const int threshold = SMALL_SIZE + static_cast<int>(round((BIG_SIZE - SMALL_SIZE) / 2.0f));
-
     int index = (size < SMALL_SIZE) ? 0 : 1;
     return this->fmgr[id][index];
 }
@@ -170,6 +168,13 @@ void Game::displayCommands() {
     };
 
     DrawCard(card, START_FRAME);
+
+    // Test
+    TextStyle title         = { &this->getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
+    TextStyle quantityStyle = { &this->getFont(DIALOGUE_LABEL, 15), "", 15.0f, 0.0f, BLACK };
+    TextStyle quantityRatio = { &this->getFont(INFO_LABEL, 18), "", 18.0f, 2.0f, WHITE };
+    TextStyle buttonStyle   = { &this->getFont(DIALOGUE_LABEL, 18), "", 18.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
+    DrawStore(title, quantityStyle, quantityRatio, buttonStyle, this->tmgr[TEX_POTATO_STATIC], this->tmgr[TEX_CARROT_STATIC], this->tmgr[TEX_APPLE_STATIC]);
 }
 
 void Game::displayPNJ() {
@@ -259,7 +264,7 @@ void Game::renderInventory() {
     if (!this->inventoryRequest) return;
 
     // --- Texture et centrage de la fenêtre d'inventaire ---
-    Texture2D inventory = this->tmgr[TEX_SLOT];
+    Texture2D inventory = this->tmgr[TEX_INVENTORY];
 
     float inventoryW = inventory.width  * INVENTORY_SCALE;
     float inventoryH = inventory.height * INVENTORY_SCALE;
@@ -307,54 +312,43 @@ void Game::renderInventory() {
             const Item& item = this->player.inventory().getItem(idx);
             if (item.getId() == ID_NONE) continue;
 
-            string slotQte = "x" + to_string(this->player.inventory().getSlotQuantity(idx));
-
-            // --- Données tooltip pour le slot ---
-            vector<vector<InfoSegment>> data = {
-                { { { &this->getFont(INFO_LABEL, 20), item.getName(), 20.0f, 2.0f, COLOR_INVENTORY_NAME } } },
-                {
-                    { { &this->getFont(INFO_LABEL, 16), "ID : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
-                    { { &this->getFont(INFO_LABEL, 16), to_string(item.getId()), 16.0f, 2.0f, COLOR_INVENTORY_ID } }
-                },
-                {
-                    { { &this->getFont(INFO_LABEL, 16), "Quantité : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
-                    { { &this->getFont(INFO_LABEL, 16), slotQte, 16.0f, 2.0f, COLOR_INVENTORY_CURRENT_AMOUNT } }
-                },
-                {
-                    { { &this->getFont(INFO_LABEL, 16), "Quantité max : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
-                    { { &this->getFont(INFO_LABEL, 16), "x" + to_string(item.getMaxAmount()), 16.0f, 2.0f, COLOR_INVENTORY_MAX_AMOUNT } }
-                }
-            };
-
             // --- Dessin de l’item ---
-            float radiusCircleInfo = 13.0f;
-            Position bottomRight = { cellPos.x + cellW - radiusCircleInfo, cellPos.y + cellH - radiusCircleInfo };
-
+            Texture2D texture = {};
             switch (item.getId()) {
                 case ID_POTATO:
-                    DrawTextureEx(potatoTex, cellPos, 0.0f, itemScale, WHITE);
+                    texture = potatoTex;
                     break;
                 case ID_CARROT:
-                    DrawTextureEx(carrotTex, cellPos, 0.0f, itemScale, WHITE);
+                    texture = carrotTex;
                     break;
                 case ID_APPLE:
-                    DrawTextureEx(appleTex, cellPos, 0.0f, itemScale, WHITE);
+                    texture = appleTex;
                     break;
                 default: break;
             }
 
-            DrawCircleV(bottomRight, radiusCircleInfo, BEIGE_LIGHT);
-            DrawRing(bottomRight, radiusCircleInfo - 2.0f, radiusCircleInfo, 0.0f, 360.0f, 64, BLACK);
-
-            float fontSize = 17.0f;
-            float spacing = 0.0f;
-            Size textSize = MeasureTextEx(*this->fmgr[DIALOGUE_LABEL], slotQte.c_str(), fontSize, spacing);
-            Position textPos = { bottomRight.x - textSize.x / 2, bottomRight.y - textSize.y / 2 };
-            DrawTextEx(*this->fmgr[DIALOGUE_LABEL], slotQte.c_str(), textPos, fontSize, spacing, BLACK);
+            TextStyle itemQuantity = { &this->getFont(DIALOGUE_LABEL, 15), to_string(this->player.inventory().getSlotQuantity(idx)), 15.0f, 0.0f, BLACK };
+            DrawItemWithQuantity(cellPos, itemQuantity, texture, itemScale);
 
             // --- Hover ---
             if (CheckCollisionPointRec(GetMousePosition(), slotRect)) {
-                isHover    = true;
+                vector<vector<InfoSegment>> data = {
+                    { { { &this->getFont(INFO_LABEL, 20), item.getName(), 20.0f, 2.0f, COLOR_INVENTORY_NAME } } },
+                    {
+                        { { &this->getFont(INFO_LABEL, 16), "ID : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                        { { &this->getFont(INFO_LABEL, 16), to_string(item.getId()), 16.0f, 2.0f, COLOR_INVENTORY_ID } }
+                    },
+                    {
+                        { { &this->getFont(INFO_LABEL, 16), "Quantité : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                        { { &this->getFont(INFO_LABEL, 16), "x" + to_string(this->player.inventory().getSlotQuantity(idx)), 16.0f, 2.0f, COLOR_INVENTORY_CURRENT_AMOUNT } }
+                    },
+                    {
+                        { { &this->getFont(INFO_LABEL, 16), "Quantité max : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                        { { &this->getFont(INFO_LABEL, 16), "x" + to_string(item.getMaxAmount()), 16.0f, 2.0f, COLOR_INVENTORY_MAX_AMOUNT } }
+                    }
+                };
+
+                isHover     = true;
                 hoveredRect = slotRect;
                 hoveredData = move(data);
             }
@@ -376,8 +370,8 @@ void Game::renderInventory() {
 
         Frame r = { selPos.x, selPos.y, cellW, cellH };
         float cornerLen   = 6.0f * INVENTORY_SCALE;
-        float cornerThick = 2.0f * INVENTORY_SCALE;
-        DrawCornerMarkers(r, cornerLen, cornerThick, GOLD);
+        float cornerThick = INVENTORY_SCALE;
+        DrawCornerMarkers(r, cornerLen, cornerThick, COLOR_INVENTORY_SELECTOR);
     }
 }
 

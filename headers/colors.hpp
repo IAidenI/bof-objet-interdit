@@ -20,13 +20,24 @@ inline constexpr Color COLOR_DIALOGUE_CONTENT_BORDER     = CLITERAL(Color){  16,
 inline constexpr Color COLOR_DIALOGUE_CONTENT_TEXT       = WHITE;
 
 // ---- Inventaire ----
-inline constexpr Color COLOR_INVENTORY_HOVER_BACKGROUND = CLITERAL(Color){  20,  28,  32, 255 };
-inline constexpr Color COLOR_INVENTORY_HOVER_BORDER     = CLITERAL(Color){ 129, 179, 220, 255};
-inline constexpr Color COLOR_INVENTORY_NAME             = CLITERAL(Color){ 165, 186, 255, 178 };
-inline constexpr Color COLOR_INVENTORY_ID               = CLITERAL(Color){ 158, 225, 169, 255 };
-inline constexpr Color COLOR_INVENTORY_CURRENT_AMOUNT   = CLITERAL(Color){ 158, 225, 169, 255 };
-inline constexpr Color COLOR_INVENTORY_MAX_AMOUNT       = CLITERAL(Color){ 225, 118, 118, 255 };
-inline constexpr Color COLOR_INVENTORY_LABEL            = CLITERAL(Color){ 197, 198, 208, 178 };
+inline constexpr Color COLOR_INVENTORY_HOVER_BACKGROUND          = CLITERAL(Color){  20,  28,  32, 255 };
+inline constexpr Color COLOR_INVENTORY_HOVER_BORDER              = CLITERAL(Color){ 129, 179, 220, 255};
+inline constexpr Color COLOR_INVENTORY_NAME                      = CLITERAL(Color){ 165, 186, 255, 178 };
+inline constexpr Color COLOR_INVENTORY_ID                        = CLITERAL(Color){ 158, 225, 169, 255 };
+inline constexpr Color COLOR_INVENTORY_CURRENT_AMOUNT            = CLITERAL(Color){ 158, 225, 169, 255 };
+inline constexpr Color COLOR_INVENTORY_MAX_AMOUNT                = CLITERAL(Color){ 225, 118, 118, 255 };
+inline constexpr Color COLOR_INVENTORY_LABEL                     = CLITERAL(Color){ 197, 198, 208, 178 };
+inline constexpr Color COLOR_INVENTORY_SELECTOR                  = CLITERAL(Color){  92, 197, 184, 255 };
+inline constexpr Color COLOR_INVENTORY_CURRENT_AMOUNT_BACKGROUND = CLITERAL(Color){ 230, 210, 170, 255 };
+
+// ---- Magasin du fermier ----
+inline constexpr Color COLOR_STORE_BACKGROUND        = CLITERAL(Color){  16,  43,  63, 255 };
+inline constexpr Color COLOR_STORE_BORDER            = CLITERAL(Color){ 199, 168, 100, 255 };
+inline constexpr Color COLOR_STORE_TITLE             = CLITERAL(Color){ 245, 240, 230, 255 };
+inline constexpr Color COLOR_STORE_ARROW             = CLITERAL(Color){ 255, 248, 230, 255 };
+inline constexpr Color COLOR_STORE_BUTTON_BACKGROUND = CLITERAL(Color){  39,  73,  98, 255 };
+inline constexpr Color COLOR_STORE_BUTTON_BORDER     = CLITERAL(Color){ 170, 161, 136, 255 };
+inline constexpr Color COLOR_STORE_BUTTON_TEXT       = WHITE;
 
 // ---- Input box ----
 inline constexpr Color COLOR_INPUT_BOX_TEXT          = MAROON;
@@ -58,9 +69,5 @@ inline constexpr Color COLOR_TOOLTIP_VALUE           = CLITERAL(Color){ 206, 145
 
 // ---- Game Colors ----
 inline constexpr Color HITBOX_COLOR                  = CLITERAL(Color){ 184, 184, 184, 102 };
-
-
-// A check
-inline constexpr Color BEIGE_LIGHT = CLITERAL(Color){ 230, 210, 170, 255 };
 
 #endif // COLOR_H

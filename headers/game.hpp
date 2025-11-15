@@ -47,7 +47,7 @@ enum TextureID {
     TEX_PLAYER,
     // Autre
     TEX_DIALOGUE,
-    TEX_SLOT,
+    TEX_INVENTORY,
     // Sentinelle pour savoir la taille
     TEX_MAX
 };
