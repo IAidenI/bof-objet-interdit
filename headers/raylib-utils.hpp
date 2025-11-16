@@ -7,6 +7,7 @@
 #include <cstdint>
 #include "colors.hpp"
 #include "item.hpp"
+#include "manager.hpp"
 #include "geometry.hpp"
 #include "game_settings.hpp"
 
@@ -186,11 +187,11 @@ void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& cont
 
 void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color); // Dessine des marqueurs dans les angles d'un rectangle
 
-Size GetButtonSize(TextStyle& data, Padding padIn);
-bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE);
-void DrawRightArrow(Frame parentFrame, float thick, Color color);
+Size GetButtonSize(TextStyle& data, Padding padIn); // Récupère la taille d'un bouton
+bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un bouton arroundi
+void DrawRightArrow(Frame parentFrame, float thick, Color color); // Dessine une flèche qui pointe vers la droite
 void DrawItemWithQuantity(Position pos, TextStyle& itemQuantity, const Texture2D& texture, float itemScale = DEFAULT_ITEM_SCALE, float radiusCircleInfo = DEFAULT_ITEM_RADIUS); // Dessine un item avec sa quantité en bas à droite
-int DrawStore(const TextStyle& title, int potatoCurrent, int carrotCurrent, int appleCurrent, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle, const Texture2D& potatoTex, const Texture2D& carrotTex, const Texture2D& appleTex, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
-bool DrawTrade(Position start, int currentValue, int maxValue, Texture2D textureIn, Texture2D textureOut, float itemScale, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle);
+int DrawStore(int potatoCurrent, int carrotCurrent, int appleCurrent, Manager& manager, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
+bool DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue, Texture2D textureIn, Texture2D textureOut, float itemScale, Manager& manager); // Dessine une linge de trade avec item in, une flèche avec le ratio actuelle/max, l'item out et un bouton pour intéragir
 
 #endif // UTILS_H

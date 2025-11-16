@@ -895,11 +895,13 @@ void DrawItemWithQuantity(Position pos, TextStyle& itemQuantity, const Texture2D
     DrawTextStyled(itemQuantity, textPos);
 }
 
+// Récupère la taille d'un bouton
 Size GetButtonSize(TextStyle& data, Padding padIn) {
     Size textSize = MeasureTextStyled(data);
     return { textSize.x + 2.0f * padIn.x, textSize.y + 2.0f * padIn.y };
 }
 
+// Dessine un bouton arroundi
 bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn, float roundness, int segments, float stroke) {
     bool isPressed = false;
 
@@ -931,6 +933,7 @@ bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding 
     return isPressed;
 }
 
+// Dessine une flèche qui pointe vers la droite
 void DrawRightArrow(Frame parentFrame, float thick, Color color) {
     float tipWidth  = 10.0f;
 
@@ -953,11 +956,13 @@ void DrawRightArrow(Frame parentFrame, float thick, Color color) {
     DrawTriangle(p0, p1, p2, color);
 }
 
-bool DrawTrade(Position start, int currentValue, int maxValue, Texture2D textureIn, Texture2D textureOut, float itemScale, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle) {
+// Dessine une linge de trade avec item in, une flèche avec le ratio actuelle/max, l'item out et un bouton pour intéragir
+bool DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue, Texture2D textureIn, Texture2D textureOut, float itemScale, Manager& manager) {
     float radiusCircleInfo = 10.0;
 
     // Item in
-    quantity.text = "8";
+    TextStyle quantity = { &manager.getFont(DIALOGUE_LABEL, 15), "", 15.0f, 0.0f, BLACK };
+    quantity.text = to_string(maxValue);
     DrawItemWithQuantity(start, quantity, textureIn, itemScale, radiusCircleInfo);
 
     // Flèche
@@ -972,6 +977,7 @@ bool DrawTrade(Position start, int currentValue, int maxValue, Texture2D texture
     DrawRightArrow(arrowPos, 20.0f, COLOR_STORE_ARROW);
 
     // Quantité actuelle / Quantité max
+    TextStyle quantityRatio = { &manager.getFont(INFO_LABEL, 18), "", 18.0f, 2.0f, COLOR_STORE_NORMAL_RATIO };
     string ratioFull = to_string(currentValue) + "/" + to_string(maxValue);
     TextStyle ratioMeasure = quantityRatio;
     ratioMeasure.text = ratioFull;
@@ -995,11 +1001,12 @@ bool DrawTrade(Position start, int currentValue, int maxValue, Texture2D texture
 
     // Item out
     Position itemOutPos = { arrowPos.x + arrowPos.width + arrowPadX, start.y };
-    quantity.text = "1";
+    quantity.text = to_string(itemGetValue);
     //DrawRectangleRec({ carrotPos.x, carrotPos.y, (float)carrotTex.width * itemScale, (float)carrotTex.height * itemScale }, RED);
     DrawItemWithQuantity(itemOutPos, quantity, textureOut, itemScale, radiusCircleInfo);
 
     // Bouton achat
+    TextStyle buttonStyle   = { &manager.getFont(INFO_LABEL, 20), "Buy", 20.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
     buttonStyle.text = "Buy";
     float buttonPadX = 20.0f;
     Padding buttonPad = { 10.0f, 7.0f };
@@ -1009,9 +1016,10 @@ bool DrawTrade(Position start, int currentValue, int maxValue, Texture2D texture
 }
 
 // Dessine un magasin où l'utilisateur peut acheter des items
-int DrawStore(const TextStyle& title, int potatoCurrent, int carrotCurent, int appleCurrent, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle, const Texture2D& potatoTex, const Texture2D& carrotTex, const Texture2D& appleTex, float roundness, int segments, float stroke) {
+int DrawStore(int potatoCurrent, int carrotCurent, int appleCurrent, Manager& manager, float roundness, int segments, float stroke) {
     // ---- Calcul de la taille et position ----
     float titleMarginY = 10.0f;
+    TextStyle title = { &manager.getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
     Size textSize = MeasureTextStyled(title);
     
     float itemScale = 3.0f;
@@ -1022,14 +1030,16 @@ int DrawStore(const TextStyle& title, int potatoCurrent, int carrotCurent, int a
     Size arrowSize = { 100.0f, 20.0f };
     float arrowPadX = 20.0f;
 
+    TextStyle buttonStyle   = { &manager.getFont(INFO_LABEL, 20), "Buy", 20.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
     buttonStyle.text = "Buy";
     Size buttonSize = MeasureTextStyled(buttonStyle);
     float buttonPadX = 20.0f;
     Padding buttonPad = { 10.0f, 7.0f };
 
+    float maxItemSize = (max(max(manager.getTexture(TEX_POTATO_STATIC).width, manager.getTexture(TEX_CARROT_STATIC).width), manager.getTexture(TEX_APPLE_STATIC).width) * itemScale);
     Size frameSize = {
-        tradePaddingX.x + (max(max(potatoTex.width, carrotTex.width), appleTex.width) * itemScale) + arrowPadX + arrowSize.x + arrowPadX + (max(max(potatoTex.width, carrotTex.width), appleTex.width) * itemScale) + buttonSize.x + 2.0f * buttonPadX + 2.0f * buttonPad.x,
-        titleMarginY + textSize.y + tradePaddingX.y + 3 * (max(max(potatoTex.height, carrotTex.height), appleTex.height) * itemScale + padItems) // On part du principe que texture.height * itemScale est le plus grand en hauteur pour DrawTrade
+        tradePaddingX.x + maxItemSize + arrowPadX + arrowSize.x + arrowPadX + maxItemSize + buttonSize.x + 2.0f * buttonPadX + 2.0f * buttonPad.x,
+        titleMarginY + textSize.y + tradePaddingX.y + 3 * (maxItemSize + padItems) // On part du principe que texture.height * itemScale est le plus grand en hauteur pour DrawTrade
     };
 
     Frame frame = {
@@ -1074,13 +1084,13 @@ int DrawStore(const TextStyle& title, int potatoCurrent, int carrotCurent, int a
     Size titleSize = MeasureTextStyled(title);
     int pressed = ID_NONE;
     Position tradePos = { frame.x + tradePaddingX.x, titlePos.y + titleSize.y + tradePaddingX.y };
-    if (DrawTrade(tradePos, potatoCurrent, TRADE_GIVE_POTATO, potatoTex, carrotTex, itemScale, quantity, quantityRatio, buttonStyle)) pressed = ID_CARROT;
+    if (DrawTrade(tradePos, potatoCurrent, TRADE_GIVE_POTATO, TRADE_GET_POTATO, manager.getTexture(TEX_POTATO_STATIC), manager.getTexture(TEX_CARROT_STATIC), itemScale, manager)) pressed = ID_CARROT;
 
-    tradePos.y += max(potatoTex.height, carrotTex.height) * itemScale + padItems;
-    if (DrawTrade(tradePos, carrotCurent, TRADE_GIVE_CARROT, carrotTex, appleTex, itemScale, quantity, quantityRatio, buttonStyle)) pressed = ID_APPLE;
+    tradePos.y += max(manager.getTexture(TEX_POTATO_STATIC).height, manager.getTexture(TEX_CARROT_STATIC).height) * itemScale + padItems;
+    if (DrawTrade(tradePos, carrotCurent, TRADE_GIVE_CARROT, TRADE_GET_CARROT, manager.getTexture(TEX_CARROT_STATIC), manager.getTexture(TEX_APPLE_STATIC), itemScale, manager)) pressed = ID_APPLE;
 
-    tradePos.y += max(carrotTex.height, appleTex.height) * itemScale + padItems;
-    if (DrawTrade(tradePos, appleCurrent, TRADE_GIVE_APPLE, appleTex, potatoTex, itemScale, quantity, quantityRatio, buttonStyle)) pressed = ID_POTATO;
+    tradePos.y += max(manager.getTexture(TEX_CARROT_STATIC).height, manager.getTexture(TEX_APPLE_STATIC).height) * itemScale + padItems;
+    if (DrawTrade(tradePos, appleCurrent, TRADE_GIVE_APPLE, TRADE_GET_APPLE, manager.getTexture(TEX_APPLE_STATIC), manager.getTexture(TEX_POTATO_STATIC), itemScale, manager)) pressed = ID_POTATO;
 
     return pressed;
 }

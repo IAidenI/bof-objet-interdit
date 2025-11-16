@@ -41,16 +41,18 @@ make clean && make
 - Un hover sur l'inventaire avec les informations sur l'item (peut-être ajouter un pomme au lancement pour connaître son ID)
 
 ### 🔜 À faire / Améliorations prévues
-**Urgent :**
-- Faire le dialogue avec le fermier
 
 **A faire :**
 - Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
 - Peut être un menu start/end
+- - Ajouter un bandeau informatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
+- Touche ESC comme étant un cancel global et le mettre dans displayCommands
+- La pomme, si inventaire plein --> elle peut pas être récupèrer
+- Le curseur bug dans le trading
 
 **Optionelles :**
-- Ajouter un bandeau informatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
 - Peut être améliorer des assets existantes
+- Ajout de certains texte en couleur dans les dialogues
 
 ## ⚠️ Avertissement
 Ce projet contient volontairement une vulnérabilité à des fins **pédagogiques**. **Ne reproduisez pas** ces techniques sur des systèmes réels ou en production sans autorisation explicite. Utilisez ce projet uniquement pour apprendre et expérimenter dans un environnement contrôlé.

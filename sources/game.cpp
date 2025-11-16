@@ -496,26 +496,24 @@ void Game::dialogue() {
                     break;
                 }
                 case 1: {
-                    TextStyle title         = { &this->manager.getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
-                    TextStyle quantityStyle = { &this->manager.getFont(DIALOGUE_LABEL, 15), "", 15.0f, 0.0f, BLACK };
-                    TextStyle quantityRatio = { &this->manager.getFont(INFO_LABEL, 18), "", 18.0f, 2.0f, COLOR_STORE_NORMAL_RATIO };
-                    TextStyle buttonStyle   = { &this->manager.getFont(INFO_LABEL, 20), "Buy", 20.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
-                    
-                    int itemToAdd = DrawStore(title, this->player.inventory().getItemQuantity(ID_POTATO), this->player.inventory().getItemQuantity(ID_CARROT), this->player.inventory().getItemQuantity(ID_APPLE), quantityStyle, quantityRatio, buttonStyle, this->manager.getTexture(TEX_POTATO_STATIC), this->manager.getTexture(TEX_CARROT_STATIC), this->manager.getTexture(TEX_APPLE_STATIC));
+                    int itemToAdd = DrawStore(this->player.inventory().getItemQuantity(ID_POTATO), this->player.inventory().getItemQuantity(ID_CARROT), this->player.inventory().getItemQuantity(ID_APPLE), this->manager);
                     switch (itemToAdd) {
                         case ID_POTATO: {
                             this->player.inventory().remove(ID_APPLE, TRADE_GIVE_APPLE);
-                            this->player.inventory().add(this->potato[0], TRADE_GET_POTATO);
+                            bool full = this->player.inventory().add(this->potato[0], TRADE_GET_POTATO);
+                            if (full) this->player.inventory().add(this->apple, TRADE_GIVE_APPLE);
                             break;
                         }
                         case ID_CARROT: {
                             this->player.inventory().remove(ID_POTATO, TRADE_GIVE_POTATO);
-                            this->player.inventory().add(this->carrot, TRADE_GET_CARROT);
+                            bool full = this->player.inventory().add(this->carrot, TRADE_GET_CARROT);
+                            if (full) this->player.inventory().add(this->potato[0], TRADE_GIVE_POTATO);
                             break;
                         }
                         case ID_APPLE: {
                             this->player.inventory().remove(ID_CARROT, TRADE_GET_CARROT);
-                            this->player.inventory().add(this->apple, TRADE_GET_APPLE);
+                            bool full = this->player.inventory().add(this->apple, TRADE_GET_APPLE);
+                            if (full) this->player.inventory().add(this->carrot, TRADE_GET_CARROT);
                             break;
                         }
                         default:
