@@ -137,6 +137,7 @@ class Game {
         bool isTyping = false;
         int sorcererStep = 0;
         int appleStep = 0;
+        int farmerStep = 0;
 
         // Affichage stack
         bool stackShowMore = false;

@@ -187,9 +187,10 @@ void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& cont
 void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color); // Dessine des marqueurs dans les angles d'un rectangle
 
 Size GetButtonSize(TextStyle& data, Padding padIn);
-void DrawRoundedButton(TextStyle& data, Position position, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE);
+bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE);
 void DrawRightArrow(Frame parentFrame, float thick, Color color);
 void DrawItemWithQuantity(Position pos, TextStyle& itemQuantity, const Texture2D& texture, float itemScale = DEFAULT_ITEM_SCALE, float radiusCircleInfo = DEFAULT_ITEM_RADIUS); // Dessine un item avec sa quantité en bas à droite
-void DrawStore(const TextStyle& title, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle, const Texture2D& potatoTex, const Texture2D& carrotTex, const Texture2D& appleTex, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
+int DrawStore(const TextStyle& title, int potatoCurrent, int carrotCurrent, int appleCurrent, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle, const Texture2D& potatoTex, const Texture2D& carrotTex, const Texture2D& appleTex, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
+bool DrawTrade(Position start, int currentValue, int maxValue, Texture2D textureIn, Texture2D textureOut, float itemScale, TextStyle& quantity, TextStyle& quantityRatio, TextStyle& buttonStyle);
 
 #endif // UTILS_H

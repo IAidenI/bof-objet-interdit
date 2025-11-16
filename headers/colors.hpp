@@ -35,9 +35,16 @@ inline constexpr Color COLOR_STORE_BACKGROUND        = CLITERAL(Color){  16,  43
 inline constexpr Color COLOR_STORE_BORDER            = CLITERAL(Color){ 199, 168, 100, 255 };
 inline constexpr Color COLOR_STORE_TITLE             = CLITERAL(Color){ 245, 240, 230, 255 };
 inline constexpr Color COLOR_STORE_ARROW             = CLITERAL(Color){ 255, 248, 230, 255 };
-inline constexpr Color COLOR_STORE_BUTTON_BACKGROUND = CLITERAL(Color){  39,  73,  98, 255 };
-inline constexpr Color COLOR_STORE_BUTTON_BORDER     = CLITERAL(Color){ 170, 161, 136, 255 };
-inline constexpr Color COLOR_STORE_BUTTON_TEXT       = WHITE;
+
+inline constexpr Color COLOR_STORE_BUTTON_BACKGROUND       = CLITERAL(Color){  39,  73,  98, 255 };
+inline constexpr Color COLOR_STORE_BUTTON_BACKGROUND_HOVER = CLITERAL(Color){  55, 103, 138, 255 };
+inline constexpr Color COLOR_STORE_BUTTON_BORDER           = CLITERAL(Color){ 170, 161, 136, 255 };
+inline constexpr Color COLOR_STORE_BUTTON_TEXT             = WHITE;
+inline constexpr Color COLOR_STORE_BUTTON_INACTIVE         = CLITERAL(Color){ 255, 255, 255,  80 };
+
+inline constexpr Color COLOR_STORE_VALID_RATIO       = CLITERAL(Color){ 162, 255, 122, 255 };
+inline constexpr Color COLOR_STORE_INVALID_RATIO     = RED;
+inline constexpr Color COLOR_STORE_NORMAL_RATIO      = CLITERAL(Color){ 255, 248, 230, 255 };
 
 // ---- Input box ----
 inline constexpr Color COLOR_INPUT_BOX_TEXT          = MAROON;

@@ -8,6 +8,7 @@ Game::Game(const char **texturesPath, const char **fontPath)
   gdb(reinterpret_cast<uintptr_t>(&this->player)) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "BOF : L'objet interdit");
     SetTargetFPS(60);
+    SetExitKey(KEY_NULL);
     Image icon = LoadImage(ICON);
     SetWindowIcon(icon);
     UnloadImage(icon);
@@ -168,13 +169,6 @@ void Game::displayCommands() {
     };
 
     DrawCard(card, START_FRAME);
-
-    // Test
-    TextStyle title         = { &this->getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
-    TextStyle quantityStyle = { &this->getFont(DIALOGUE_LABEL, 15), "", 15.0f, 0.0f, BLACK };
-    TextStyle quantityRatio = { &this->getFont(INFO_LABEL, 18), "", 18.0f, 2.0f, WHITE };
-    TextStyle buttonStyle   = { &this->getFont(DIALOGUE_LABEL, 18), "", 18.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
-    DrawStore(title, quantityStyle, quantityRatio, buttonStyle, this->tmgr[TEX_POTATO_STATIC], this->tmgr[TEX_CARROT_STATIC], this->tmgr[TEX_APPLE_STATIC]);
 }
 
 void Game::displayPNJ() {
@@ -501,18 +495,56 @@ void Game::dialogue() {
             break;
         }
         case FARMER: {
-            vector<vector<InfoSegment>> data = {
-                {
-                    { { &this->getFont(DIALOGUE_LABEL, 25), "Je suis une fermier", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
-                },
-            };
+            switch (this->farmerStep) {
+                case 0: {
+                    vector<vector<InfoSegment>> data = {
+                        {
+                            { { &this->getFont(DIALOGUE_LABEL, 25), "Vous souhaitez échanger des objets ?", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                        },
+                    };
 
-            IconProfile profile = { this->tmgr[TEX_FARMER], this->farmerAnim, this->farmerSprite, WHITE };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    IconProfile profile = { this->tmgr[TEX_FARMER], this->farmerAnim, this->farmerSprite, WHITE };
+                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
-            if (IsKeyPressed(KEY_SPACE)) {
-                this->isPause = false;
-                this->displayDialogue.request = false;
+                    if (IsKeyPressed(KEY_SPACE)) this->farmerStep = 1;
+                    break;
+                }
+                case 1: {
+                    TextStyle title         = { &this->getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
+                    TextStyle quantityStyle = { &this->getFont(DIALOGUE_LABEL, 15), "", 15.0f, 0.0f, BLACK };
+                    TextStyle quantityRatio = { &this->getFont(INFO_LABEL, 18), "", 18.0f, 2.0f, COLOR_STORE_NORMAL_RATIO };
+                    TextStyle buttonStyle   = { &this->getFont(INFO_LABEL, 20), "Buy", 20.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
+                    
+                    int itemToAdd = DrawStore(title, this->player.inventory().getItemQuantity(ID_POTATO), this->player.inventory().getItemQuantity(ID_CARROT), this->player.inventory().getItemQuantity(ID_APPLE), quantityStyle, quantityRatio, buttonStyle, this->tmgr[TEX_POTATO_STATIC], this->tmgr[TEX_CARROT_STATIC], this->tmgr[TEX_APPLE_STATIC]);
+                    switch (itemToAdd) {
+                        case ID_POTATO: {
+                            this->player.inventory().remove(ID_APPLE, TRADE_GIVE_APPLE);
+                            this->player.inventory().add(this->potato[0], TRADE_GET_POTATO);
+                            break;
+                        }
+                        case ID_CARROT: {
+                            this->player.inventory().remove(ID_POTATO, TRADE_GIVE_POTATO);
+                            this->player.inventory().add(this->carrot, TRADE_GET_CARROT);
+                            break;
+                        }
+                        case ID_APPLE: {
+                            this->player.inventory().remove(ID_CARROT, TRADE_GET_CARROT);
+                            this->player.inventory().add(this->apple, TRADE_GET_APPLE);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+
+                    if (IsKeyPressed(KEY_ESCAPE)) {
+                        this->isPause = false;
+                        this->displayDialogue.request = false;
+                        this->farmerStep = 0;
+                    }
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         }

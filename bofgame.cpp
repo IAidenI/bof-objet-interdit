@@ -59,6 +59,9 @@ int main() {
     Game game(textures, fonts);
 
     while (!WindowShouldClose() && !game.hasEnded()) {
+        // Reset du curseur
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        
         game.handlePlayerMovements();
 
         game.handlePlayerInput();

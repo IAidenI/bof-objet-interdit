@@ -14,4 +14,14 @@ inline constexpr int POTATO_AVAILABLE = 8;
 
 inline constexpr float INVENTORY_SCALE = 5.0f;
 
+// ---- Paramètres de trade ----
+inline constexpr int TRADE_GIVE_POTATO = 8;
+inline constexpr int TRADE_GET_CARROT  = 1;
+
+inline constexpr int TRADE_GIVE_CARROT = 8;
+inline constexpr int TRADE_GET_APPLE   = 1;
+
+inline constexpr int TRADE_GIVE_APPLE  = 8;
+inline constexpr int TRADE_GET_POTATO   = 1;
+
 #endif // GAME_SETTINGS_H
