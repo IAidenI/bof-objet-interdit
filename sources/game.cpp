@@ -1,34 +1,24 @@
 #include "game.hpp"
 
-Game::Game(const char **texturesPath, const char **fontPath) 
+Game::Game()
 : player("Vous", { { 600.0f, 500.0f }, 80.0f }),
   farmer("Fermier", { { 770.0f, 630.0f }, 80.0f }),
   guard("Garde", { { 580.0f, 300.0f }, 80.0f }),
   sorcerer("Sorcier", { { 350.0f, 490.0f }, 80.0f }),
   gdb(reinterpret_cast<uintptr_t>(&this->player)) {
+
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "BOF : L'objet interdit");
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
     Image icon = LoadImage(ICON);
     SetWindowIcon(icon);
     UnloadImage(icon);
+}
 
-    // ---- Initialisation des textures ----
-    for (int i = 0; i < TEX_MAX; i++) {
-        this->tmgr[i] = LoadTexture(texturesPath[i]);
-    }
-
-    // ---- Initialisation de fonts ----
-    vector<int> cps;
-    cps.reserve(size(FR_CHARS));
-    for (char32_t ch : FR_CHARS) cps.push_back((int)ch);
-    
-    for (int i = 0; i < FONT_MAX; ++i) {
-        fmgr[i][0] = LoadFontEx(fontPath[i], SMALL_SIZE, cps.data(), cps.size());
-        SetTextureFilter(fmgr[i][0].texture, TEXTURE_FILTER_BILINEAR);
-
-        fmgr[i][1] = LoadFontEx(fontPath[i], BIG_SIZE, cps.data(), cps.size());
-        SetTextureFilter(fmgr[i][1].texture, TEXTURE_FILTER_BILINEAR);
+bool Game::init() {
+    if (!manager.init()) {
+        cerr << "[FATAL] Manager invalide : ressources manquantes." << endl;
+        return false;
     }
 
     // ---- Initialisation des objets ----
@@ -64,12 +54,8 @@ Game::Game(const char **texturesPath, const char **fontPath)
     this->appleAnim  = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.1f, .frameTimeMove = 0.0f, .scale = 3.0f };
 
     // ---- Initialise la saisie utilisateur ----
-    this->newName = { .font = &this->getFont(INFO_LABEL, 40), .text = "", .fontSize = 40.0f, .spacing = 2.0f, .color = COLOR_INPUT_BOX_TEXT };
-}
-
-Font& Game::getFont(FontID id, int size) {
-    int index = (size < SMALL_SIZE) ? 0 : 1;
-    return this->fmgr[id][index];
+    this->newName = { .font = &this->manager.getFont(INFO_LABEL, 40), .text = "", .fontSize = 40.0f, .spacing = 2.0f, .color = COLOR_INPUT_BOX_TEXT };
+    return true;
 }
 
 void Game::handlePlayerMovements() {
@@ -125,7 +111,7 @@ void Game::handlePlayerInput() {
 }
 
 void Game::displayBackground() {
-    Texture2D bg = this->tmgr[TEX_BACKGROUND];
+    Texture2D bg = this->manager.getTexture(TEX_BACKGROUND);
     Frame src = {0, 0, (float)bg.width, (float)bg.height};
     Frame dst = {0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
     Position origin = {0, 0};
@@ -134,31 +120,31 @@ void Game::displayBackground() {
 }
 
 void Game::displayCommands() {
-    TextStyle cardTitle = { &this->getFont(INFO_LABEL, 25), "Commandes", 25.0f, 2.0f, COLOR_COMMANDS_ACTION };
+    TextStyle cardTitle = { &this->manager.getFont(INFO_LABEL, 25), "Commandes", 25.0f, 2.0f, COLOR_COMMANDS_ACTION };
     vector<vector<InfoSegment>> cardContent = {        
         { 
-            { { &this->getFont(INFO_LABEL, 20), "ZQSD / Flêches : ", 20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
-            { { &this->getFont(INFO_LABEL, 20), "Déplacement",       20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "ZQSD / Flêches : ", 20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "Déplacement",       20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "E : ",      20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
-            { { &this->getFont(INFO_LABEL, 20), "Interagir", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "E : ",      20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "Interagir", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "I : ",       20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
-            { { &this->getFont(INFO_LABEL, 20), "Inventaire", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "I : ",       20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "Inventaire", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "F1 : ",          20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
-            { { &this->getFont(INFO_LABEL, 20), "Hitbox ON/OFF", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "F1 : ",          20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "Hitbox ON/OFF", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
 
         { 
-            { { &this->getFont(INFO_LABEL, 20), "F2 : ",             20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
-            { { &this->getFont(INFO_LABEL, 20), "Affichage avancé", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "F2 : ",             20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "Affichage avancé", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
     };
 
@@ -173,35 +159,35 @@ void Game::displayCommands() {
 
 void Game::displayPNJ() {
     if (this->hitboxRequest) DrawCircleV(this->farmer.getHitbox().pos, this->farmer.getHitbox().radius, HITBOX_COLOR);
-    DrawAnimatedEntity(this->tmgr[TEX_FARMER], this->farmerAnim, this->farmer.getHitbox().pos, false, this->farmerSprite, WHITE);
+    DrawAnimatedEntity(this->manager.getTexture(TEX_FARMER), this->farmerAnim, this->farmer.getHitbox().pos, false, this->farmerSprite, WHITE);
     if (this->hitboxRequest) DrawCircleV(this->guard.getHitbox().pos, this->guard.getHitbox().radius, HITBOX_COLOR);
-    DrawAnimatedEntity(this->tmgr[TEX_GUARD], this->guardAnim, this->guard.getHitbox().pos, false, this->guardSprite, RED);
+    DrawAnimatedEntity(this->manager.getTexture(TEX_GUARD), this->guardAnim, this->guard.getHitbox().pos, false, this->guardSprite, RED);
     if (this->hitboxRequest) DrawCircleV(this->sorcerer.getHitbox().pos, this->sorcerer.getHitbox().radius, HITBOX_COLOR);
-    DrawAnimatedEntity(this->tmgr[TEX_SORCERER], this->sorcererAnim, this->sorcerer.getHitbox().pos, false, this->sorcererSprite, BLUE);
+    DrawAnimatedEntity(this->manager.getTexture(TEX_SORCERER), this->sorcererAnim, this->sorcerer.getHitbox().pos, false, this->sorcererSprite, BLUE);
 }
 
 void Game::displayItems() {
     for (int i = 0; i < POTATO_AVAILABLE; i++) {
         if (this->hitboxRequest) DrawCircleV(this->potato[i].getHitbox().pos, this->potato[i].getHitbox().radius, HITBOX_COLOR);
-        DrawAnimatedEntity(this->tmgr[TEX_POTATO], this->potatoAnim, this->potato[i].getHitbox().pos, false, this->potatoSprite, WHITE);
+        DrawAnimatedEntity(this->manager.getTexture(TEX_POTATO), this->potatoAnim, this->potato[i].getHitbox().pos, false, this->potatoSprite, WHITE);
     }
 
     if (!this->isAppleTaken) {
         if (this->hitboxRequest) DrawCircleV(this->apple.getHitbox().pos, this->apple.getHitbox().radius, HITBOX_COLOR);
-        DrawAnimatedEntity(this->tmgr[TEX_APPLE], this->appleAnim, this->apple.getHitbox().pos, false, this->appleSprite, WHITE);
+        DrawAnimatedEntity(this->manager.getTexture(TEX_APPLE), this->appleAnim, this->apple.getHitbox().pos, false, this->appleSprite, WHITE);
     }
 }
 
 void Game::displayPlayer() {
     if (this->hitboxRequest) DrawCircleV(this->player.getHitbox().pos, this->player.getHitbox().radius, HITBOX_COLOR);
-    DrawAnimatedEntity(tmgr[TEX_PLAYER], this->playerAnim, this->player.getHitbox().pos, this->isMoving, this->playerSprite, WHITE);
-    DrawInfoLabel(this->player.getHitbox(), PLAYER_FRAME_H, { fmgr[ENTITY_LABEL], this->player.getName(), 15.0f, 2.0f, WHITE });
+    DrawAnimatedEntity(this->manager.getTexture(TEX_PLAYER), this->playerAnim, this->player.getHitbox().pos, this->isMoving, this->playerSprite, WHITE);
+    DrawInfoLabel(this->player.getHitbox(), PLAYER_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15.0f), this->player.getName(), 15.0f, 2.0f, WHITE });
 }
 
 void Game::playerInteractions() {
     // Avec le fermier
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->farmer.getHitbox().pos, this->farmer.getHitbox().radius)) {
-        DrawInfoLabel(this->farmer.getHitbox(), FARMER_FRAME_H, { this->fmgr[ENTITY_LABEL], this->farmer.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->farmer.getHitbox(), FARMER_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->farmer.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = FARMER;
@@ -211,7 +197,7 @@ void Game::playerInteractions() {
     
     // Avec le garde
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->guard.getHitbox().pos, this->guard.getHitbox().radius)) {
-        DrawInfoLabel(this->guard.getHitbox(), GUARD_FRAME_H, { this->fmgr[ENTITY_LABEL], this->guard.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->guard.getHitbox(), GUARD_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->guard.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = GUARD;
@@ -221,7 +207,7 @@ void Game::playerInteractions() {
     
     // Avec le sorcier
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->sorcerer.getHitbox().pos, this->sorcerer.getHitbox().radius)) {
-        DrawInfoLabel(this->sorcerer.getHitbox(), SORCERER_FRAME_H, { this->fmgr[ENTITY_LABEL], this->sorcerer.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->sorcerer.getHitbox(), SORCERER_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->sorcerer.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = SORCERER;
@@ -232,7 +218,7 @@ void Game::playerInteractions() {
     // Avec les patates
     for (int i = 0; i < POTATO_AVAILABLE; ++i) {
         if (CheckCollisionCircles(this->player.getHitbox().pos, player.getHitbox().radius, this->potato[i].getHitbox().pos, this->potato[i].getHitbox().radius)) {
-            DrawInfoLabel(potato[i].getHitbox(), POTATO_FRAME_H, { this->fmgr[ENTITY_LABEL], this->potato[i].getName(), 15.0f, 2.0f, WHITE });
+            DrawInfoLabel(potato[i].getHitbox(), POTATO_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->potato[i].getName(), 15.0f, 2.0f, WHITE });
             if (this->dialogueRequest) {
                 this->displayDialogue.request = !this->displayDialogue.request;
                 this->displayDialogue.entity = ITEM_POTATO;
@@ -244,7 +230,7 @@ void Game::playerInteractions() {
     // Avec la pomme
     if (!this->isAppleTaken) {
         if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->apple.getHitbox().pos, this->apple.getHitbox().radius)) {
-            DrawInfoLabel(this->apple.getHitbox(), APPLE_FRAME_H, { this->fmgr[ENTITY_LABEL], this->apple.getName(), 15.0f, 2.0f, WHITE });
+            DrawInfoLabel(this->apple.getHitbox(), APPLE_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->apple.getName(), 15.0f, 2.0f, WHITE });
             if (this->dialogueRequest) {
                 this->displayDialogue.request = !this->displayDialogue.request;
                 this->displayDialogue.entity = ITEM_APPLE;
@@ -258,7 +244,7 @@ void Game::renderInventory() {
     if (!this->inventoryRequest) return;
 
     // --- Texture et centrage de la fenêtre d'inventaire ---
-    Texture2D inventory = this->tmgr[TEX_INVENTORY];
+    Texture2D inventory = this->manager.getTexture(TEX_INVENTORY);
 
     float inventoryW = inventory.width  * INVENTORY_SCALE;
     float inventoryH = inventory.height * INVENTORY_SCALE;
@@ -276,9 +262,9 @@ void Game::renderInventory() {
     float gap = 3.0f * INVENTORY_SCALE;
 
     // On prend la patate comme référence de taille de cellule
-    const Texture2D potatoTex = this->tmgr[TEX_POTATO_STATIC];
-    const Texture2D carrotTex = this->tmgr[TEX_CARROT_STATIC];
-    const Texture2D appleTex  = this->tmgr[TEX_APPLE_STATIC];
+    const Texture2D potatoTex = this->manager.getTexture(TEX_POTATO_STATIC);
+    const Texture2D carrotTex = this->manager.getTexture(TEX_CARROT_STATIC);
+    const Texture2D appleTex  = this->manager.getTexture(TEX_APPLE_STATIC);
     const float cellW = potatoTex.width  * itemScale;
     const float cellH = potatoTex.height * itemScale;
 
@@ -321,24 +307,24 @@ void Game::renderInventory() {
                 default: break;
             }
 
-            TextStyle itemQuantity = { &this->getFont(DIALOGUE_LABEL, 15), to_string(this->player.inventory().getSlotQuantity(idx)), 15.0f, 0.0f, BLACK };
+            TextStyle itemQuantity = { &this->manager.getFont(DIALOGUE_LABEL, 15), to_string(this->player.inventory().getSlotQuantity(idx)), 15.0f, 0.0f, BLACK };
             DrawItemWithQuantity(cellPos, itemQuantity, texture, itemScale);
 
             // --- Hover ---
             if (CheckCollisionPointRec(GetMousePosition(), slotRect)) {
                 vector<vector<InfoSegment>> data = {
-                    { { { &this->getFont(INFO_LABEL, 20), item.getName(), 20.0f, 2.0f, COLOR_INVENTORY_NAME } } },
+                    { { { &this->manager.getFont(INFO_LABEL, 20), item.getName(), 20.0f, 2.0f, COLOR_INVENTORY_NAME } } },
                     {
-                        { { &this->getFont(INFO_LABEL, 16), "ID : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
-                        { { &this->getFont(INFO_LABEL, 16), to_string(item.getId()), 16.0f, 2.0f, COLOR_INVENTORY_ID } }
+                        { { &this->manager.getFont(INFO_LABEL, 16), "ID : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                        { { &this->manager.getFont(INFO_LABEL, 16), to_string(item.getId()), 16.0f, 2.0f, COLOR_INVENTORY_ID } }
                     },
                     {
-                        { { &this->getFont(INFO_LABEL, 16), "Quantité : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
-                        { { &this->getFont(INFO_LABEL, 16), "x" + to_string(this->player.inventory().getSlotQuantity(idx)), 16.0f, 2.0f, COLOR_INVENTORY_CURRENT_AMOUNT } }
+                        { { &this->manager.getFont(INFO_LABEL, 16), "Quantité : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                        { { &this->manager.getFont(INFO_LABEL, 16), "x" + to_string(this->player.inventory().getSlotQuantity(idx)), 16.0f, 2.0f, COLOR_INVENTORY_CURRENT_AMOUNT } }
                     },
                     {
-                        { { &this->getFont(INFO_LABEL, 16), "Quantité max : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
-                        { { &this->getFont(INFO_LABEL, 16), "x" + to_string(item.getMaxAmount()), 16.0f, 2.0f, COLOR_INVENTORY_MAX_AMOUNT } }
+                        { { &this->manager.getFont(INFO_LABEL, 16), "Quantité max : ", 16.0f, 2.0f, COLOR_INVENTORY_LABEL } },
+                        { { &this->manager.getFont(INFO_LABEL, 16), "x" + to_string(item.getMaxAmount()), 16.0f, 2.0f, COLOR_INVENTORY_MAX_AMOUNT } }
                     }
                 };
 
@@ -373,10 +359,10 @@ void Game::renderStack() {
     if (!this->stackRequest) return;
 
     // Titre
-    TextStyle cardTitle = { &this->getFont(INFO_LABEL, 25), "Stack Trace", 25.0f, 2.0f, COLOR_STACK_TEXT };
+    TextStyle cardTitle = { &this->manager.getFont(INFO_LABEL, 25), "Stack Trace", 25.0f, 2.0f, COLOR_STACK_TEXT };
     
     // Contenu
-    TextStyle style = { &this->getFont(INFO_LABEL, 16), "", 16.0f, 2.0f, RAYWHITE };
+    TextStyle style = { &this->manager.getFont(INFO_LABEL, 16), "", 16.0f, 2.0f, RAYWHITE };
     vector<vector<InfoSegment>> cardContent = this->gdb.getFormatedStack(style);
 
     // Affichage
@@ -389,8 +375,8 @@ void Game::renderStack() {
     
     // Hover
     if (ret.offset != SIZE_MAX) {
-        TextStyle styleHoverTitle = { &this->getFont(INFO_LABEL, 19), "", 19.0f, 2.0f, COLOR_TOOLTIP_TITLE };
-        TextStyle styleHoverContent = { &this->getFont(INFO_LABEL, 15), "", 15.0f, 2.0f, COLOR_TOOLTIP_LABEL };
+        TextStyle styleHoverTitle = { &this->manager.getFont(INFO_LABEL, 19), "", 19.0f, 2.0f, COLOR_TOOLTIP_TITLE };
+        TextStyle styleHoverContent = { &this->manager.getFont(INFO_LABEL, 15), "", 15.0f, 2.0f, COLOR_TOOLTIP_LABEL };
 
         vector<vector<InfoSegment>> dataHover = this->gdb.getMoreInfo(ret.offset, styleHoverTitle, styleHoverContent);
         DrawToolTip(dataHover, ret.frame, { 8.0f, 8.0f });
@@ -401,18 +387,18 @@ void Game::dialogue() {
     if (!this->displayDialogue.request) return;
     this->isPause = true;
 
-    TextStyle basic = {fmgr[DIALOGUE_LABEL], "", 25.0f, 2.0f, WHITE};
+    TextStyle basic = { &this->manager.getFont(DIALOGUE_LABEL, 25), "", 25.0f, 2.0f, WHITE };
 
     switch (this->displayDialogue.entity) {
         case ITEM_POTATO: {
             vector<vector<InfoSegment>> data = {
                 {
-                    { { &this->getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(POTATO_AVAILABLE) + " patates.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(POTATO_AVAILABLE) + " patates.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                 },
             };
 
-            IconProfile profile = { this->tmgr[TEX_POTATO], this->potatoAnim, this->potatoSprite, WHITE };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+            IconProfile profile = { this->manager.getTexture(TEX_POTATO), this->potatoAnim, this->potatoSprite, WHITE };
+            DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
@@ -426,12 +412,12 @@ void Game::dialogue() {
                 case 0: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(this->apple.getMaxAmount()) + " pomme.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(this->apple.getMaxAmount()) + " pomme.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
-                    IconProfile profile = { this->tmgr[TEX_APPLE], this->appleAnim, this->appleSprite, WHITE };
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    IconProfile profile = { this->manager.getTexture(TEX_APPLE), this->appleAnim, this->appleSprite, WHITE };
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
                     if (IsKeyPressed(KEY_SPACE)) this->appleStep = 1;
                     break;
@@ -439,15 +425,15 @@ void Game::dialogue() {
                 case 1: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "La pomme s'exite.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "La pomme s'exite.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
 
                     float speedTemp = this->appleAnim.frameTimeIdle;
                     this->appleAnim.frameTimeIdle = 0.02;
-                    IconProfile profile = { this->tmgr[TEX_APPLE], this->appleAnim, this->appleSprite, WHITE };
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    IconProfile profile = { this->manager.getTexture(TEX_APPLE), this->appleAnim, this->appleSprite, WHITE };
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
                     if (IsKeyPressed(KEY_SPACE)) {
                         this->appleStep = 2;
@@ -458,12 +444,12 @@ void Game::dialogue() {
                 case 2: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "La pomme s'est enfuit.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "La pomme s'est enfuit.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
                     IconProfile profile = { };
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
 
                     if (IsKeyPressed(KEY_SPACE)) {
@@ -478,12 +464,12 @@ void Game::dialogue() {
                 default: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Euuuh t'es pas sensé voir ce texte chef", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Euuuh t'es pas sensé voir ce texte chef", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
-                    IconProfile profile = {this->tmgr[TEX_PLAYER], this->playerAnim, this->playerSprite, WHITE };
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    IconProfile profile = {this->manager.getTexture(TEX_PLAYER), this->playerAnim, this->playerSprite, WHITE };
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
                     if (IsKeyPressed(KEY_SPACE)) {
                         this->isPause = false;
@@ -499,23 +485,23 @@ void Game::dialogue() {
                 case 0: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Vous souhaitez échanger des objets ?", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous souhaitez échanger des objets ?", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
-                    IconProfile profile = { this->tmgr[TEX_FARMER], this->farmerAnim, this->farmerSprite, WHITE };
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    IconProfile profile = { this->manager.getTexture(TEX_FARMER), this->farmerAnim, this->farmerSprite, WHITE };
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
                     if (IsKeyPressed(KEY_SPACE)) this->farmerStep = 1;
                     break;
                 }
                 case 1: {
-                    TextStyle title         = { &this->getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
-                    TextStyle quantityStyle = { &this->getFont(DIALOGUE_LABEL, 15), "", 15.0f, 0.0f, BLACK };
-                    TextStyle quantityRatio = { &this->getFont(INFO_LABEL, 18), "", 18.0f, 2.0f, COLOR_STORE_NORMAL_RATIO };
-                    TextStyle buttonStyle   = { &this->getFont(INFO_LABEL, 20), "Buy", 20.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
+                    TextStyle title         = { &this->manager.getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
+                    TextStyle quantityStyle = { &this->manager.getFont(DIALOGUE_LABEL, 15), "", 15.0f, 0.0f, BLACK };
+                    TextStyle quantityRatio = { &this->manager.getFont(INFO_LABEL, 18), "", 18.0f, 2.0f, COLOR_STORE_NORMAL_RATIO };
+                    TextStyle buttonStyle   = { &this->manager.getFont(INFO_LABEL, 20), "Buy", 20.0f, 2.0f, COLOR_STORE_BUTTON_TEXT };
                     
-                    int itemToAdd = DrawStore(title, this->player.inventory().getItemQuantity(ID_POTATO), this->player.inventory().getItemQuantity(ID_CARROT), this->player.inventory().getItemQuantity(ID_APPLE), quantityStyle, quantityRatio, buttonStyle, this->tmgr[TEX_POTATO_STATIC], this->tmgr[TEX_CARROT_STATIC], this->tmgr[TEX_APPLE_STATIC]);
+                    int itemToAdd = DrawStore(title, this->player.inventory().getItemQuantity(ID_POTATO), this->player.inventory().getItemQuantity(ID_CARROT), this->player.inventory().getItemQuantity(ID_APPLE), quantityStyle, quantityRatio, buttonStyle, this->manager.getTexture(TEX_POTATO_STATIC), this->manager.getTexture(TEX_CARROT_STATIC), this->manager.getTexture(TEX_APPLE_STATIC));
                     switch (itemToAdd) {
                         case ID_POTATO: {
                             this->player.inventory().remove(ID_APPLE, TRADE_GIVE_APPLE);
@@ -554,12 +540,12 @@ void Game::dialogue() {
 
             vector<vector<InfoSegment>> data = {
                 {
-                    { { &this->getFont(DIALOGUE_LABEL, 25), hasEnough ? string("Bravo, vous avez assez de ") + this->apple.getName() + ". Vous avez terminé le jeu." : string("Vous n'avez pas assez de ") + this->apple.getName() + " (Vous avez " + to_string(quantity) + "/" + to_string(AMOUNT_TO_FINISH_GAME) + ")", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), hasEnough ? string("Bravo, vous avez assez de ") + this->apple.getName() + ". Vous avez terminé le jeu." : string("Vous n'avez pas assez de ") + this->apple.getName() + " (Vous avez " + to_string(quantity) + "/" + to_string(AMOUNT_TO_FINISH_GAME) + ")", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                 },
             };
 
-            IconProfile profile = { this->tmgr[TEX_GUARD], this->guardAnim, this->guardSprite, RED };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+            IconProfile profile = { this->manager.getTexture(TEX_GUARD), this->guardAnim, this->guardSprite, RED };
+            DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
@@ -569,17 +555,17 @@ void Game::dialogue() {
             break;
         }
         case SORCERER: {
-            IconProfile profile = { this->tmgr[TEX_SORCERER], this->sorcererAnim, this->sorcererSprite, BLUE };
+            IconProfile profile = { this->manager.getTexture(TEX_SORCERER), this->sorcererAnim, this->sorcererSprite, BLUE };
             if (this->player.inventory().isEmpty()) this->sorcererStep = 4;
             switch (this->sorcererStep) {
                 case 0: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Vous souhaitez renommer un objet de votre inventaire ?", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous souhaitez renommer un objet de votre inventaire ?", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) this->sorcererStep = 1;
                     break;
@@ -590,11 +576,11 @@ void Game::dialogue() {
 
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Séléctionnez le avec ZQSD ou les flêches.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Séléctionnez le avec ZQSD ou les flêches.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Valider [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Valider [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) {
                         Item item = this->player.inventory().getItem(this->invSelectorIndex);
@@ -609,11 +595,11 @@ void Game::dialogue() {
                 case 2: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Saisissez le nouveau nom.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Saisissez le nouveau nom.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },  
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Valider [Press enter]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Valider [Press enter]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     Item item = this->player.inventory().getItem(this->invSelectorIndex);
                     if (this->renameInit) {
@@ -636,11 +622,11 @@ void Game::dialogue() {
                 case 3: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Vous avez renomé votre objet en : " + this->newName.text, 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous avez renomé votre objet en : " + this->newName.text, 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) {
                         this->isPause = false;
@@ -653,11 +639,11 @@ void Game::dialogue() {
                 case 4: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->getFont(DIALOGUE_LABEL, 25), "Vous n'avez aucun objet à renommer.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous n'avez aucun objet à renommer.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
-                    DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+                    DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Continue [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) {
                         this->isPause = false;
@@ -672,12 +658,12 @@ void Game::dialogue() {
         default: {
             vector<vector<InfoSegment>> data = {
                 {
-                    { { &this->getFont(DIALOGUE_LABEL, 25), "Euuuh t'es pas sensé voir ce texte chef", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Euuuh t'es pas sensé voir ce texte chef", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                 },
             };
 
-            IconProfile profile = {this->tmgr[TEX_PLAYER], this->playerAnim, this->playerSprite, WHITE };
-            DrawDialogue(data, { &this->getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+            IconProfile profile = {this->manager.getTexture(TEX_PLAYER), this->playerAnim, this->playerSprite, WHITE };
+            DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
@@ -715,17 +701,5 @@ void Game::resetRequests() {
 }
 
 Game::~Game() {
-    // Déchargement des textures
-    for (int i = 0; i < TEX_MAX; i++) {
-        UnloadTexture(this->tmgr[i]);
-    }
-
-    // Déchargement des fonts
-    for (int i = 0; i < FONT_MAX; i++) {
-        for (int j = 0; j < FONT_SIZE_COUNT; j++) {
-            UnloadFont(this->fmgr[i][j]);
-        }
-    }
-
     CloseWindow();
 }

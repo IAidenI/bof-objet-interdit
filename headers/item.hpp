@@ -20,21 +20,16 @@ inline constexpr float       POTATO_FRAME_W        = 19.0f;
 inline constexpr float       POTATO_FRAME_H        = 19.0f;
 inline constexpr float       POTATO_COLS           = 5.0f;
 inline constexpr float       POTATO_ROW_IDLE       = 0.0f;
-inline constexpr const char *POTATO_TEXTURE        = "assets/potato.png";
-inline constexpr const char *POTATO_STATIC_TEXTURE = "assets/potato_static.png";
 
 inline constexpr float       CARROT_FRAME_W        = 32.0f;
 inline constexpr float       CARROT_FRAME_H        = 32.0f;
 inline constexpr float       CARROT_COLS           = 4.0f;
 inline constexpr float       CARROT_ROW_IDLE       = 0.0f;
-inline constexpr const char *CARROT_STATIC_TEXTURE = "assets/carrot.png";
 
 inline constexpr float       APPLE_FRAME_W        = 18.0f;
 inline constexpr float       APPLE_FRAME_H        = 18.0f;
 inline constexpr float       APPLE_COLS           = 5.0f;
 inline constexpr float       APPLE_ROW_IDLE       = 0.0f;
-inline constexpr const char *APPLE_TEXTURE        = "assets/apple.png";
-inline constexpr const char *APPLE_STATIC_TEXTURE = "assets/apple_static.png";
 
 // ---- Structure pour les objets ----
 enum ItemType {

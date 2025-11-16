@@ -40,7 +40,7 @@ inline constexpr float DEFAULT_ITEM_RADIUS = 13.0f;
 
 // ---- Style pour les textes ----
 struct TextStyle {
-    Font *font;
+    const Font *font;
     string text;
     float fontSize;
     float spacing;
@@ -181,7 +181,7 @@ void DrawItemToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame,
 
 void DrawStaticItem(const Texture2D& texture, Position pos, float scale); // Dessine une image statique
 void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, const SpriteSheetInfo& entitySprite, Color color); // Dessine une image animé
-void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text); // Dessine au dessus d'une entité une étiquette d'information
+void DrawInfoLabel(Hitbox entity, int entitySize, const TextStyle& text); // Dessine au dessus d'une entité une étiquette d'information
 void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, IconProfile& profile, Padding padInFrameContent = DEFAULT_TITLE_PAD_IN, Padding padInContent = DEFAULT_TITLE_PAD_IN, Size iconFrameSize = DEFAULT_ICON_SIZE, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau pour un dialogue
 
 void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color); // Dessine des marqueurs dans les angles d'un rectangle

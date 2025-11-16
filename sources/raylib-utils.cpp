@@ -770,7 +770,7 @@ void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position
 }
 
 // Dessine au dessus d'une entité une étiquette d'information
-void DrawInfoLabel(Hitbox entity, int entitySize, TextStyle text) {
+void DrawInfoLabel(Hitbox entity, int entitySize, const TextStyle& text) {
     Size label_size = MeasureTextStyled(text);
     float padding = 5.0f;
 

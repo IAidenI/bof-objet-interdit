@@ -14,7 +14,6 @@ using namespace std;
 inline constexpr int         MAX_INVENTORY_LENGTH = 9;
 inline constexpr int         UI_INVENTORY_WIDTH   = 200;
 inline constexpr int         UI_INVENTORY_HEIGHT  = 200;
-inline constexpr const char *INVENTORY_TEXTURE    = "assets/inventory.png";
 
 // ---- Classe Inventory ----
 class Inventory {

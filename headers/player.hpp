@@ -10,7 +10,6 @@ inline constexpr float       PLAYER_FRAME_H  = 32.0f;
 inline constexpr float       PLAYER_COLS     = 4.0f;
 inline constexpr float       PLAYER_ROW_IDLE = 0.0f;
 inline constexpr float       PLAYER_ROW_MOVE = 1.0f;
-inline constexpr const char *PLAYER_TEXTURE  = "assets/player.png";
 
 // ---- Classe Player ----
 class Player : public Entity {
