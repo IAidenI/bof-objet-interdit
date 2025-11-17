@@ -9,57 +9,16 @@
 #include "item.hpp"
 #include "manager.hpp"
 #include "geometry.hpp"
+#include "style.hpp"
 #include "game_settings.hpp"
 
-// ---- Padding ----
-struct Spacing {
-    float x;
-    float y;
-};
-using Padding = Spacing;
-using Margins = Spacing;
-
 // ---- Constantes ----
-// Card
-inline constexpr Padding DEFAULT_TITLE_PAD_IN  = { 5.0f, 3.0f };
-inline constexpr float   DEFAULT_TITLE_OFFSET  = 15.0f;
-
-inline constexpr Padding DEFAULT_PAD_IN        = { 10.0f, 10.0f };
-inline constexpr Margins DEFAULT_PAD_OUT       = { 15.0f, 15.0f };
-inline constexpr float   DEFAULT_INTERLINE     = 5.0f;
-
-inline constexpr float   DEFAULT_ROUNDNESS     = 0.12f;
-inline constexpr int     DEFAULT_SEGMENTS      = 32;
-inline constexpr float   DEFAULT_STROKE        = 2.0f;
-
 // Dialogue
 inline constexpr Size DEFAULT_ICON_SIZE = { 94.0f, 94.0f };
 
 // Items
 inline constexpr float DEFAULT_ITEM_SCALE  = INVENTORY_SCALE * 0.88f;
 inline constexpr float DEFAULT_ITEM_RADIUS = 13.0f;
-
-// ---- Style pour les textes ----
-struct TextStyle {
-    const Font *font;
-    string text;
-    float fontSize;
-    float spacing;
-    Color color;
-};
-
-inline void DrawTextStyled(TextStyle data, Position position) {
-    DrawTextEx(*data.font, data.text.c_str(), position, data.fontSize, data.spacing, data.color);
-}
-
-inline Size MeasureTextStyled(TextStyle data) {
-    return MeasureTextEx(*data.font, data.text.c_str(), data.fontSize, data.spacing);
-}
-
-struct InfoSegment {
-    TextStyle textStyle;
-    size_t offset = SIZE_MAX;
-};
 
 // ---- Position dans une frame ----
 enum WindowPosition {
@@ -193,5 +152,6 @@ void DrawRightArrow(Frame parentFrame, float thick, Color color); // Dessine une
 void DrawItemWithQuantity(Position pos, TextStyle& itemQuantity, const Texture2D& texture, float itemScale = DEFAULT_ITEM_SCALE, float radiusCircleInfo = DEFAULT_ITEM_RADIUS); // Dessine un item avec sa quantité en bas à droite
 int DrawStore(int potatoCurrent, int carrotCurrent, int appleCurrent, Manager& manager, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
 bool DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue, Texture2D textureIn, Texture2D textureOut, float itemScale, Manager& manager); // Dessine une linge de trade avec item in, une flèche avec le ratio actuelle/max, l'item out et un bouton pour intéragir
+void DrawNotificationBar(string data, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT); // Dessine une barre de notification en bas à gauche de l'écran (TODO passer en paramètre la position)
 
 #endif // UTILS_H

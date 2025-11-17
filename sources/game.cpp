@@ -7,7 +7,7 @@ Game::Game()
   sorcerer("Sorcier", { { 350.0f, 490.0f }, 80.0f }),
   gdb(reinterpret_cast<uintptr_t>(&this->player)) {
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "BOF : L'objet interdit");
+    InitWindow((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT, "BOF : L'objet interdit");
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
     Image icon = LoadImage(ICON);
@@ -55,31 +55,33 @@ bool Game::init() {
 
     // ---- Initialise la saisie utilisateur ----
     this->newName = { .font = &this->manager.getFont(INFO_LABEL, 40), .text = "", .fontSize = 40.0f, .spacing = 2.0f, .color = COLOR_INPUT_BOX_TEXT };
+
+    this->notification.config(START_FRAME, NOTIFICATION_MAX_WIDTH, this->manager.getFont(INFO_LABEL, 18));
     return true;
 }
 
 void Game::handlePlayerMovements() {
-        if (this->isPause) return;
+    if (this->isPause) return;
 
-        this->isMoving = false;
-        if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
-            this->player.setPosX(this->player.getHitbox().pos.x + PLAYER_SPEED);
-            this->isMoving = true;
-            this->playerAnim.facingRight = true;
-        }
-        if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
-            this->player.setPosX(this->player.getHitbox().pos.x - PLAYER_SPEED);
-            this->isMoving = true;
-            this->playerAnim.facingRight = false;
-        }
-        if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
-            this->player.setPosY(this->player.getHitbox().pos.y - PLAYER_SPEED);
-            this->isMoving = true;
-        }
-        if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
-            this->player.setPosY(this->player.getHitbox().pos.y + PLAYER_SPEED);
-            this->isMoving = true;
-        }
+    this->isMoving = false;
+    if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
+        this->player.setPosX(this->player.getHitbox().pos.x + PLAYER_SPEED);
+        this->isMoving = true;
+        this->playerAnim.facingRight = true;
+    }
+    if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
+        this->player.setPosX(this->player.getHitbox().pos.x - PLAYER_SPEED);
+        this->isMoving = true;
+        this->playerAnim.facingRight = false;
+    }
+    if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
+        this->player.setPosY(this->player.getHitbox().pos.y - PLAYER_SPEED);
+        this->isMoving = true;
+    }
+    if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
+        this->player.setPosY(this->player.getHitbox().pos.y + PLAYER_SPEED);
+        this->isMoving = true;
+    }
 }
 
 void Game::handlePlayerInput() {
@@ -393,7 +395,7 @@ void Game::dialogue() {
         case ITEM_POTATO: {
             vector<vector<InfoSegment>> data = {
                 {
-                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(POTATO_AVAILABLE) + " patates.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(POTATO_AVAILABLE) + this->potato[0].getName() + "(s).", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                 },
             };
 
@@ -403,29 +405,43 @@ void Game::dialogue() {
             if (IsKeyPressed(KEY_SPACE)) {
                 this->isPause = false;
                 this->displayDialogue.request = false;
-                this->player.inventory().add(this->potato[0], POTATO_AVAILABLE);
+                bool full = this->player.inventory().add(this->potato[0], POTATO_AVAILABLE);
+                if (full) this->notification.push(this->player.getName(), "Inventaire plein.");
+                else this->notification.push(this->player.getName(), "x" + to_string(POTATO_AVAILABLE) + " " + this->potato->getName() + "(s) récolté(es).");
             }
             break;
         }
         case ITEM_APPLE: {
+            if (this->player.inventory().isFull()) {
+                this->notification.push(this->player.getName(), "Inventaire plein.");
+                this->isPause = false;
+                this->displayDialogue.request = false;
+                break;
+            }
+
             switch (this->appleStep) {
                 case 0: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(this->apple.getMaxAmount()) + " pomme.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez x" + to_string(this->apple.getMaxAmount()) + " " + this->apple.getName() + "(s).", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
                     IconProfile profile = { this->manager.getTexture(TEX_APPLE), this->appleAnim, this->appleSprite, WHITE };
                     DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
 
-                    if (IsKeyPressed(KEY_SPACE)) this->appleStep = 1;
+                    if (IsKeyPressed(KEY_SPACE)) {
+                        this->appleStep = 1;
+                        bool full = this->player.inventory().add(this->apple, this->apple.getMaxAmount());
+                        if (full) this->notification.push(this->player.getName(), "Inventaire plein.");
+                        else this->notification.push(this->player.getName(), "x" + to_string(this->apple.getMaxAmount()) + " " + this->apple.getName() + " récolté(s).");
+                    }
                     break;
                 }
                 case 1: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "La pomme s'exite.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), string("La ") + this->apple.getName() + " s'exite.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
@@ -444,7 +460,7 @@ void Game::dialogue() {
                 case 2: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "La pomme s'est enfuit.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), string("La ") + this->apple.getName() + " s'est enfuit.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
@@ -456,7 +472,6 @@ void Game::dialogue() {
                         this->appleStep = 0;
                         this->isPause = false;
                         this->displayDialogue.request = false;
-                        this->player.inventory().add(this->apple, this->apple.getMaxAmount());
                         this->isAppleTaken = true;
                     }
                     break;
@@ -501,19 +516,34 @@ void Game::dialogue() {
                         case ID_POTATO: {
                             this->player.inventory().remove(ID_APPLE, TRADE_GIVE_APPLE);
                             bool full = this->player.inventory().add(this->potato[0], TRADE_GET_POTATO);
-                            if (full) this->player.inventory().add(this->apple, TRADE_GIVE_APPLE);
+                            if (full) {
+                                this->player.inventory().add(this->apple, TRADE_GIVE_APPLE);
+                                this->notification.push(this->player.getName(), "Inventaire plein.");
+                            } else {
+                                this->notification.push(this->farmer.getName(), "x" + to_string(TRADE_GET_POTATO) + " " + this->potato[0].getName() + "(s) échangé(es) contre " + to_string(TRADE_GIVE_APPLE) + " " + this->apple.getName() + "(s).");
+                            }
                             break;
                         }
                         case ID_CARROT: {
                             this->player.inventory().remove(ID_POTATO, TRADE_GIVE_POTATO);
                             bool full = this->player.inventory().add(this->carrot, TRADE_GET_CARROT);
-                            if (full) this->player.inventory().add(this->potato[0], TRADE_GIVE_POTATO);
+                            if (full) {
+                                this->player.inventory().add(this->potato[0], TRADE_GIVE_POTATO);
+                                this->notification.push(this->player.getName(), "Inventaire plein.");
+                            } else {
+                                this->notification.push(this->farmer.getName(), "x" + to_string(TRADE_GET_CARROT) + " " + this->carrot.getName() + "(s) échangé(es) contre " + to_string(TRADE_GIVE_POTATO) + " " + this->potato[0].getName() + "(s).");
+                            }
                             break;
                         }
                         case ID_APPLE: {
-                            this->player.inventory().remove(ID_CARROT, TRADE_GET_CARROT);
+                            this->player.inventory().remove(ID_CARROT, TRADE_GIVE_CARROT);
                             bool full = this->player.inventory().add(this->apple, TRADE_GET_APPLE);
-                            if (full) this->player.inventory().add(this->carrot, TRADE_GET_CARROT);
+                            if (full) {
+                                this->player.inventory().add(this->carrot, TRADE_GIVE_CARROT);
+                                this->notification.push(this->player.getName(), "Inventaire plein.");
+                            } else {
+                                this->notification.push(this->farmer.getName(), "x" + to_string(TRADE_GET_APPLE) + " " + this->apple.getName() + "(s) échangé(es) contre " + to_string(TRADE_GIVE_CARROT) + " " + this->carrot.getName() + "(s).");
+                            }
                             break;
                         }
                         default:
@@ -538,7 +568,7 @@ void Game::dialogue() {
 
             vector<vector<InfoSegment>> data = {
                 {
-                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), hasEnough ? string("Bravo, vous avez assez de ") + this->apple.getName() + ". Vous avez terminé le jeu." : string("Vous n'avez pas assez de ") + this->apple.getName() + " (Vous avez " + to_string(quantity) + "/" + to_string(AMOUNT_TO_FINISH_GAME) + ")", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), hasEnough ? string("Bravo, vous avez assez de ") + this->apple.getName() + "(s). Vous avez terminé le jeu." : string("Vous n'avez pas assez de ") + this->apple.getName() + "(s) (Vous avez " + to_string(quantity) + "/" + to_string(AMOUNT_TO_FINISH_GAME) + ")", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                 },
             };
 
@@ -627,6 +657,7 @@ void Game::dialogue() {
                     DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
                     if (IsKeyPressed(KEY_SPACE)) {
+                        this->notification.push(this->sorcerer.getName(), "Voici un(e) " + this->newName.text);
                         this->isPause = false;
                         this->displayDialogue.request = false;
                         this->newName.text = "";

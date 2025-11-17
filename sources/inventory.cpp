@@ -17,19 +17,19 @@ bool Inventory::add(const Item newItem, int amount) {
     
     // Parcours tout l'inventaire
     for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
-        auto& slot = this->inventory[i].first;
-        auto& slotSize = this->inventory[i].second;
+        auto& item  = this->inventory[i].first;
+        auto& count = this->inventory[i].second;
 
         // Récupère l'index du premier slot vide
-        if (slot.getId() == ID_NONE) {
+        if (item.getId() == ID_NONE) {
             if (firstEmpty == -1) firstEmpty = i;
             continue;
         }
 
         // Si un slot est déjà utilisé alors on stack
-        if (slot.getId() == newItem.getId()) {
-            if (slotSize == slot.getMaxAmount()) continue; // Indique que le slot est complet
-            slotSize = min(slotSize + amount, slot.getMaxAmount()); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
+        if (item.getId() == newItem.getId()) {
+            if (count == item.getMaxAmount()) continue; // Indique que le slot est complet
+            count = min(count + amount, item.getMaxAmount()); // Prend le plus petit entre le maximum autorisé et la nouvelle valeur, pour évité d'avoir plus que le maximum
             return false;
         }
     }
@@ -92,6 +92,21 @@ bool Inventory::isEmpty() {
         if (this->inventory[i].first.getId() != ID_NONE) {
             return false;
         }
+    }
+    return true;
+}
+
+bool Inventory::isFull() {
+    // Parcours tout l'inventaire
+    for (int i = 0; i < MAX_INVENTORY_LENGTH; i++) {
+        auto& item  = this->inventory[i].first;
+        auto& count = this->inventory[i].second;
+
+        // Slot vide
+        if (item.getId() == ID_NONE) return false;
+
+        //  Slot pas rempli au max
+        if (count < item.getMaxAmount()) return false;
     }
     return true;
 }

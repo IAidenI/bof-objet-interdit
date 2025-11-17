@@ -11,8 +11,7 @@
 #include "raylib-utils.hpp"
 #include "game_settings.hpp"
 #include "manager.hpp"
-
-inline constexpr Frame START_FRAME = { 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT };
+#include "notification.hpp"
 
 // ---- Structures dialogues ----
 enum DialogueEntity {
@@ -30,8 +29,8 @@ struct DialogueInfo {
 
 class Game {
     private:
-        // Fonts / Textures
         Manager manager;
+        Notification notification;
 
         // ---- Entités ----
         // Le joueur
@@ -114,6 +113,7 @@ class Game {
         Game();
 
         bool init();
+        void notificationUpdate() { this->notification.update(); }
         
         void handlePlayerMovements();
         void handlePlayerInput();
@@ -133,6 +133,8 @@ class Game {
 
         void resetRequests();
         bool hasEnded() const { return this->gameEnded; }
+
+        void notificationDraw() { this->notification.draw(); }
 
         ~Game();
 };

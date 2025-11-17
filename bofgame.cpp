@@ -15,14 +15,16 @@ int main() {
     while (!WindowShouldClose() && !game.hasEnded()) {
         // Reset du curseur
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-        
+
+        game.notificationUpdate();
+
         game.handlePlayerMovements();
 
         game.handlePlayerInput();
 
         // ---- Affichage de l'UI ----
         BeginDrawing();
-            ClearBackground(RED);
+            ClearBackground(RAYWHITE);
 
             game.displayBackground();
             game.displayPNJ();
@@ -37,6 +39,7 @@ int main() {
             game.dialogue();
             
             game.resetRequests();
+            game.notificationDraw();
         EndDrawing();
     }
 

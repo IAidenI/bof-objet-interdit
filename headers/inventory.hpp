@@ -33,6 +33,7 @@ class Inventory {
         int getItemQuantity(int id);
         int getSlotQuantity(int idx) { return this->inventory[idx].second; };
         bool isEmpty();
+        bool isFull();
         
         void display(); 
 

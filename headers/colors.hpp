@@ -19,6 +19,11 @@ inline constexpr Color COLOR_DIALOGUE_CONTENT_BACKGROUND = CLITERAL(Color){  39,
 inline constexpr Color COLOR_DIALOGUE_CONTENT_BORDER     = CLITERAL(Color){  16,  51,  71, 255 };
 inline constexpr Color COLOR_DIALOGUE_CONTENT_TEXT       = WHITE;
 
+// ---- Notification ----
+inline constexpr Color COLOR_NOTIFICATION_BACKGROUND = CLITERAL(Color){ 255, 255, 255, 102 };
+inline constexpr Color COLOR_NOTIFICATION_MESSAGE    = CLITERAL(Color){   0,   0,   0, 204 };
+inline constexpr Color COLOR_NOTIFICATION_USER       = CLITERAL(Color){  23,  40,  52, 204 };
+
 // ---- Inventaire ----
 inline constexpr Color COLOR_INVENTORY_HOVER_BACKGROUND          = CLITERAL(Color){  20,  28,  32, 255 };
 inline constexpr Color COLOR_INVENTORY_HOVER_BORDER              = CLITERAL(Color){ 129, 179, 220, 255};

@@ -39,16 +39,18 @@ make clean && make
 - Visuel de la stack
 - Affichage de la stack : ajout pour le survol de la souris, des informations complémentaire (A quoi correspond la valeur, sa correspondance en ASCII etc...)
 - Un hover sur l'inventaire avec les informations sur l'item (peut-être ajouter un pomme au lancement pour connaître son ID)
+- Systeme de notification
 
 ### 🔜 À faire / Améliorations prévues
 
 **A faire :**
 - Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
 - Peut être un menu start/end
-- - Ajouter un bandeau informatif (par exemple en bas à droite) pour indiquer des informations comme x1 patate récupèré, inventaire plein...
 - Touche ESC comme étant un cancel global et le mettre dans displayCommands
 - La pomme, si inventaire plein --> elle peut pas être récupèrer
 - Le curseur bug dans le trading
+- Faire les colistions des bordures
+- font.baseSize peut être utiliser au lieu de fontSize pour les TextStyle
 
 **Optionelles :**
 - Peut être améliorer des assets existantes
