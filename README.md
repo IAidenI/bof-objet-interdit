@@ -1,4 +1,8 @@
 # BOF : L'objet Interdit
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-blue)
+![Languages](https://img.shields.io/badge/language-C%20%2F%20C%2B%2B-red)
+![Version](https://img.shields.io/badge/version-0.1-yellow)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 Un petit jeu en **C/C++ avec raylib** pour découvrir les **buffer overflows** de façon ludique et pédagogique.
 
@@ -26,7 +30,7 @@ make clean && make
 
 ## Objectif du joueur
 
-- Explorer le jeu  
+- Explorer le jeu   
 - Découvrir le bug  
 - Terminer le jeu
 
