@@ -2,9 +2,10 @@
 
 Game::Game()
 : player("Vous", { { 600.0f, 500.0f }, 80.0f }),
-  farmer("Fermier", { { 770.0f, 630.0f }, 80.0f }),
-  guard("Garde", { { 580.0f, 300.0f }, 80.0f }),
-  sorcerer("Sorcier", { { 350.0f, 490.0f }, 80.0f }),
+  farmer("Fermier", { { 770.0f, 630.0f }, 50.0f }),
+  guard("Garde", { { 580.0f, 300.0f }, 50.0f }),
+  sorcerer("Sorcier", { { 350.0f, 490.0f }, 50.0f }),
+  trash("Poubelle", { { 430.0f, 620.0f }, 50.0f }),
   gdb(reinterpret_cast<uintptr_t>(&this->player)) {
 
     InitWindow((float)SCREEN_WIDTH, (float)SCREEN_HEIGHT, "BOF : L'objet interdit");
@@ -50,47 +51,58 @@ bool Game::init() {
     this->guardAnim    = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.15f, .frameTimeMove = 0.0f, .scale = 4.0f };
     this->sorcererAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.12f, .frameTimeMove = 0.0f, .scale = 4.0f };
 
-    this->potatoAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 1.0f, .frameTimeMove = 0.0f, .scale = 4.0f };
-    this->appleAnim  = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.1f, .frameTimeMove = 0.0f, .scale = 3.0f };
+    this->potatoAnim = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 1.0f, .frameTimeMove = 0.0f, .scale = 0.8f };
+    this->appleAnim  = { .frame = 0, .timer = 0.0f, .facingRight = true, .frameTimeIdle = 0.1f, .frameTimeMove = 0.0f, .scale = 0.8f };
 
     // ---- Initialise la saisie utilisateur ----
     this->newName = { .font = &this->manager.getFont(INFO_LABEL, 40), .text = "", .fontSize = 40.0f, .spacing = 2.0f, .color = COLOR_INPUT_BOX_TEXT };
 
-    this->notification.config(START_FRAME, NOTIFICATION_MAX_WIDTH, this->manager.getFont(INFO_LABEL, 18));
+    this->notification.config(START_FRAME, NOTIFICATION_MAX_WIDTH, this->manager.getFont(INFO_LABEL, 18), 18.0f);
     return true;
 }
 
 void Game::handlePlayerMovements() {
     if (this->isPause) return;
 
+    Position pos = this->player.getHitbox().pos;
+
     this->isMoving = false;
     if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
-        this->player.setPosX(this->player.getHitbox().pos.x + PLAYER_SPEED);
+        pos.x += PLAYER_SPEED;
         this->isMoving = true;
         this->playerAnim.facingRight = true;
     }
     if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
-        this->player.setPosX(this->player.getHitbox().pos.x - PLAYER_SPEED);
+        pos.x -= PLAYER_SPEED;
         this->isMoving = true;
         this->playerAnim.facingRight = false;
     }
     if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
-        this->player.setPosY(this->player.getHitbox().pos.y - PLAYER_SPEED);
+        pos.y -= PLAYER_SPEED;
         this->isMoving = true;
     }
     if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
-        this->player.setPosY(this->player.getHitbox().pos.y + PLAYER_SPEED);
+        pos.y += PLAYER_SPEED;
         this->isMoving = true;
     }
+
+    float radius = this->player.getHitbox().radius;
+
+    float minX = START_FRAME.x + radius;
+    float maxX = START_FRAME.x + START_FRAME.width - radius;
+    float minY = START_FRAME.y + radius;
+    float maxY = START_FRAME.y + START_FRAME.height - radius;
+
+    if (pos.x < minX) pos.x = minX;
+    if (pos.x > maxX) pos.x = maxX;
+    if (pos.y < minY) pos.y = minY;
+    if (pos.y > maxY) pos.y = maxY;
+
+    this->player.setPosition(pos);
 }
 
 void Game::handlePlayerInput() {
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        printf("[ DEBUG ] Position : %.2fx%.2f\n", GetMousePosition().x, GetMousePosition().y);
-    }
-    if (IsKeyPressed(KEY_F)) this->player.inventory().display();
-
-    if (this->isTyping) return;
+    if (IsKeyPressed(KEY_ESCAPE)) this->cancel = true;
 
     if (this->inventoryRequest && this->invSelectorVisible) {
         int rowSize = static_cast<int>(sqrt(static_cast<float>(MAX_INVENTORY_LENGTH)));
@@ -101,6 +113,8 @@ void Game::handlePlayerInput() {
         if (IsKeyPressed(KEY_UP)    || IsKeyPressed(KEY_W)) this->invSelectorIndex = (this->invSelectorIndex - rowSize + MAX_INVENTORY_LENGTH) % MAX_INVENTORY_LENGTH;
         return;
     }
+
+    if (this->isTyping || this->displayDialogue.request) return;
 
     if (IsKeyPressed(KEY_I)) {
         this->inventoryRequest = !this->inventoryRequest;
@@ -148,6 +162,11 @@ void Game::displayCommands() {
             { { &this->manager.getFont(INFO_LABEL, 20), "F2 : ",             20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
             { { &this->manager.getFont(INFO_LABEL, 20), "Affichage avancé", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
         },
+
+        { 
+            { { &this->manager.getFont(INFO_LABEL, 20), "ESC : ",             20.0f, 2.0f, COLOR_COMMANDS_LABEL } },
+            { { &this->manager.getFont(INFO_LABEL, 20), "Ferme le menu ouvert", 20.0f, 2.0f, COLOR_COMMANDS_ACTION } },
+        },
     };
 
     Card card = {
@@ -166,13 +185,15 @@ void Game::displayPNJ() {
     DrawAnimatedEntity(this->manager.getTexture(TEX_GUARD), this->guardAnim, this->guard.getHitbox().pos, false, this->guardSprite, RED);
     if (this->hitboxRequest) DrawCircleV(this->sorcerer.getHitbox().pos, this->sorcerer.getHitbox().radius, HITBOX_COLOR);
     DrawAnimatedEntity(this->manager.getTexture(TEX_SORCERER), this->sorcererAnim, this->sorcerer.getHitbox().pos, false, this->sorcererSprite, BLUE);
+    if (this->hitboxRequest) DrawCircleV(this->trash.getHitbox().pos, this->trash.getHitbox().radius, HITBOX_COLOR);
+    DrawStaticItem(this->manager.getTexture(TEX_TRASH), this->trash.getHitbox().pos, 0.5f);
 }
 
 void Game::displayItems() {
     for (int i = 0; i < POTATO_AVAILABLE; i++) {
         if (this->hitboxRequest) DrawCircleV(this->potato[i].getHitbox().pos, this->potato[i].getHitbox().radius, HITBOX_COLOR);
         DrawAnimatedEntity(this->manager.getTexture(TEX_POTATO), this->potatoAnim, this->potato[i].getHitbox().pos, false, this->potatoSprite, WHITE);
-    }
+    }   
 
     if (!this->isAppleTaken) {
         if (this->hitboxRequest) DrawCircleV(this->apple.getHitbox().pos, this->apple.getHitbox().radius, HITBOX_COLOR);
@@ -183,23 +204,33 @@ void Game::displayItems() {
 void Game::displayPlayer() {
     if (this->hitboxRequest) DrawCircleV(this->player.getHitbox().pos, this->player.getHitbox().radius, HITBOX_COLOR);
     DrawAnimatedEntity(this->manager.getTexture(TEX_PLAYER), this->playerAnim, this->player.getHitbox().pos, this->isMoving, this->playerSprite, WHITE);
-    DrawInfoLabel(this->player.getHitbox(), PLAYER_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15.0f), this->player.getName(), 15.0f, 2.0f, WHITE });
+    DrawInfoLabel(this->player.getHitbox(), this->playerSprite.frameH * this->playerAnim.scale, { &this->manager.getFont(ENTITY_LABEL, 15.0f), this->player.getName(), 15.0f, 2.0f, WHITE });
 }
 
 void Game::playerInteractions() {
     // Avec le fermier
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->farmer.getHitbox().pos, this->farmer.getHitbox().radius)) {
-        DrawInfoLabel(this->farmer.getHitbox(), FARMER_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->farmer.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->farmer.getHitbox(), this->farmerSprite.frameH * this->farmerAnim.scale, { &this->manager.getFont(ENTITY_LABEL, 15), this->farmer.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = FARMER;
             this->dialogueRequest = false;
         }
     }
+
+    // Avec la poubelle
+    if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->trash.getHitbox().pos, this->trash.getHitbox().radius)) {
+        DrawInfoLabel(this->trash.getHitbox(), this->manager.getTexture(TEX_TRASH).height * 0.5f, { &this->manager.getFont(ENTITY_LABEL, 15), this->trash.getName(), 15.0f, 2.0f, WHITE });
+        if (this->dialogueRequest) {
+            this->displayDialogue.request = !this->displayDialogue.request;
+            this->displayDialogue.entity = TRASH;
+            this->dialogueRequest = false;
+        }
+    }
     
     // Avec le garde
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->guard.getHitbox().pos, this->guard.getHitbox().radius)) {
-        DrawInfoLabel(this->guard.getHitbox(), GUARD_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->guard.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->guard.getHitbox(), this->guardSprite.frameH * this->guardAnim.scale, { &this->manager.getFont(ENTITY_LABEL, 15), this->guard.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = GUARD;
@@ -209,7 +240,7 @@ void Game::playerInteractions() {
     
     // Avec le sorcier
     if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->sorcerer.getHitbox().pos, this->sorcerer.getHitbox().radius)) {
-        DrawInfoLabel(this->sorcerer.getHitbox(), SORCERER_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->sorcerer.getName(), 15.0f, 2.0f, WHITE });
+        DrawInfoLabel(this->sorcerer.getHitbox(), this->sorcererSprite.frameH * this->sorcererAnim.scale, { &this->manager.getFont(ENTITY_LABEL, 15), this->sorcerer.getName(), 15.0f, 2.0f, WHITE });
         if (this->dialogueRequest) {
             this->displayDialogue.request = !this->displayDialogue.request;
             this->displayDialogue.entity = SORCERER;
@@ -220,7 +251,7 @@ void Game::playerInteractions() {
     // Avec les patates
     for (int i = 0; i < POTATO_AVAILABLE; ++i) {
         if (CheckCollisionCircles(this->player.getHitbox().pos, player.getHitbox().radius, this->potato[i].getHitbox().pos, this->potato[i].getHitbox().radius)) {
-            DrawInfoLabel(potato[i].getHitbox(), POTATO_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->potato[i].getName(), 15.0f, 2.0f, WHITE });
+            DrawInfoLabel(potato[i].getHitbox(), this->potatoSprite.frameH * this->potatoAnim.scale, { &this->manager.getFont(ENTITY_LABEL, 15), this->potato[i].getName(), 15.0f, 2.0f, WHITE });
             if (this->dialogueRequest) {
                 this->displayDialogue.request = !this->displayDialogue.request;
                 this->displayDialogue.entity = ITEM_POTATO;
@@ -232,7 +263,7 @@ void Game::playerInteractions() {
     // Avec la pomme
     if (!this->isAppleTaken) {
         if (CheckCollisionCircles(this->player.getHitbox().pos, this->player.getHitbox().radius, this->apple.getHitbox().pos, this->apple.getHitbox().radius)) {
-            DrawInfoLabel(this->apple.getHitbox(), APPLE_FRAME_H, { &this->manager.getFont(ENTITY_LABEL, 15), this->apple.getName(), 15.0f, 2.0f, WHITE });
+            DrawInfoLabel(this->apple.getHitbox(), this->appleSprite.frameH * this->appleAnim.scale, { &this->manager.getFont(ENTITY_LABEL, 15), this->apple.getName(), 15.0f, 2.0f, WHITE });
             if (this->dialogueRequest) {
                 this->displayDialogue.request = !this->displayDialogue.request;
                 this->displayDialogue.entity = ITEM_APPLE;
@@ -244,6 +275,11 @@ void Game::playerInteractions() {
 
 void Game::renderInventory() {
     if (!this->inventoryRequest) return;
+    if (this->cancel) {
+        this->inventoryRequest = false;
+        this->isPause = false;
+        return;
+    }
 
     // --- Texture et centrage de la fenêtre d'inventaire ---
     Texture2D inventory = this->manager.getTexture(TEX_INVENTORY);
@@ -260,7 +296,7 @@ void Game::renderInventory() {
 
     // --- Paramètres des items ---
     Position itemPos = { pos.x + 5.0f * INVENTORY_SCALE, pos.y + 5.0f * INVENTORY_SCALE }; // premier slot
-    float itemScale = INVENTORY_SCALE * 0.88f;
+    float itemScale = 1.0f;
     float gap = 3.0f * INVENTORY_SCALE;
 
     // On prend la patate comme référence de taille de cellule
@@ -395,7 +431,9 @@ void Game::dialogue() {
         case ITEM_POTATO: {
             vector<vector<InfoSegment>> data = {
                 {
-                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez " + to_string(POTATO_AVAILABLE) + this->potato[0].getName() + "(s).", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez ", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } },
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "x" + to_string(POTATO_AVAILABLE), 25.0f, 2.0f, COLOR_DIALOGUE_DIGIT } },
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), string(" ") + this->potato[0].getName() + "(s).", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                 },
             };
 
@@ -423,7 +461,9 @@ void Game::dialogue() {
                 case 0: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez x" + to_string(this->apple.getMaxAmount()) + " " + this->apple.getName() + "(s).", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous récoltez ", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } },
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "x" + to_string(this->apple.getMaxAmount()), 25.0f, 2.0f, COLOR_DIALOGUE_DIGIT } },
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), string(" ") + this->apple.getName() + "(s).", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
@@ -495,6 +535,52 @@ void Game::dialogue() {
             }
             break;
         }
+        case TRASH: {
+            if (this->player.inventory().isEmpty()) {
+                this->notification.push(this->player.getName(), "Inventaire déjà vide.");
+                this->isPause = false;
+                this->displayDialogue.request = false;
+                break;
+            }
+
+            vector<vector<InfoSegment>> data = {
+                {
+                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous vous videz dans la poubelle.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                },
+            };
+
+            // Fake animation car statique
+            Texture2D trashTex = this->manager.getTexture(TEX_TRASH);
+            float trashScale = 0.5f;
+
+            SpriteSheetInfo trashSprite = {
+                .frameW   = (float)trashTex.width,
+                .frameH   = (float)trashTex.height,
+                .frameCols = 1,
+                .rowIdle   = 0,
+                .rowMove   = 0
+            };
+
+            AnimationState trashAnim = {
+                .frame         = 0.0f,
+                .timer         = 0.0f,
+                .facingRight   = true,
+                .frameTimeIdle = 0.2f,
+                .frameTimeMove = 0.2f,
+                .scale         = trashScale
+            };
+
+            IconProfile profile = { this->manager.getTexture(TEX_TRASH), trashAnim, trashSprite, WHITE };
+            DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
+
+            if (IsKeyPressed(KEY_SPACE)) {
+                this->isPause = false;
+                this->displayDialogue.request = false;
+                this->player.inventory().removeAll();
+                this->notification.push(this->player.getName(), "Inventaire vidé.");
+            }
+            break;
+        }
         case FARMER: {
             switch (this->farmerStep) {
                 case 0: {
@@ -511,8 +597,9 @@ void Game::dialogue() {
                     break;
                 }
                 case 1: {
-                    int itemToAdd = DrawStore(this->player.inventory().getItemQuantity(ID_POTATO), this->player.inventory().getItemQuantity(ID_CARROT), this->player.inventory().getItemQuantity(ID_APPLE), this->manager);
-                    switch (itemToAdd) {
+                    StoreResult itemToAdd = DrawStore(this->player.inventory().getItemQuantity(ID_POTATO), this->player.inventory().getItemQuantity(ID_CARROT), this->player.inventory().getItemQuantity(ID_APPLE), this->manager);
+                    this->hover = itemToAdd.hover;
+                    switch (itemToAdd.pressedID) {
                         case ID_POTATO: {
                             this->player.inventory().remove(ID_APPLE, TRADE_GIVE_APPLE);
                             bool full = this->player.inventory().add(this->potato[0], TRADE_GET_POTATO);
@@ -566,11 +653,22 @@ void Game::dialogue() {
             bool hasEnough = this->player.inventory().hasEnoughOf(ID_APPLE, AMOUNT_TO_FINISH_GAME);
             int quantity = this->player.inventory().getItemQuantity(ID_APPLE);
 
-            vector<vector<InfoSegment>> data = {
-                {
-                    { { &this->manager.getFont(DIALOGUE_LABEL, 25), hasEnough ? string("Bravo, vous avez assez de ") + this->apple.getName() + "(s). Vous avez terminé le jeu." : string("Vous n'avez pas assez de ") + this->apple.getName() + "(s) (Vous avez " + to_string(quantity) + "/" + to_string(AMOUNT_TO_FINISH_GAME) + ")", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
-                },
-            };
+            vector<vector<InfoSegment>> data;
+            if (hasEnough) {
+                data = {
+                    {
+                        { { &this->manager.getFont(DIALOGUE_LABEL, 25), string("Bravo, vous avez assez de ") + this->apple.getName() + "(s). Vous avez terminé le jeu.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    },
+                };
+            } else {
+                data = {
+                    {
+                        { { &this->manager.getFont(DIALOGUE_LABEL, 25), string("Vous n'avez pas assez de ") + this->apple.getName() + "(s) (Vous avez ", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } },
+                        { { &this->manager.getFont(DIALOGUE_LABEL, 25), to_string(quantity), 25.0f, 2.0f, COLOR_DIALOGUE_DIGIT_NOT_ENOUGH } },
+                        { { &this->manager.getFont(DIALOGUE_LABEL, 25), "/" + to_string(AMOUNT_TO_FINISH_GAME) + ")", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                    },
+                };
+            }
 
             IconProfile profile = { this->manager.getTexture(TEX_GUARD), this->guardAnim, this->guardSprite, RED };
             DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Terminer [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
@@ -604,12 +702,24 @@ void Game::dialogue() {
 
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Séléctionnez le avec ZQSD ou les flêches.", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Séléctionnez le avec ", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } },
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "ZQSD", 25.0f, 2.0f, COLOR_DIALOGUE_HIGHLIGHT } },
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), " ou ", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } },
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "les flêches", 25.0f, 2.0f, COLOR_DIALOGUE_HIGHLIGHT } },
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), ".", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
                         },
                     };
 
                     DrawDialogue(data, { &this->manager.getFont(DIALOGUE_LABEL, 25), "Valider [Press space]", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT }, profile);
                     
+                    if (this->cancel) {
+                        this->sorcererStep = 0;
+                        this->inventoryRequest = false;
+                        this->invSelectorVisible = false;
+                        this->displayDialogue.request = false;
+                        this->isPause = false;
+                    }
+
                     if (IsKeyPressed(KEY_SPACE)) {
                         Item item = this->player.inventory().getItem(this->invSelectorIndex);
                         if (item.getId() != 0) {
@@ -637,6 +747,16 @@ void Game::dialogue() {
                     }
                     this->getNewName();
 
+                    if (this->cancel) {
+                        this->sorcererStep = 0;
+                        this->isTyping = false;
+                        this->renameInit = true;
+                        this->invSelectorIndex = 0;
+                        this->isPause = false;
+                        this->displayDialogue.request = false;
+                        this->newName.text = "";
+                    }
+
                     if (IsKeyPressed(KEY_ENTER)) {
                         item.changeName(this->newName.text.c_str());
                         this->player.inventory().setItem(item, this->invSelectorIndex);
@@ -650,7 +770,8 @@ void Game::dialogue() {
                 case 3: {
                     vector<vector<InfoSegment>> data = {
                         {
-                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous avez renomé votre objet en : " + this->newName.text, 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } }
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), "Vous avez renomé votre objet en : ", 25.0f, 2.0f, COLOR_DIALOGUE_CONTENT_TEXT } },
+                            { { &this->manager.getFont(DIALOGUE_LABEL, 25), this->newName.text, 25.0f, 2.0f, COLOR_DIALOGUE_HIGHLIGHT } }
                         },
                     };
 
@@ -727,6 +848,7 @@ void Game::getNewName() {
 
 void Game::resetRequests() {
     this->dialogueRequest = false;
+    this->cancel = false;
 }
 
 Game::~Game() {

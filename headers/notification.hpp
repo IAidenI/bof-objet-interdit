@@ -34,6 +34,7 @@ class Notification {
         Frame parentFrame;
         float maxWidth;
         const Font* font = nullptr;
+        float fontSize;
         Padding padIn;
         Margins padOut;
         int notifCount = 0;
@@ -44,7 +45,7 @@ class Notification {
         bool isValid(); // Vérifie que la configuration à bien été faite
         int generateID(); // Génère un id unique pour chaque notifications
     public:
-        void config(Frame parentFrame, float maxWidth, const Font& font, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT); // Configure les paramètres
+        void config(Frame parentFrame, float maxWidth, const Font& font, float fontSize, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT); // Configure les paramètres
         void push(string user, string message); // Ajoute une notification
         void update(); // Supprime de la list de notification si elle a expiré
         void draw(); // Dessine une barre de notification en bas à gauche de l'écran

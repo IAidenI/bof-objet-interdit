@@ -7,7 +7,7 @@ vector<string> Multilines(TextStyle data, float maxWidth) {
     string currentWord = "";
 
     auto measure = [&](const string& s) {
-        return MeasureTextStyled({ data.font, s.c_str(), (float)data.font->baseSize, data.spacing, data.color }).x;
+        return MeasureTextStyled({ data.font, s.c_str(), data.fontSize, data.spacing, data.color }).x;
     };
 
     for (char c : data.text) {
@@ -38,10 +38,11 @@ vector<string> Multilines(TextStyle data, float maxWidth) {
 }
 
 // Configure les paramètres
-void Notification::config(Frame parentFrame, float maxWidth, const Font& font, Padding padIn, Margins padOut) {
+void Notification::config(Frame parentFrame, float maxWidth, const Font& font, float fontSize, Padding padIn, Margins padOut) {
     this->parentFrame = parentFrame;
     this->maxWidth    = maxWidth;
     this->font        = &font;
+    this->fontSize    = fontSize;
     this->padIn       = padIn;
     this->padOut      = padOut;
     this->notifications.reserve(NOTIFICATION_LIMIT);
@@ -50,7 +51,7 @@ void Notification::config(Frame parentFrame, float maxWidth, const Font& font, P
 // Vérifie que la configuration à bien été faite
 bool Notification::isValid() {
     if (this->font == nullptr) return false;
-    if (this->font->baseSize <= 0) return false;
+    if (this->fontSize <= 0) return false;
     if (this->maxWidth <= 0 || this->maxWidth <= 0) return false;
     if (this->parentFrame.width <= 0 || this->parentFrame.height <= 0) return false;
 
@@ -71,10 +72,10 @@ void Notification::draw() {
         const Notif &notif = *it;
 
         // Mesures
-        TextStyle user = { this->font, notif.user + " > ", (float)this->font->baseSize, 2.0f, COLOR_NOTIFICATION_USER };
+        TextStyle user = { this->font, notif.user + " > ", this->fontSize, 2.0f, COLOR_NOTIFICATION_USER };
         Size userSize = MeasureTextStyled(user);
         
-        TextStyle fullData = { this->font, notif.content, (float)this->font->baseSize, 2.0f, COLOR_NOTIFICATION_MESSAGE };
+        TextStyle fullData = { this->font, notif.content, this->fontSize, 2.0f, COLOR_NOTIFICATION_MESSAGE };
         vector<string> lines = Multilines(fullData, maxWidth - 2.0f * this->padIn.x - userSize.x);
         
         float lineHeight    = MeasureTextStyled(fullData).y;
@@ -123,7 +124,7 @@ void Notification::draw() {
 
         for (const auto& line : lines) {
             fullData.color.a = alphaMsg;
-            TextStyle lineStyle = { this->font, line, (float)fullData.font->baseSize, fullData.spacing, fullData.color };
+            TextStyle lineStyle = { this->font, line, fullData.fontSize, fullData.spacing, fullData.color };
             DrawTextStyled(lineStyle, { contentPosition.x + userSize.x, contentPosition.y });
             contentPosition.y += lineHeight;
         }

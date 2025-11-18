@@ -17,6 +17,7 @@
 enum DialogueEntity {
     ITEM_POTATO,
     ITEM_APPLE,
+    TRASH,
     FARMER,
     GUARD,
     SORCERER
@@ -40,6 +41,7 @@ class Game {
         PNJ farmer;
         PNJ guard;
         PNJ sorcerer;
+        PNJ trash;
 
         // Les objets
         Item potato[POTATO_AVAILABLE];
@@ -77,7 +79,6 @@ class Game {
 
         // Les objets
         const SpriteSheetInfo potatoSprite = { POTATO_FRAME_W, POTATO_FRAME_H, POTATO_COLS, POTATO_ROW_IDLE, POTATO_ROW_IDLE };
-        const SpriteSheetInfo carrotSprite = { CARROT_FRAME_W, CARROT_FRAME_H, CARROT_COLS, CARROT_ROW_IDLE, CARROT_ROW_IDLE };
         const SpriteSheetInfo appleSprite = { APPLE_FRAME_W, APPLE_FRAME_H, APPLE_COLS, APPLE_ROW_IDLE, APPLE_ROW_IDLE };
 
         // Dialogue
@@ -101,6 +102,8 @@ class Game {
         bool isMoving = false;
         bool isPause = false;
         bool gameEnded = false;
+        bool hover = false;
+        bool cancel = false;
 
         void getNewName();
         void changeItemName();
@@ -114,6 +117,7 @@ class Game {
 
         bool init();
         void notificationUpdate() { this->notification.update(); }
+        bool getHover() const { return this->hover; }
         
         void handlePlayerMovements();
         void handlePlayerInput();

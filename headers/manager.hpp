@@ -36,6 +36,7 @@ enum TextureID {
     // Autre
     TEX_DIALOGUE,
     TEX_INVENTORY,
+    TEX_TRASH,
     // Sentinelle pour savoir la taille
     TEX_MAX
 };
@@ -53,6 +54,7 @@ enum FontID {
 inline constexpr const char *ICON             = "assets/icon.png";
 inline constexpr const char *BACKGROUND       = "assets/background.png";
 inline constexpr const char *DIALOGUE_TEXTURE = "assets/dialogue.png";
+inline constexpr const char *TRASH_TEXTURE    = "assets/trash.png";
 
 // Item
 inline constexpr const char *POTATO_TEXTURE        = "assets/potato.png";
@@ -100,7 +102,8 @@ class Manager {
             PLAYER_TEXTURE,
             // Autre
             DIALOGUE_TEXTURE,
-            INVENTORY_TEXTURE
+            INVENTORY_TEXTURE,
+            TRASH_TEXTURE
         };
 
         const char *fonts[FONT_MAX] = {

@@ -16,18 +16,13 @@ inline constexpr int MAX_CARROT = 16;
 inline constexpr int MAX_APPLE  = 1;
 
 // ---- Textures ----
-inline constexpr float       POTATO_FRAME_W        = 19.0f;
-inline constexpr float       POTATO_FRAME_H        = 19.0f;
+inline constexpr float       POTATO_FRAME_W        = 70.0f;
+inline constexpr float       POTATO_FRAME_H        = 70.0f;
 inline constexpr float       POTATO_COLS           = 5.0f;
 inline constexpr float       POTATO_ROW_IDLE       = 0.0f;
 
-inline constexpr float       CARROT_FRAME_W        = 32.0f;
-inline constexpr float       CARROT_FRAME_H        = 32.0f;
-inline constexpr float       CARROT_COLS           = 4.0f;
-inline constexpr float       CARROT_ROW_IDLE       = 0.0f;
-
-inline constexpr float       APPLE_FRAME_W        = 18.0f;
-inline constexpr float       APPLE_FRAME_H        = 18.0f;
+inline constexpr float       APPLE_FRAME_W        = 70.0f;
+inline constexpr float       APPLE_FRAME_H        = 70.0f;
 inline constexpr float       APPLE_COLS           = 5.0f;
 inline constexpr float       APPLE_ROW_IDLE       = 0.0f;
 

@@ -13,9 +13,6 @@ int main() {
     }
 
     while (!WindowShouldClose() && !game.hasEnded()) {
-        // Reset du curseur
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-
         game.notificationUpdate();
 
         game.handlePlayerMovements();
@@ -40,6 +37,12 @@ int main() {
             
             game.resetRequests();
             game.notificationDraw();
+
+            if (game.getHover()) {
+                SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+            } else {
+                SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            }
         EndDrawing();
     }
 

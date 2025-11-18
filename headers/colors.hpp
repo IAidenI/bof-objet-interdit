@@ -18,6 +18,9 @@ inline constexpr Color COLOR_DIALOGUE_BORDER             = WHITE;
 inline constexpr Color COLOR_DIALOGUE_CONTENT_BACKGROUND = CLITERAL(Color){  39,  71,  98, 255 };
 inline constexpr Color COLOR_DIALOGUE_CONTENT_BORDER     = CLITERAL(Color){  16,  51,  71, 255 };
 inline constexpr Color COLOR_DIALOGUE_CONTENT_TEXT       = WHITE;
+inline constexpr Color COLOR_DIALOGUE_DIGIT              = CLITERAL(Color){ 158, 225, 169, 255 };
+inline constexpr Color COLOR_DIALOGUE_DIGIT_NOT_ENOUGH   = CLITERAL(Color){ 225, 118, 118, 255 };
+inline constexpr Color COLOR_DIALOGUE_HIGHLIGHT          = CLITERAL(Color){ 165, 186, 255, 178 };
 
 // ---- Notification ----
 inline constexpr Color COLOR_NOTIFICATION_BACKGROUND = CLITERAL(Color){ 255, 255, 255, 102 };

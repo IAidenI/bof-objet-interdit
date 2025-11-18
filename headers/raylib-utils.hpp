@@ -113,6 +113,17 @@ struct IconProfile {
     Color color;
 };
 
+// ---- Pour les boutons ----
+struct ButtonResult {
+    bool pressed;
+    bool hover;
+};
+
+struct StoreResult {
+    int pressedID;
+    bool hover;
+};
+
 // ---- Pour arrondir les frames et ne pas avoir des demi pixels ----
 inline Frame AlignToPixels(Frame f) {
     f.x = roundf(f.x);
@@ -135,23 +146,23 @@ HoverValues DrawCard(const Card& card, Frame parentFrame, float roundness = DEFA
 void DrawDataSection(const DataSection& data, Frame parentFrame, float roundness = DEFAULT_SEGMENTS, int segments = DEFAULT_SEGMENTS); // Dessine une section avec des cards et des zones de textes
 void DrawInfoSection(const vector<Card>& cards, const vector<DataSection>& dataSection, WindowPosition position, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT, float interline = DEFAULT_INTERLINE, float stroke = DEFAULT_STROKE); // Dessine une section avec des cards et des zones de textes
 
-void DrawInputBox(TextStyle name, int maxInputChars, Padding padIn = DEFAULT_PAD_IN, float stroke = DEFAULT_STROKE); // Dessine une saisie utilisateur
+void DrawInputBox(const TextStyle& name, int maxInputChars, Padding padIn = DEFAULT_PAD_IN, float stroke = DEFAULT_STROKE); // Dessine une saisie utilisateur
 void DrawToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un info-bulle pour un hover
 void DrawItemToolTip(const vector<vector<InfoSegment>>& data, Frame parentFrame, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un info-bulle pour un item de l'inventaire
 
 void DrawStaticItem(const Texture2D& texture, Position pos, float scale); // Dessine une image statique
 void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position pos, bool moving, const SpriteSheetInfo& entitySprite, Color color); // Dessine une image animé
-void DrawInfoLabel(Hitbox entity, int entitySize, const TextStyle& text); // Dessine au dessus d'une entité une étiquette d'information
+void DrawInfoLabel(Hitbox entity, int entityHeight, const TextStyle& text); // Dessine au dessus d'une entité une étiquette d'information
 void DrawDialogue(const vector<vector<InfoSegment>>& data, const TextStyle& continueData, IconProfile& profile, Padding padInFrameContent = DEFAULT_TITLE_PAD_IN, Padding padInContent = DEFAULT_TITLE_PAD_IN, Size iconFrameSize = DEFAULT_ICON_SIZE, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE, float interline = DEFAULT_INTERLINE); // Dessine un bandeau pour un dialogue
 
 void DrawCornerMarkers(const Rectangle& r, float len, float thick, Color color); // Dessine des marqueurs dans les angles d'un rectangle
 
 Size GetButtonSize(TextStyle& data, Padding padIn); // Récupère la taille d'un bouton
-bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un bouton arroundi
+ButtonResult DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn = DEFAULT_PAD_IN, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un bouton arroundi
 void DrawRightArrow(Frame parentFrame, float thick, Color color); // Dessine une flèche qui pointe vers la droite
 void DrawItemWithQuantity(Position pos, TextStyle& itemQuantity, const Texture2D& texture, float itemScale = DEFAULT_ITEM_SCALE, float radiusCircleInfo = DEFAULT_ITEM_RADIUS); // Dessine un item avec sa quantité en bas à droite
-int DrawStore(int potatoCurrent, int carrotCurrent, int appleCurrent, Manager& manager, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
-bool DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue, Texture2D textureIn, Texture2D textureOut, float itemScale, Manager& manager); // Dessine une linge de trade avec item in, une flèche avec le ratio actuelle/max, l'item out et un bouton pour intéragir
+StoreResult DrawStore(int potatoCurrent, int carrotCurrent, int appleCurrent, Manager& manager, float roundness = DEFAULT_ROUNDNESS, int segments = DEFAULT_SEGMENTS, float stroke = DEFAULT_STROKE); // Dessine un magasin où l'utilisateur peut acheter des items
+ButtonResult DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue, Texture2D textureIn, Texture2D textureOut, float itemScale, Manager& manager); // Dessine une linge de trade avec item in, une flèche avec le ratio actuelle/max, l'item out et un bouton pour intéragir
 void DrawNotificationBar(string data, Padding padIn = DEFAULT_PAD_IN, Margins padOut = DEFAULT_PAD_OUT); // Dessine une barre de notification en bas à gauche de l'écran (TODO passer en paramètre la position)
 
 #endif // UTILS_H

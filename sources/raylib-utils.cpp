@@ -521,7 +521,7 @@ void DrawInfoSection(const vector<Card>& cards, const vector<DataSection>& dataS
 }
 
 // Dessine une saisie utilisateur
-void DrawInputBox(TextStyle name, int maxInputChars, Padding padIn, float stroke) {
+void DrawInputBox(const TextStyle& name, int maxInputChars, Padding padIn, float stroke) {
     // ---- Calcul la taille et position de l'input box ----
 
     // === TODO ===
@@ -770,14 +770,14 @@ void DrawAnimatedEntity(const Texture2D& texture, AnimationState& anim, Position
 }
 
 // Dessine au dessus d'une entité une étiquette d'information
-void DrawInfoLabel(Hitbox entity, int entitySize, const TextStyle& text) {
+void DrawInfoLabel(Hitbox entity, int entityHeight, const TextStyle& text) {
     Size label_size = MeasureTextStyled(text);
     float padding = 5.0f;
 
     // Calcul la position
     Position position;
-    position.x = entity.pos.x - (label_size.x / 2);
-    position.y = entity.pos.y - entitySize - label_size.y - padding;
+    position.x = entity.pos.x - (label_size.x / 2.0f);
+    position.y = entity.pos.y - (entityHeight * 0.5f) - label_size.y - padding;
     
     DrawTextStyled(text, position);
 }
@@ -902,7 +902,7 @@ Size GetButtonSize(TextStyle& data, Padding padIn) {
 }
 
 // Dessine un bouton arroundi
-bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn, float roundness, int segments, float stroke) {
+ButtonResult DrawRoundedButton(TextStyle& data, Position position, bool active, Padding padIn, float roundness, int segments, float stroke) {
     bool isPressed = false;
 
     // Calcul de la taille
@@ -917,7 +917,6 @@ bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding 
     // Hover
     bool hover = false; 
     if (CheckCollisionPointRec(GetMousePosition(), frame) && active) {
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         hover = true;
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) isPressed = true;
     }
@@ -930,7 +929,7 @@ bool DrawRoundedButton(TextStyle& data, Position position, bool active, Padding 
     // Affiche le texte
     DrawTextStyled(data, { frame.x + padIn.x, frame.y + padIn.y });
 
-    return isPressed;
+    return { isPressed, hover };
 }
 
 // Dessine une flèche qui pointe vers la droite
@@ -957,7 +956,7 @@ void DrawRightArrow(Frame parentFrame, float thick, Color color) {
 }
 
 // Dessine une linge de trade avec item in, une flèche avec le ratio actuelle/max, l'item out et un bouton pour intéragir
-bool DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue, Texture2D textureIn, Texture2D textureOut, float itemScale, Manager& manager) {
+ButtonResult DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue, Texture2D textureIn, Texture2D textureOut, float itemScale, Manager& manager) {
     float radiusCircleInfo = 10.0;
 
     // Item in
@@ -1016,13 +1015,13 @@ bool DrawTrade(Position start, int currentValue, int maxValue, int itemGetValue,
 }
 
 // Dessine un magasin où l'utilisateur peut acheter des items
-int DrawStore(int potatoCurrent, int carrotCurent, int appleCurrent, Manager& manager, float roundness, int segments, float stroke) {
+StoreResult DrawStore(int potatoCurrent, int carrotCurent, int appleCurrent, Manager& manager, float roundness, int segments, float stroke) {
     // ---- Calcul de la taille et position ----
     float titleMarginY = 10.0f;
     TextStyle title = { &manager.getFont(INFO_LABEL, 28), "Acheter des récoltes", 28.0f, 2.0f, COLOR_STORE_TITLE };
     Size textSize = MeasureTextStyled(title);
     
-    float itemScale = 3.0f;
+    float itemScale = 1.0f;
     float padItems = 20.0f;
 
     Padding tradePaddingX = { 50.0f, 20.0f };
@@ -1083,14 +1082,21 @@ int DrawStore(int potatoCurrent, int carrotCurent, int appleCurrent, Manager& ma
     // ---- Dessin des items ----
     Size titleSize = MeasureTextStyled(title);
     int pressed = ID_NONE;
+    bool hover = false;
     Position tradePos = { frame.x + tradePaddingX.x, titlePos.y + titleSize.y + tradePaddingX.y };
-    if (DrawTrade(tradePos, potatoCurrent, TRADE_GIVE_POTATO, TRADE_GET_POTATO, manager.getTexture(TEX_POTATO_STATIC), manager.getTexture(TEX_CARROT_STATIC), itemScale, manager)) pressed = ID_CARROT;
+    ButtonResult btnRes = DrawTrade(tradePos, potatoCurrent, TRADE_GIVE_POTATO, TRADE_GET_POTATO, manager.getTexture(TEX_POTATO_STATIC), manager.getTexture(TEX_CARROT_STATIC), itemScale, manager);
+    if (btnRes.hover) hover = btnRes.hover;
+    if (btnRes.pressed) pressed = ID_CARROT;
 
     tradePos.y += max(manager.getTexture(TEX_POTATO_STATIC).height, manager.getTexture(TEX_CARROT_STATIC).height) * itemScale + padItems;
-    if (DrawTrade(tradePos, carrotCurent, TRADE_GIVE_CARROT, TRADE_GET_CARROT, manager.getTexture(TEX_CARROT_STATIC), manager.getTexture(TEX_APPLE_STATIC), itemScale, manager)) pressed = ID_APPLE;
+    btnRes = DrawTrade(tradePos, carrotCurent, TRADE_GIVE_CARROT, TRADE_GET_CARROT, manager.getTexture(TEX_CARROT_STATIC), manager.getTexture(TEX_APPLE_STATIC), itemScale, manager);
+    if (btnRes.hover) hover = btnRes.hover;
+    if (btnRes.pressed) pressed = ID_APPLE;
 
     tradePos.y += max(manager.getTexture(TEX_CARROT_STATIC).height, manager.getTexture(TEX_APPLE_STATIC).height) * itemScale + padItems;
-    if (DrawTrade(tradePos, appleCurrent, TRADE_GIVE_APPLE, TRADE_GET_APPLE, manager.getTexture(TEX_APPLE_STATIC), manager.getTexture(TEX_POTATO_STATIC), itemScale, manager)) pressed = ID_POTATO;
+    btnRes = DrawTrade(tradePos, appleCurrent, TRADE_GIVE_APPLE, TRADE_GET_APPLE, manager.getTexture(TEX_APPLE_STATIC), manager.getTexture(TEX_POTATO_STATIC), itemScale, manager);
+    if (btnRes.hover) hover = btnRes.hover;
+    if (btnRes.pressed) pressed = ID_POTATO;
 
-    return pressed;
+    return { pressed, hover };
 }

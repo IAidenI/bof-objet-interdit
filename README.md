@@ -2,12 +2,14 @@
 
 Un petit jeu en **C/C++ avec raylib** pour découvrir les **buffer overflows** de façon ludique et pédagogique.
 
-## 🎮 Concept
+## Concept
+
 Vous incarnez un personnage pouvant parler à des PNJ, gérer un petit inventaire et tenter d’obtenir **L'Objet Interdit**.  
-Le problème ? **L'Objet Interdit** est indispensable pour terminer le jeu, mais il semble impossible à récupérer par des moyens « normaux ».  
+Le problème ? **L'Objet Interdit** est indispensable pour terminer le jeu, mais il semble impossible à récupérer en quantité suffisante par des moyens « normaux ».  
 Saurez‑vous quand même finir le jeu ?
 
-## 🚀 Compilation & Exécution
+## Compilation & Exécution
+
 ```bash
 # Cloner le dépôt
 git clone https://github.com/IAidenI/bof-objet-interdit
@@ -20,41 +22,81 @@ make clean && make
 ./bofgame
 ```
 
-***⚠️ATTENTION : la taille de l'écran doit être au minimum de 1280x960***
+**⚠️ ATTENTION : la taille de l'écran doit être au minimum de 1280x960**
 
-## 🎯 Objectif du joueur
+## Objectif du joueur
+
 - Explorer le jeu  
 - Découvrir le bug  
 - Terminer le jeu
 
-## 📌 État du projet (TODO / DONE)
-### ✅ Fait
-- Prototype (PoC) en console fonctionnel : lecture du nom, remplissage d'inventaire, appel des fonctions `inventory().add()`, `inventory().hasEnoughOf()` et affichage d'informations. (bofgame_command_line)
-- Définitions d'entités de base (`Player`, `Item`, `Inventory`, `Hitbox`, `Position`) et headers dans `headers/`.
-- Menu permettant de visualiser le contenu de la stack (en ligne de commande)
-- Main minimal démontrant la vulnérabilité.
-- Système de dialogues avec choix (version simple pour l'instant) implémenté.
-- Premier PoC avec UI réalisé, pour se faire, récupèrer 32 patates, les renommer en CCCCCCCCCCCCCCCC puis voir le garde
-- Asset pour le background
-- Visuel de la stack
-- Affichage de la stack : ajout pour le survol de la souris, des informations complémentaire (A quoi correspond la valeur, sa correspondance en ASCII etc...)
-- Un hover sur l'inventaire avec les informations sur l'item (peut-être ajouter un pomme au lancement pour connaître son ID)
-- Systeme de notification
-
-### 🔜 À faire / Améliorations prévues
-
-**A faire :**
-- Documentation pédagogique dans `/docs` expliquant la faille et comment elle fonctionne.
-- Peut être un menu start/end
-- Touche ESC comme étant un cancel global et le mettre dans displayCommands
-- La pomme, si inventaire plein --> elle peut pas être récupèrer
-- Le curseur bug dans le trading
-- Faire les colistions des bordures
-- font.baseSize peut être utiliser au lieu de fontSize pour les TextStyle
-
-**Optionelles :**
-- Peut être améliorer des assets existantes
-- Ajout de certains texte en couleur dans les dialogues
-
 ## ⚠️ Avertissement
+
 Ce projet contient volontairement une vulnérabilité à des fins **pédagogiques**. **Ne reproduisez pas** ces techniques sur des systèmes réels ou en production sans autorisation explicite. Utilisez ce projet uniquement pour apprendre et expérimenter dans un environnement contrôlé.
+
+## Explication du Buffer Overflow
+
+Le **buffer overflow**, ou dépassement de tampon, est l’une des vulnérabilités les plus anciennes et les plus exploitées. Que ce soit sur des serveurs ou des applications critiques, ses conséquences peuvent être dévastatrices.
+
+Un dépassement de tampon se produit lorsqu’un processus écrit en dehors de la mémoire qui lui est allouée. Cela peut écraser des données cruciales ou être détourné pour modifier le comportement du programme. Dans certains cas, il est même possible d’exécuter du **code arbitraire**.
+
+Dans ce projet, il s’agit simplement d’**écraser une valeur mémoire** pour modifier le comportement du programme.
+
+## Résolution du Jeu
+
+Le jeu commence par l’apparition d’un personnage dans un univers interactif.
+
+<p align="center">
+  <img src="./images/start.png"/>
+</p>
+
+L’objectif, comme l’indique le garde, est de **récupérer 32 pommes**.
+
+<p align="center">
+  <img src="./images/guard.png"/>
+</p>
+
+Une première pomme est disponible à proximité, mais elle est **à usage unique**. En parlant au **fermier**, on découvre qu’il est possible d’**échanger des objets**.
+
+<p align="center">
+  <img src="./images/trade.png"/>
+</p>
+
+Les **patates**, disponibles en quantité illimitée, peuvent être échangées contre des **carottes**, puis ces dernières contre des **pommes**. Toutefois, en consultant l’inventaire :
+
+<p align="center">
+  <img src="./images/inventory.png"/>
+</p>
+
+On constate que **chaque slot est limité à 1 objet**, et il n’y a que 9 slots disponibles. Impossible donc d’obtenir 32 pommes de manière légitime.
+
+## Exploitation
+
+En affichant la **stack**, on remarque que le **nom de l’objet** et son **ID** sont stockés côte à côte :
+
+<p align="center">
+  <img src="./images/stack_name.png" width="40%">
+  <img src="./images/stack_id.png" width="40%">
+</p>
+
+Cela signifie qu’un **dépassement du champ du nom** permet d’écraser l’ID. Grâce au **sorcier**, on peut **modifier le nom d’un objet**.
+
+On sait que l’ID de la pomme est **67**, ce qui correspond à **'C'** en ASCII ([référence](https://www.ascii-code.com/fr)).
+
+<p align="center">
+  <img src="./images/select_item.png" width="40%">
+  <img src="./images/change_name.png" width="40%">
+</p>
+
+On peut entrer **17 caractères**, alors que seulement **16 sont alloués** pour le nom. Le 17e caractère écrasera donc l’ID si l’application n’effectue pas de vérification.
+
+Une fois le nom modifié avec un suffixe `'C'`, on constate que l’ID a changé, et l’objet est reconnu comme une **pomme**. Il est ainsi possible d’en accumuler 32 dans l’inventaire et de terminer le jeu.
+
+<p align="center">
+  <img src="./images/end.png"/>
+</p>
+
+## ✅ TODO
+
+- Ajouter un système de profondeur visuelle : plus le Y du personnage diminue, plus sa taille devrait diminuer, afin de simuler un effet de perspective.
+
