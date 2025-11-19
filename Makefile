@@ -7,7 +7,7 @@ HEADERSDIR = headers
 SOURCES := $(wildcard $(SOURCEDIR)/*.cpp) $(TARGET).cpp
 OBJECTS := $(SOURCES:.cpp=.o)
 
-CFLAGS  = -Wall -g -std=c++20 -I$(HEADERSDIR) # Pour minimiser la console -mwindows
+CFLAGS  = -Wall -g -std=c++20 -I$(HEADERSDIR)
 LDFLAGS =
 LDLIBS  =
 
@@ -16,7 +16,7 @@ ifeq ($(OS),Windows_NT)
   EXE := .exe
   RAYLIB_DIR ?= C:/raylib
 
-  CFLAGS  += -I$(RAYLIB_DIR)/include -I$(RAYLIB_DIR)/raylib/src
+  CFLAGS  += -mwindows -I$(RAYLIB_DIR)/include -I$(RAYLIB_DIR)/raylib/src
 
   LDFLAGS += -L$(RAYLIB_DIR)/lib/win64
   LDLIBS  += -lraylib -lopengl32 -lgdi32 -lwinmm
